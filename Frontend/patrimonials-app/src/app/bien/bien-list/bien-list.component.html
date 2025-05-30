@@ -1,0 +1,29 @@
+<p>bien-list works!</p>
+<div class="container">
+    <h2>Lista de Bienes</h2>
+    <table *ngIf="bienes.length; else noBienes">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descripción</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let bien of bienes">
+          <td>{{ bien.codigo }}</td>
+          <td>{{ bien.descripcion }}</td>
+          <td>{{ bien.estado }}</td>
+          <td>
+            <button (click)="viewDetails(bien.id)">Ver Detalles</button>
+            <button (click)="moveBien(bien.id)">Mover</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noBienes>
+      <p>No hay bienes registrados.</p>
+    </ng-template>
+    <p *ngIf="error" class="error">{{ error }}</p>
+  </div>

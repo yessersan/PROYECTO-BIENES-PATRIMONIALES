@@ -1,0 +1,18 @@
+<p>bien-mover works!</p>
+<div>
+    <h2>Mover Bien</h2>
+    <form (ngSubmit)="mover()">
+      <div>
+        <label>Nueva Ubicación:
+          <select [(ngModel)]="ubicacionId" name="ubicacionId" required>
+            <option value="" disabled>Seleccione una ubicación</option>
+            <option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion.id">
+              {{ ubicacion.edificio }} - {{ ubicacion.oficina }}
+            </option>
+          </select>
+        </label>
+      </div>
+      <button type="submit">Mover</button>
+      <p *ngIf="error" style="color: red;">{{ error }}</p>
+    </form>
+  </div>

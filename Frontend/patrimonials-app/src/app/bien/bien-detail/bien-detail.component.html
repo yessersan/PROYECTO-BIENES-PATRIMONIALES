@@ -1,0 +1,75 @@
+<div class="container">
+  <h2>Detalles del Bien</h2>
+  <div *ngIf="!loading; else loadingIndicator">
+    <div *ngIf="bien; else noBien">
+      <div *ngIf="!editMode; else editForm">
+        <p><strong>Código:</strong> {{ bien.codigo }}</p>
+        <p><strong>Descripción:</strong> {{ bien.descripcion }}</p>
+        <p><strong>Estado:</strong> {{ bien.estado }}</p>
+        <p><strong>Ubicación:</strong> 
+          <span *ngIf="ubicacion; else noUbicacion">
+            {{ ubicacion.edificio }} - {{ ubicacion.oficina }} (Piso {{ ubicacion.piso }})
+          </span>
+          <ng-template #noUbicacion>
+            <span *ngIf="bien.ubicacion">Cargando ubicación...</span>
+            <span *ngIf="!bien.ubicacion">No asignada</span>
+          </ng-template>
+        </p>
+        <p><strong>Responsable:</strong> 
+          <span *ngIf="responsable">{{ responsable.nombre }}</span>
+          <span *ngIf="!responsable && bien.responsable">Cargando responsable...</span>
+          <span *ngIf="!bien.responsable">No asignado</span>
+        </p>
+        <p><strong>Fecha de Adquisición:</strong> {{ bien.fecha_adquisicion | date:'shortDate' }}</p>
+        <p><strong>Valor de Adquisición:</strong> {{ bien.valor_adquisicion | currency }}</p>
+        <p><strong>Depreciación:</strong> {{ bien.depreciacion | currency }}</p>
+        <p><strong>Valor Residual:</strong> {{ bien.valor_residual | currency }}</p>
+        <div class="actions">
+          <button (click)="goBack()">Volver a la Lista</button>
+          <button (click)="moveBien()">Mover Bien</button>
+          <button (click)="toggleEdit()">Editar</button>
+          <button (click)="confirmDelete()">Eliminar</button>
+        </div>
+      </div>
+      <ng-template #editForm>
+        <form (ngSubmit)="saveChanges()">
+          <div class="form-group">
+            <label>Descripción:
+              <input [(ngModel)]="editedBien.descripcion" name="descripcion" required>
+            </label>
+          </div>
+          <div class="form-group">
+            <label>Estado:
+              <select [(ngModel)]="editedBien.estado" name="estado" required>
+                <option value="BUENO">Bueno</option>
+                <option value="REGULAR">Regular</option>
+                <option value="MALO">Malo</option>
+                <option value="BAJA">Baja</option>
+                <option value="REPARACION">Reparación</option>
+              </select>
+            </label>
+          </div>
+          <div class="actions">
+            <button type="submit">Guardar</button>
+            <button type="button" (click)="toggleEdit()">Cancelar</button>
+          </div>
+        </form>
+      </ng-template>
+    </div>
+    <ng-template #noBien>
+      <p>Bien no encontrado.</p>
+    </ng-template>
+  </div>
+  <ng-template #loadingIndicator>
+    <p>Cargando detalles del bien...</p>
+  </ng-template>
+  <p *ngIf="error" class="error">{{ error }}</p>
+
+  <div *ngIf="showDeleteConfirm" class="confirm-dialog">
+    <div class="dialog-content">
+      <p>¿Está seguro de que desea eliminar este bien?</p>
+      <button (click)="deleteBien()">Sí, Eliminar</button>
+      <button (click)="cancelDelete()">Cancelar</button>
+    </div>
+  </div>
+</div>

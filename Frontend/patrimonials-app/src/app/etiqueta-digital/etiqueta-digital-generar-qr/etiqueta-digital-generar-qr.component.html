@@ -1,0 +1,9 @@
+<p>etiqueta-digital-generar-qr works!</p>
+<div>
+    <h2>Generar Código QR</h2>
+    <div *ngIf="qrCodeUrl">
+      <img [src]="qrCodeUrl" alt="QR Code">
+    </div>
+    <button (click)="generateQrCode()">Regenerar QR</button>
+    <p *ngIf="error" style="color: red;">{{ error }}</p>
+  </div>
