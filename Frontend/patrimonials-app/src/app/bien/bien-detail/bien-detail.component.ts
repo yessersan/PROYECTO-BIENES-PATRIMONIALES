@@ -8,7 +8,8 @@ import { Responsable } from '../../models/responsable.model';
 @Component({
   selector: 'app-bien-detail',
   templateUrl: './bien-detail.component.html',
-  styleUrls: ['./bien-detail.component.css']
+  styleUrls: ['./bien-detail.component.css'],
+  standalone: false
 })
 export class BienDetailComponent implements OnInit {
   bien: Bien | null = null;

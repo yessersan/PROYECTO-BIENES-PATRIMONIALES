@@ -1,13 +1,83 @@
-<div>
-    <h2>Login</h2>
-    <form (ngSubmit)="login()">
-      <div>
-        <label>Username: <input [(ngModel)]="credentials.username" name="username" required></label>
-      </div>
-      <div>
-        <label>Password: <input [(ngModel)]="credentials.password" type="password" name="password" required></label>
-      </div>
-      <button type="submit">Login</button>
-      <p *ngIf="error" style="color: red;">{{ error }}</p>
-    </form>
-  </div>
+<div class="login-container">
+  <h2>Login</h2>
+  <form (ngSubmit)="login()" class="login-form">
+    <div class="form-group">
+      <label>Username:</label>
+      <input [(ngModel)]="credentials.username" name="username" required placeholder="Enter your username" />
+    </div>
+    <div class="form-group">
+      <label>Password:</label>
+      <input [(ngModel)]="credentials.password" type="password" name="password" required placeholder="Enter your password" />
+    </div>
+    <button type="submit" class="btn-login">Login</button>
+    <p *ngIf="error" class="error-message">{{ error }}</p>
+  </form>
+</div>
+
+<style>
+  .login-container {
+    max-width: 350px;
+    margin: 40px auto;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    background-color: #fff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .login-container h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333;
+  }
+
+  .login-form .form-group {
+    margin-bottom: 20px;
+  }
+
+  .login-form label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #555;
+  }
+
+  .login-form input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.8px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+  }
+
+  .login-form input:focus {
+    border-color: #0066ff;
+    outline: none;
+    box-shadow: 0 0 6px #80b3ff;
+  }
+
+  .btn-login {
+    width: 100%;
+    padding: 12px;
+    background-color: #0066ff;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .btn-login:hover {
+    background-color: #004bb5;
+  }
+
+  .error-message {
+    margin-top: 15px;
+    text-align: center;
+    color: #d93025;
+    font-weight: 600;
+  }
+</style>
