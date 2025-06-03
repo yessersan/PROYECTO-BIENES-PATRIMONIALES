@@ -5,26 +5,25 @@ import { environment } from '../../environments/environment';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Skip adding token for login requests
-    if (req.url.includes(`${environment.apiUrl}login/`)) {
-      return next.handle(req);
-    }
+intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  const publicEndpoints = [`${environment.apiUrl}auth/login`, `${environment.apiUrl}auth/registro`];
 
-    // Get token from localStorage
-    const token = localStorage.getItem('token');
-
-    // Clone request and add Authorization header if token exists
-    if (token) {
-      const authReq = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      return next.handle(authReq);
-    }
-
-    // Proceed without modification if no token
+  if (publicEndpoints.some(url => req.url.includes(url))) {
     return next.handle(req);
   }
+
+  const token = localStorage.getItem('token');
+
+  if (token) {
+    const authReq = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return next.handle(authReq);
+  }
+
+  return next.handle(req);
+}
+
 }

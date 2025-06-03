@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions, status
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
@@ -8,7 +9,7 @@ from patrimonials.models import (
     Notificacion, Mantenimiento, EtiquetaDigital
 )
 from patrimonials.serializers import (
-    UsuarioSerializer, CategoriaSerializer, UbicacionSerializer, ResponsableSerializer,
+    RegistroSerializer, UsuarioSerializer, CategoriaSerializer, UbicacionSerializer, ResponsableSerializer,
     BienPatrimonialSerializer, MovimientoSerializer, ReporteSerializer,
     HistorialAuditoriaSerializer, DocumentoAdjuntoSerializer,
     NotificacionSerializer, MantenimientoSerializer, EtiquetaDigitalSerializer
@@ -61,6 +62,11 @@ class UsuarioRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
     permission_classes = [IsAuthenticatedWithPermission]
+
+class RegistroUsuarioAPIView(generics.CreateAPIView):
+    queryset = Usuario.objects.all()
+    serializer_class = RegistroSerializer
+    permission_classes = [AllowAny]
 
 class CategoriaListCreateView(generics.ListCreateAPIView):
     queryset = Categoria.objects.all()

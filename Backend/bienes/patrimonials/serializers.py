@@ -15,7 +15,33 @@ class UsuarioSerializer(serializers.ModelSerializer):
         if value not in dict(Usuario.ROLES).keys():
             raise serializers.ValidationError("Rol no válido")
         return value
+    
+class RegistroSerializer(serializers.ModelSerializer):
+    confirmPassword = serializers.CharField(write_only=True)
 
+    class Meta:
+        model = Usuario
+        fields = [
+            'username', 'email', 'password', 'confirmPassword',
+            'first_name', 'last_name', 'rol', 'departamento', 'telefono'
+        ]
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+    def validate(self, data):
+        if data['password'] != data['confirmPassword']:
+            raise serializers.ValidationError("Las contraseñas no coinciden.")
+        return data
+
+    def create(self, validated_data):
+        validated_data.pop('confirmPassword')
+        password = validated_data.pop('password')
+        user = Usuario(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
+    
 class CategoriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Categoria

@@ -14,7 +14,7 @@ from .views import (
     MantenimientoListCreateView, MantenimientoRetrieveUpdateDestroyView,
     MantenimientoIniciarView, MantenimientoFinalizarView,
     EtiquetaDigitalListCreateView, EtiquetaDigitalRetrieveUpdateDestroyView,
-    EtiquetaDigitalGenerarQRView
+    EtiquetaDigitalGenerarQRView,RegistroUsuarioAPIView
 )
 
 urlpatterns = [
@@ -46,5 +46,6 @@ urlpatterns = [
     path('mantenimientos/<int:pk>/finalizar/', MantenimientoFinalizarView.as_view(), name='mantenimiento-finalizar'),
     path('etiquetas-digitales/', EtiquetaDigitalListCreateView.as_view(), name='etiqueta-digital-list-create'),
     path('etiquetas-digitales/<int:pk>/', EtiquetaDigitalRetrieveUpdateDestroyView.as_view(), name='etiqueta-digital-detail'),
+    path('registro/', RegistroUsuarioAPIView.as_view(), name='registro'),
     path('etiquetas-digitales/<int:pk>/generar-qr/', EtiquetaDigitalGenerarQRView.as_view(), name='etiqueta-digital-generar-qr'),
 ]

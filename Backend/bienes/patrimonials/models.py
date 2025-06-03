@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser, UserManager
 
 # Create your models here.
 from django.contrib.auth.models import AbstractUser 
@@ -9,6 +10,27 @@ from datetime import date, timedelta
 import qrcode 
 from io import BytesIO
 from django.core.files import File 
+
+class UsuarioManager(UserManager):
+    def create_user(self, username, email=None, password=None, **extra_fields):
+        if not username:
+            raise ValueError('El username debe ser obligatorio')
+        email = self.normalize_email(email)
+        user = self.model(username=username, email=email, **extra_fields)
+        user.set_password(password)  # Esto hace el hash automáticamente
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser debe tener is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser debe tener is_superuser=True.')
+
+        return self.create_user(username, email, password, **extra_fields)
 
 class Usuario(AbstractUser):
     ROLES = (
@@ -24,6 +46,7 @@ class Usuario(AbstractUser):
     telefono = models.CharField(max_length=20, blank=True, null=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     ultimo_acceso = models.DateTimeField(null=True, blank=True)
+    bjects = UsuarioManager()
 
     def autenticar(self, password):
         """Autentica al usuario verificando la contraseña"""
