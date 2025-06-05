@@ -44,8 +44,14 @@ export class AuthService {
   }
 
   getUsuario(): Usuario | null {
-    const usuario = localStorage.getItem('usuario');
-    return usuario ? JSON.parse(usuario) : null;
+    try {
+      const usuario = localStorage.getItem('usuario');
+      return usuario ? JSON.parse(usuario) : null;
+    } catch (e) {
+      console.error('Error al parsear usuario', e);
+      this.logout();
+      return null;
+    }
   }
 
   // Métodos para registro (nuevos)

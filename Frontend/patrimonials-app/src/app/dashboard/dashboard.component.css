@@ -1,31 +1,65 @@
-nav ul {
-  list-style: none;
-  padding: 0;
-}
-
-nav li {
-  margin: 10px 0;
-}
-
-nav a {
-  text-decoration: none;
-  color: #007bff;
-  font-weight: bold;
-}
-
-nav a:hover {
-  text-decoration: underline;
-}
-button {
-  margin-top: 20px;
-  padding: 8px 16px;
-  background-color: #dc3545;
+/* Estilos adicionales para el control de accesos */
+.user-info {
+  display: flex;
+  flex-direction: column;
+  margin-right: 20px;
   color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  font-size: 14px;
 }
 
-button:hover {
-  background-color: #c82333;
+.user-name {
+  font-weight: 600;
+}
+
+.user-role {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.access-alert {
+  padding: 15px;
+  margin: 10px;
+  background-color: #fff3cd;
+  color: #856404;
+  border-radius: 4px;
+  text-align: center;
+  border-left: 4px solid #ffeeba;
+}
+
+.nav-link.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.nav-link.disabled .tooltip {
+  visibility: hidden;
+  width: 120px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.nav-link.disabled:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.notification-badge {
+  background: #f56565;
+  color: white;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: auto;
 }
