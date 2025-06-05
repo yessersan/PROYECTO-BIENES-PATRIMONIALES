@@ -1,1 +1,69 @@
 <p>notificacion-list works!</p>
+<!-- notificacion-list.component.html -->
+<div class="container">
+  <h2>Notificaciones</h2>
+  
+  <!-- Filtros -->
+  <div class="filtros">
+    <mat-form-field>
+      <mat-label>Estado</mat-label>
+      <mat-select [(value)]="estadoSeleccionado" (selectionChange)="aplicarFiltros()">
+        <mat-option *ngFor="let estado of estados" [value]="estado">
+          {{ estado | titlecase }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-checkbox [(ngModel)]="soloImportantes" (change)="aplicarFiltros()">
+      Solo importantes
+    </mat-checkbox>
+  </div>
+
+  <!-- Lista de notificaciones -->
+  <mat-card *ngFor="let notificacion of notificaciones" 
+            [class.importante]="notificacion.importante"
+            [class.no-leido]="notificacion.estado === 'NO_LEIDO'">
+    <mat-card-header>
+      <mat-card-title>
+        <span *ngIf="notificacion.importante" class="badge-importante">IMPORTANTE</span>
+        {{ notificacion.mensaje }}
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ notificacion.fecha_envio | date:'medium' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-actions align="end">
+      <button mat-button color="primary" 
+              *ngIf="notificacion.estado === 'NO_LEIDO'"
+              (click)="marcarComoLeido(notificacion)">
+        Marcar como leído
+      </button>
+      <a mat-button *ngIf="notificacion.url" [href]="notificacion.url" target="_blank">
+        Ver más
+      </a>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- Paginación -->
+  <mat-paginator [length]="totalItems" 
+                 [pageSize]="pageSize"
+                 [pageSizeOptions]="[5, 10, 25, 100]"
+                 (page)="cambiarPagina($event)"
+                 *ngIf="totalItems > 0">
+  </mat-paginator>
+
+  <!-- Mensajes de estado -->
+  <div *ngIf="isLoading" class="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <span>Cargando notificaciones...</span>
+  </div>
+
+  <div *ngIf="!isLoading && notificaciones.length === 0" class="empty">
+    No hay notificaciones para mostrar
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+</div>

@@ -35,30 +35,30 @@ export class RegistroComponent {
 
   passwordMatchValidator(g: FormGroup) {
     return g.get('password')?.value === g.get('confirmPassword')?.value
-      ? null : { mismatch: true };
+      ? null
+      : { mismatch: true };
   }
 
-onSubmit() {
-  if (this.registroForm.invalid) {
-    console.log('Formulario inválido:', this.registroForm.errors);
-    return;
-  }
-
-  this.loading = true;
-  const registroData: Registro = this.registroForm.value;
-  console.log('Datos de registro a enviar:', registroData);
-
-  this.authService.registrar(registroData).subscribe({
-    next: (response) => {
-      console.log('Registro exitoso:', response);
-      this.router.navigate(['/login']);
-    },
-    error: (err) => {
-      console.error('Error en registro:', err);
-      this.error = err.message || 'Error en el registro';
-      this.loading = false;
+  onSubmit() {
+    if (this.registroForm.invalid) {
+      console.log('Formulario inválido:', this.registroForm.errors);
+      return;
     }
-  });
-}
 
+    this.loading = true;
+    const registroData: Registro = this.registroForm.value;
+    console.log('Datos de registro a enviar:', registroData);
+    this.authService.registrar(registroData).subscribe({
+      next: (response) => {
+        console.log('Registro exitoso:', response);
+        this.loading = false;
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        console.error('Error en el registro:', err);
+        this.error = 'Error al registrar usuario. Por favor, inténtalo de nuevo.';
+        this.loading = false;
+      }
+    });
+  }
 }

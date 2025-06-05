@@ -1,29 +1,35 @@
 import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-  const publicEndpoints = [`${environment.apiUrl}auth/login`, `${environment.apiUrl}auth/registro`];
+  constructor(private router: Router) {}
 
-  if (publicEndpoints.some(url => req.url.includes(url))) {
-    return next.handle(req);
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const token = localStorage.getItem('token');
+    let authReq = req;
+
+    if (token) {
+      authReq = req.clone({
+        setHeaders: {
+          Authorization: `Token ${token}`
+        }
+      });
+    }
+
+    return next.handle(authReq).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          // Token inválido o expirado
+          localStorage.removeItem('token');
+          localStorage.removeItem('usuario');
+          this.router.navigate(['/login']);
+        }
+        return throwError(() => error);
+      })
+    );
   }
-
-  const token = localStorage.getItem('token');
-
-  if (token) {
-    const authReq = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    return next.handle(authReq);
-  }
-
-  return next.handle(req);
-}
-
 }

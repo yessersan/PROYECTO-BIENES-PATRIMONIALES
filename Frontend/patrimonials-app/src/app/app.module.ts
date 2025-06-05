@@ -23,7 +23,6 @@ import { HistorialAuditoriaListComponent } from './historial-auditoria/historial
 import { DocumentoListComponent } from './documento/documento-list/documento-list.component';
 import { DocumentoDetailComponent } from './documento/documento-detail/documento-detail.component';
 import { NotificacionListComponent } from './notificacion/notificacion-list/notificacion-list.component';
-import { NotificacionDetailComponent } from './notificacion/notificacion-detail/notificacion-detail.component';
 import { MantenimientoListComponent } from './mantenimiento/mantenimiento-list/mantenimiento-list.component';
 import { MantenimientoDetailComponent } from './mantenimiento/mantenimiento-detail/mantenimiento-detail.component';
 import { MantenimientoIniciarComponent } from './mantenimiento/mantenimiento-iniciar/mantenimiento-iniciar.component';
@@ -35,7 +34,15 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './core/auth.interceptor';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { RegistroComponent } from './registro/registro.component';
-
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCardModule } from '@angular/material/card';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 
 @NgModule({
@@ -60,7 +67,7 @@ import { RegistroComponent } from './registro/registro.component';
     DocumentoListComponent,
     DocumentoDetailComponent,
     NotificacionListComponent,
-    NotificacionDetailComponent,
+    UbicacionDetailComponent,
     MantenimientoListComponent,
     MantenimientoDetailComponent,
     MantenimientoIniciarComponent,
@@ -76,7 +83,17 @@ import { RegistroComponent } from './registro/registro.component';
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatOptionModule,
+    MatCheckboxModule,
+    MatCardModule,
+    MatPaginatorModule,
+    MatIconModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
     AppRoutingModule
+  
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }

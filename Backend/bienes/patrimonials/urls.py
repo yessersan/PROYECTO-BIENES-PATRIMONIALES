@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    LoginView, UsuarioListCreateView, UsuarioRetrieveUpdateDestroyView,
+    LoginView, UsuarioActualView, UsuarioListCreateView, UsuarioRetrieveUpdateDestroyView,
     CategoriaListCreateView, CategoriaRetrieveUpdateDestroyView,
     UbicacionListCreateView, UbicacionRetrieveUpdateDestroyView,
     ResponsableListCreateView, ResponsableRetrieveUpdateDestroyView,
@@ -48,4 +48,5 @@ urlpatterns = [
     path('etiquetas-digitales/<int:pk>/', EtiquetaDigitalRetrieveUpdateDestroyView.as_view(), name='etiqueta-digital-detail'),
     path('registro/', RegistroUsuarioAPIView.as_view(), name='registro'),
     path('etiquetas-digitales/<int:pk>/generar-qr/', EtiquetaDigitalGenerarQRView.as_view(), name='etiqueta-digital-generar-qr'),
+     path('auth/usuario/', UsuarioActualView.as_view(), name='usuario-actual'),
 ]

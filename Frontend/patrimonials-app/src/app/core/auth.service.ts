@@ -8,74 +8,47 @@ import { Registro } from '../models/registro';
   providedIn: 'root'
 })
 export class AuthService {
+getUsuarioBackend(): Observable<Usuario> {
+  return this.apiService.get<Usuario>('auth/usuario/');
+}
+  
   constructor(private apiService: ApiService) {}
 
-  // Métodos existentes
+  registrar(registroData: Registro): Observable<any> {
+    return this.apiService.registrar(registroData);
+  }
+
   getToken(): string | null {
     return localStorage.getItem('token');
   }
 
-  isTokenValid(): boolean {
-    const token = this.getToken();
-    if (!token) {
-      return false;
-    }
-    // Aquí podrías añadir validación JWT más avanzada si es necesario
-    return true;
+  isLoggedIn(): boolean {
+    return !!this.getToken();
   }
 
-  isLoggedIn(): boolean {
-    return this.isTokenValid();
+    login(credentials: { username: string; password: string }): Observable<{ token: string; usuario: Usuario }> {
+    return this.apiService.post('login/', credentials);
   }
+
+setSession(token: string, usuario: Usuario | null): void {
+  localStorage.setItem('token', token);
+  localStorage.setItem('usuario', JSON.stringify(usuario));
+}
 
   logout(): void {
     localStorage.removeItem('token');
-    localStorage.removeItem('usuario'); // Opcional: limpiar datos de usuario
-  }
-
-  // Métodos para login (si no existen)
-  login(credentials: { username: string; password: string }): Observable<{ token: string, usuario: Usuario }> {
-    return this.apiService.post('/auth/login', credentials);
-  }
-
-  setSession(token: string, usuario: Usuario): void {
-    localStorage.setItem('token', token);
-    localStorage.setItem('usuario', JSON.stringify(usuario)); // Opcional: guardar datos de usuario
+    localStorage.removeItem('usuario');
   }
 
   getUsuario(): Usuario | null {
+    const usuarioStr = localStorage.getItem('usuario');
+    if (!usuarioStr) return null;
     try {
-      const usuario = localStorage.getItem('usuario');
-      return usuario ? JSON.parse(usuario) : null;
-    } catch (e) {
-      console.error('Error al parsear usuario', e);
+      return JSON.parse(usuarioStr);
+    } catch {
       this.logout();
       return null;
     }
   }
-
-  // Métodos para registro (nuevos)
-registrar(registroData: Registro): Observable<{ token: string, usuario: Usuario }> {
-  const { confirmPassword, ...userData } = registroData;
-  return this.apiService.post('/auth/registro', userData);
-}
-
-  verificarUsernameUnico(username: string): Observable<boolean> {
-    return this.apiService.get(`/auth/verificar-username?username=${username}`);
-  }
-
-  verificarEmailUnico(email: string): Observable<boolean> {
-    return this.apiService.get(`/auth/verificar-email?email=${email}`);
-  }
-
-  // Método para verificar roles (útil para guards)
-  tieneRol(rol: string): boolean {
-    const usuario = this.getUsuario();
-    return usuario ? usuario.rol === rol : false;
-  }
-
-  // Método para verificar si es admin
-  esAdmin(): boolean {
-    return this.tieneRol('ADMIN');
-  }
+  
 }

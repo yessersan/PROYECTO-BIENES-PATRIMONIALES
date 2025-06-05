@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ApiService } from '../core/api.service';
+import { AuthService } from '../core/auth.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -12,23 +12,24 @@ export class LoginComponent {
   credentials = { username: '', password: '' };
   error: string | null = null;
 
-  
-constructor(private apiService: ApiService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
-login() {
-  this.apiService.login(this.credentials).subscribe({
+  login() {
+     this.authService.login(this.credentials).subscribe({
     next: (response) => {
-      localStorage.setItem('token', response.token);
-      console.log('Login successful', response);
-      this.router.navigate(['/dashboard']);
+      localStorage.setItem('token', response.token); // Solo guarda el token aquí
+      this.authService.getUsuarioBackend().subscribe(usuario => {
+        localStorage.setItem('usuario', JSON.stringify(usuario));
+        this.router.navigate(['/dashboard']);
+      });
     },
-    error: (err) => {
-      this.error = 'Login failed: ' + (err.error?.message || 'Unknown error');
+    error: () => {
+      this.error = 'Usuario o contraseña incorrectos';
     }
   });
-}
-goToRegistro() {
-  this.router.navigate(['/registro']);
-}
+  }
 
+  goToRegistro() {
+    this.router.navigate(['/registro']);
+  }
 }

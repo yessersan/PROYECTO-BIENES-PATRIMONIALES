@@ -1,1 +1,49 @@
 <p>notificacion-detail works!</p>
+<!-- notificacion-detail.component.html -->
+<div class="container">
+  <button mat-button (click)="location.back()" class="back-button">
+    <mat-icon>arrow_back</mat-icon> Volver
+  </button>
+
+  <div *ngIf="isLoading" class="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <span>Cargando notificación...</span>
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <mat-card *ngIf="notificacion && !isLoading" class="notificacion-card">
+    <mat-card-header>
+      <mat-card-title>
+        <span *ngIf="notificacion.importante" class="badge-importante">IMPORTANTE</span>
+        Detalles de la notificación
+      </mat-card-title>
+      <mat-card-subtitle>
+        Estado: {{ notificacion.estado | titlecase }} | 
+        Fecha: {{ notificacion.fecha_envio | date:'medium' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="mensaje">
+        {{ notificacion.mensaje }}
+      </div>
+
+      <div *ngIf="notificacion.url" class="url">
+        <strong>Enlace relacionado:</strong> 
+        <a [href]="notificacion.url" target="_blank">{{ notificacion.url }}</a>
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <button mat-button color="primary" (click)="navegarSiHayURL()" *ngIf="notificacion.url">
+        <mat-icon>open_in_new</mat-icon> Abrir enlace
+      </button>
+      <button mat-button color="warn" (click)="archivar()">
+        <mat-icon>archive</mat-icon> Archivar
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

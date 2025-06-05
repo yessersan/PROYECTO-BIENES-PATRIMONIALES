@@ -30,7 +30,6 @@ import { DocumentoListComponent } from './documento/documento-list/documento-lis
 import { DocumentoDetailComponent } from './documento/documento-detail/documento-detail.component';
 
 import { NotificacionListComponent } from './notificacion/notificacion-list/notificacion-list.component';
-import { NotificacionDetailComponent } from './notificacion/notificacion-detail/notificacion-detail.component';
 
 import { MantenimientoListComponent } from './mantenimiento/mantenimiento-list/mantenimiento-list.component';
 import { MantenimientoDetailComponent } from './mantenimiento/mantenimiento-detail/mantenimiento-detail.component';
@@ -179,11 +178,7 @@ const routes: Routes = [
     component: NotificacionListComponent,
     canActivate: [AuthGuard]
   },
-  { 
-    path: 'notificaciones/:id', 
-    component: NotificacionDetailComponent,
-    canActivate: [AuthGuard]
-  },
+ 
 
   // Rutas de mantenimiento
   { 

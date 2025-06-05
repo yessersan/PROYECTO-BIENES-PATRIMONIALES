@@ -19,16 +19,19 @@ import { EtiquetaDigital } from '../models/etiqueta-digital.model';
   providedIn: 'root'
 })
 export class ApiService {
-  get(arg0: string): Observable<boolean> {
-    throw new Error('Method not implemented.');
-  }
-  post(arg0: string, credentials: { username: string; password: string; }): Observable<{ token: string; usuario: Usuario; }> {
-    throw new Error('Method not implemented.');
+
+ get<T>(url: string): Observable<T> {
+  return this.http.get<T>(`${this.apiUrl}${url}`);
+}
+  post<T>(url: string, body: any): Observable<T> {
+    return this.http.post<T>(`${this.apiUrl}${url}`, body);
   }
   private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
-
+patch(url: string, body: any): Observable<any> {
+  return this.http.patch(`${this.apiUrl}${url}`, body);
+}
   // Authentication
    login(credentials: { username: string; password: string }): Observable<any> {
     return this.http.post(`${environment.apiUrl}login/`, credentials);
