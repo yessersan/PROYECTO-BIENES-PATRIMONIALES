@@ -49,12 +49,13 @@ export class NotificacionListComponent implements OnInit {
       url += `&importante=true`;
     }
 
-    this.apiService.get(url).subscribe({
-      next: (response: any) => {
-        this.notificaciones = response.results;
-        this.totalItems = response.count;
-        this.isLoading = false;
-      },
+   this.apiService.get(url).subscribe({
+  next: (response: any) => {
+    console.log('Respuesta del backend:', response);
+    this.notificaciones = response; 
+    this.totalItems = response.length; 
+    this.isLoading = false;
+  },
       error: (err) => {
         this.error = 'Error al cargar notificaciones';
         this.isLoading = false;

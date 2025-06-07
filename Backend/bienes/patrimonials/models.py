@@ -63,9 +63,9 @@ class Usuario(AbstractUser):
     def tiene_permiso(self, permiso_requerido):
         """Verifica si el usuario tiene el permiso requerido"""
         permisos = {
-            'ADMIN': ['crear', 'editar', 'eliminar', 'asignar', 'reportes'],
-            'GESTOR': ['crear', 'editar', 'asignar', 'reportes'],
-            'AUDITOR': ['editar', 'reportes'],
+            'ADMIN': ['crear', 'editar', 'eliminar', 'asignar', 'reportes','consultar'],
+            'GESTOR': ['crear', 'editar', 'asignar', 'reportes''consultar'],
+            'AUDITOR': ['editar', 'reportes','consultar'],
             'CONSULTA': ['consultar']
         }
         return permiso_requerido in permisos.get(self.rol, [])

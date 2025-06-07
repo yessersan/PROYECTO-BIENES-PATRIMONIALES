@@ -59,9 +59,9 @@
     <span>Cargando notificaciones...</span>
   </div>
 
-  <div *ngIf="!isLoading && notificaciones.length === 0" class="empty">
-    No hay notificaciones para mostrar
-  </div>
+ <div *ngIf="!isLoading && (notificaciones?.length === 0)" class="empty">
+  No hay notificaciones para mostrar
+</div>
 
   <div *ngIf="error" class="error">
     {{ error }}

@@ -1,1 +1,12 @@
 <p>bien-dar-baja works!</p>
+<!-- bien-dar-baja.component.html -->
+<div class="container">
+  <h2>Dar de baja bien patrimonial</h2>
+  <div *ngIf="mensaje" class="success">{{ mensaje }}</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+  <mat-form-field>
+    <mat-label>Motivo de baja</mat-label>
+    <textarea matInput [(ngModel)]="motivo"></textarea>
+  </mat-form-field>
+  <button mat-raised-button color="warn" (click)="darDeBaja()">Dar de baja</button>
+</div>
