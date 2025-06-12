@@ -22,7 +22,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
     // Opcional: excluir login y registro si no quieres enviar la API KEY ahí
     if (req.url.includes('login') || req.url.includes('registro')) {
-      headersConfig = {};
+      headersConfig = { 'X-API-KEY': this.apiKey};
     }
 
     const authReq = req.clone({
