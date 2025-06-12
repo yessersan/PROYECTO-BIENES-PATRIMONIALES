@@ -17,7 +17,7 @@ class UsuarioManager(UserManager):
             raise ValueError('El username debe ser obligatorio')
         email = self.normalize_email(email)
         user = self.model(username=username, email=email, **extra_fields)
-        user.set_password(password)  # Esto hace el hash automáticamente
+        user.set_password(password) 
         user.save(using=self._db)
         return user
 

@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+from corsheaders.defaults import default_headers
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -54,7 +54,11 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication', 
         'rest_framework.authentication.SessionAuthentication',
     ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -65,7 +69,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-   # 'patrimonials.middleware.PatrimonialMiddleware'
+    'patrimonials.middleware.PatrimonialsMiddleware',
+
 ]
 
 CACHES = {
@@ -74,6 +79,8 @@ CACHES = {
     }
 }
 ROOT_URLCONF = 'bienes.urls'
+
+API_KEY = 'ABC123ABC123ABC123ABC123'
 
 TEMPLATES = [
     {
@@ -98,15 +105,10 @@ WSGI_APPLICATION = 'bienes.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bienespatrimonialesdb',
-        'USER': 'root',
-        'PASSWORD': 'santiago',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -156,4 +158,8 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 # CORS settings for frontend (e.g., Angular)
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:4200',  # Adjust if your frontend uses a different port
+]
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'x-api-key',
+    'authorization',
 ]

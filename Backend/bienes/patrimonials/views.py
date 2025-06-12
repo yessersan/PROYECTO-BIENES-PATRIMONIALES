@@ -32,14 +32,15 @@ class IsAuthenticatedWithPermission(permissions.BasePermission):
         return request.user.tiene_permiso(required_permission)
 
 class LoginView(generics.GenericAPIView):
+    permission_classes = [AllowAny]
     serializer_class = UsuarioSerializer
 
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
         user = authenticate(username=username, password=password)
-        if user:
-            token, created = Token.objects.get_or_create(user=user)
+        if user is not None:
+            token, _ = Token.objects.get_or_create(user=user)
             return Response({
                 'token': token.key,
                 'user': UsuarioSerializer(user).data
