@@ -19,6 +19,7 @@ import { EtiquetaDigital } from '../models/etiqueta-digital.model';
   providedIn: 'root'
 })
 export class ApiService {
+  apiService: any;
 
  get<T>(url: string): Observable<T> {
   return this.http.get<T>(`${this.apiUrl}${url}`);
@@ -38,7 +39,7 @@ patch(url: string, body: any): Observable<any> {
   }
   registrar(usuario: Partial<Usuario>): Observable<Usuario> {
   return this.http.post<Usuario>(`${this.apiUrl}auth/registro/`, usuario);
-}
+  }
 
   // Usuarios
   getUsuarios(): Observable<Usuario[]> {

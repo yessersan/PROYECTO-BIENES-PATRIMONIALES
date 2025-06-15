@@ -25,7 +25,7 @@ export class RegistroComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', Validators.required],
-      rol: ['GESTOR', Validators.required],
+      rol: ['', Validators.required],
       departamento: [''],
       telefono: [''],
       first_name: [''],

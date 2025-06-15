@@ -29,6 +29,9 @@
           <button (click)="moveBien()">Mover Bien</button>
           <button (click)="toggleEdit()">Editar</button>
           <button (click)="confirmDelete()">Eliminar</button>
+          <a [routerLink]="['/bienes/dar-baja', bien.id]" class="btn btn-warning">
+    Dar de baja
+  </a>
         </div>
       </div>
       <ng-template #editForm>
