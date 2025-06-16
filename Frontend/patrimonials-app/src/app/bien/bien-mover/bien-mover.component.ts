@@ -14,6 +14,7 @@ export class BienMoverComponent implements OnInit {
   ubicacionId: number | null = null;
   ubicaciones: Ubicacion[] = [];
   error: string | null = null;
+  success: string | null = null;
 
   constructor(private route: ActivatedRoute, private apiService: ApiService) {
     this.bienId = +this.route.snapshot.paramMap.get('id')!;
@@ -25,12 +26,12 @@ export class BienMoverComponent implements OnInit {
     });
   }
 
-  mover() {
-    if (this.ubicacionId) {
-      this.apiService.moverBien(this.bienId, { ubicacion_id: this.ubicacionId }).subscribe({
-        next: () => console.log('Bien moved successfully'),
-        error: (err) => this.error = 'Error moving bien: ' + (err.error?.message || 'Unknown error')
-      });
-    }
+mover() {
+  if (this.ubicacionId) {
+    this.apiService.moverBien(this.bienId, { nueva_ubicacion_id: this.ubicacionId }).subscribe({
+      next: () => this.success = 'Bien movido correctamente',
+      error: (err) => this.error = 'Error moving bien: ' + (err.error?.message || 'Unknown error')
+    });
   }
+}
 }

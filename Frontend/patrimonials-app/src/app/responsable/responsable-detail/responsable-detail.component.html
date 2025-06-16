@@ -1,1 +1,29 @@
-<p>responsable-detail works!</p>
+<h2>Detalle del Responsable</h2>
+<p><strong>Usuario:</strong>
+  <ng-container *ngIf="responsable && isUsuarioObject(responsable.usuario); else soloId">
+    {{ responsable.usuario.username }}
+  </ng-container>
+  <ng-template #soloId>
+    {{ responsable?.usuario }}
+  </ng-template>
+</p>
+<p><strong>Email:</strong>
+  <ng-container *ngIf="responsable && isUsuarioObject(responsable.usuario) && responsable.usuario.email; else soloEmail">
+    {{ responsable.usuario.email }}
+  </ng-container>
+  <ng-template #soloEmail>
+    {{ responsable?.usuario }}
+  </ng-template>
+</p>
+<p><strong>Rol:</strong>
+  <ng-container *ngIf="responsable && isUsuarioObject(responsable.usuario) && responsable.usuario.rol; else soloRol">
+    {{ responsable.usuario.rol }}
+  </ng-container>
+  <ng-template #soloRol>
+    {{ responsable?.usuario }}
+  </ng-template>
+</p>
+<p><strong>Cargo:</strong> {{ responsable?.cargo }}</p>
+<p><strong>Departamento:</strong> {{ responsable?.departamento }}</p>
+<p><strong>Fecha de asignación:</strong> {{ responsable?.fecha_asignacion | date:'longDate' }}</p>
+<p><strong>Activo:</strong> {{ responsable?.activo ? 'Sí' : 'No' }}</p>

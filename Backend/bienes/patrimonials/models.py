@@ -124,14 +124,13 @@ class Ubicacion(models.Model):
     capacidad = models.PositiveIntegerField(default=1)
     ocupados = models.PositiveIntegerField(default=0)
 
-    def mover_bien(self, bien, nueva_ubicacion):
-        """Mueve un bien a una nueva ubicación actualizando contadores"""
+    def mover_bien(self, bien, nueva_ubicacion, usuario):
         if nueva_ubicacion.ocupados >= nueva_ubicacion.capacidad:
             return False, "La ubicación destino está llena"
         
         # Liberar espacio en ubicación actual
         if bien.ubicacion:
-            bien.ubicacion.ocupados -= 1
+            bien.ubicacion.ocupados =max(bien.ubicacion.ocupados - 1, 0)
             bien.ubicacion.save()
         
         # Asignar nueva ubicación
@@ -142,6 +141,10 @@ class Ubicacion(models.Model):
         nueva_ubicacion.ocupados += 1
         nueva_ubicacion.save()
         
+        # Validar responsable
+        if not bien.responsable:
+            return False, "El bien no tiene responsable asignado"
+        
         # Registrar movimiento
         Movimiento.objects.create(
             tipo='TRASLADO',
@@ -149,14 +152,14 @@ class Ubicacion(models.Model):
             bien=bien,
             responsable=bien.responsable,
             origen=self,
-            destino=nueva_ubicacion
+            destino=nueva_ubicacion,
+            usuario_registro=usuario
         )
         
         return True, f"Bien movido a {nueva_ubicacion}"
-
+    
     def espacio_disponible(self):
-        return self.capacidad - self.ocupados
-
+            return self.capacidad - self.ocupados
     def __str__(self):
         return f"{self.edificio} - Piso {self.piso} - {self.oficina} ({self.codigo})"
 
@@ -181,7 +184,8 @@ class Responsable(models.Model):
             descripcion=f"Asignación a {self}",
             bien=bien,
             responsable=self,
-            destino=bien.ubicacion
+            destino=bien.ubicacion,
+            usuario_registro=self.usuario
         )
         
         return True, f"Bien {bien.codigo} asignado a {self}"

@@ -1,0 +1,83 @@
+/* Puedes usar este CSS en responsable-list.component.css y responsable-detail.component.css */
+
+/* Títulos */
+h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+}
+
+/* Tabla */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+th, td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+th {
+  background: #f5f6fa;
+  font-weight: 600;
+  color: #34495e;
+}
+
+tbody tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+a {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Detalle */
+p {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+}
+
+strong {
+  color: #34495e;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+  thead tr {
+    display: none;
+  }
+  tr {
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
+  }
+  td {
+    position: relative;
+    padding-left: 50%;
+    border: none;
+    border-bottom: 1px solid #eee;
+  }
+  td:before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 45%;
+    padding-left: 1rem;
+    font-weight: bold;
+    color: #888;
+    content: attr(data-label);
+  }
+}

@@ -174,12 +174,16 @@ class BienPatrimonialMoverView(generics.GenericAPIView):
             if not nueva_ubicacion_id:
                 return Response({'error': 'Se requiere nueva_ubicacion_id'}, status=status.HTTP_400_BAD_REQUEST)
             nueva_ubicacion = Ubicacion.objects.get(id=nueva_ubicacion_id)
-            success, message = bien.ubicacion.mover_bien(bien, nueva_ubicacion)
+            if not bien.ubicacion:
+                return Response({'error': 'El bien no tiene ubicación actual asignada'}, status=status.HTTP_400_BAD_REQUEST)        
+            success, message = bien.ubicacion.mover_bien(bien, nueva_ubicacion, request.user)
             if not success:
                 return Response({'error': message}, status=status.HTTP_400_BAD_REQUEST)
             return Response({'message': message}, status=status.HTTP_200_OK)
         except Ubicacion.DoesNotExist:
             return Response({'error': 'Ubicación no encontrada'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class BienPatrimonialDarBajaView(generics.GenericAPIView):
     queryset = BienPatrimonial.objects.all()

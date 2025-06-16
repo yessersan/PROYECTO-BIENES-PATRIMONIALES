@@ -125,9 +125,9 @@ patch(url: string, body: any): Observable<any> {
   deleteBien(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}bienes/${id}/`);
   }
-  moverBien(id: number, data: { ubicacion_id: number }): Observable<any> {
+  moverBien(id: number, data: { nueva_ubicacion_id: number }): Observable<any> {
     return this.http.post(`${this.apiUrl}bienes/${id}/mover/`, data);
-  }
+  } 
   darBajaBien(id: number, data: { motivo: string; fecha_baja?: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}bienes/${id}/dar-baja/`, data);
   }
