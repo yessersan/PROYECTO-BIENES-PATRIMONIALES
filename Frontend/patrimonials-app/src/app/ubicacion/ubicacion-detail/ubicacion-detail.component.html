@@ -1,1 +1,16 @@
 <p>ubicacion-detail works!</p>
+<div *ngIf="ubicacion">
+  <h2>Detalle de Ubicación: {{ ubicacion.codigo }}</h2>
+  <p><strong>Edificio:</strong> {{ ubicacion.edificio }}</p>
+  <p><strong>Piso:</strong> {{ ubicacion.piso }}</p>
+  <p><strong>Oficina:</strong> {{ ubicacion.oficina }}</p>
+  <p><strong>Dirección:</strong> {{ ubicacion.direccion }}</p>
+  <p><strong>Capacidad:</strong> {{ ubicacion.capacidad }}</p>
+  <p><strong>Ocupados:</strong> {{ ubicacion.ocupados }}</p>
+  <h3>Bienes en esta ubicación</h3>
+  <ul>
+    <li *ngFor="let bien of bienes">
+      {{ bien.codigo }} - {{ bien.descripcion }}
+    </li>
+  </ul>
+</div>

@@ -1,1 +1,28 @@
 <p>ubicacion-list works!</p>
+<h2>Ubicaciones</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Código</th>
+      <th>Edificio</th>
+      <th>Piso</th>
+      <th>Oficina</th>
+      <th>Capacidad</th>
+      <th>Ocupados</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let ubicacion of ubicaciones">
+      <td>{{ ubicacion.codigo }}</td>
+      <td>{{ ubicacion.edificio }}</td>
+      <td>{{ ubicacion.piso }}</td>
+      <td>{{ ubicacion.oficina }}</td>
+      <td>{{ ubicacion.capacidad }}</td>
+      <td>{{ ubicacion.ocupados }}</td>
+      <td>
+        <button (click)="verDetalle(ubicacion.id)">Ver detalle</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

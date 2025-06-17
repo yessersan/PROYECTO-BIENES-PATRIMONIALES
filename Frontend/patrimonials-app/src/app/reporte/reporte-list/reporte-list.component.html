@@ -1,1 +1,26 @@
-<p>reporte-list works!</p>
+<h2>Reportes</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Tipo</th>
+      <th>Fecha de generación</th>
+      <th>Formato</th>
+      <th>Usuario</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let reporte of reportes">
+      <td>{{ reporte.id }}</td>
+      <td>{{ reporte.tipo }}</td>
+      <td>{{ reporte.fecha_generacion | date:'short' }}</td>
+      <td>{{ reporte.formato }}</td>
+      <td>{{ reporte.usuario }}</td>
+      <td>
+        <button (click)="verDetalle(reporte.id)">Ver detalle</button>
+        <a *ngIf="reporte.archivo" [href]="reporte.archivo" target="_blank">Descargar</a>
+      </td>
+    </tr>
+  </tbody>
+</table>

@@ -1,1 +1,14 @@
 <p>reporte-detail works!</p>
+<div *ngIf="reporte">
+  <h2>Detalle de Reporte</h2>
+  <p><strong>ID:</strong> {{ reporte.id }}</p>
+  <p><strong>Tipo:</strong> {{ reporte.tipo }}</p>
+  <p><strong>Fecha de generación:</strong> {{ reporte.fecha_generacion | date:'short' }}</p>
+  <p><strong>Formato:</strong> {{ reporte.formato }}</p>
+  <p><strong>Usuario:</strong> {{ reporte.usuario }}</p>
+  <p><strong>Parámetros:</strong> {{ reporte.parametros | json }}</p>
+  <p><strong>Contenido:</strong> {{ reporte.contenido }}</p>
+  <div *ngIf="reporte.archivo">
+    <a [href]="reporte.archivo" target="_blank">Descargar archivo</a>
+  </div>
+</div>

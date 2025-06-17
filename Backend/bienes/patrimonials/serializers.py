@@ -104,8 +104,7 @@ class MovimientoSerializer(serializers.ModelSerializer):
         return value
 
 class ReporteSerializer(serializers.ModelSerializer):
-    usuario = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
-
+    usuario = UsuarioSerializer(read_only=True)
     class Meta:
         model = Reporte
         fields = ['id', 'tipo', 'fecha_generacion', 'contenido', 'formato', 'parametros', 'usuario', 'archivo']
