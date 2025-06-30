@@ -1,0 +1,29 @@
+.login-wrapper {
+  background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+}
+
+.p-card {
+  transition: transform 0.3s ease;
+}
+
+.p-card:hover {
+  transform: translateY(-5px);
+}
+
+.p-inputtext-lg {
+  padding: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.p-button-lg {
+  padding: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.p-error {
+  font-size: 0.875rem;
+}
+
+.register-link {
+  text-decoration: none;
+}

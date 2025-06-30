@@ -1,1 +1,31 @@
-<p>movimiento-list works!</p>
+<div>
+  <h2>Movimientos</h2>
+  <button (click)="crearMovimiento()">Nuevo Movimiento</button>
+  <div *ngIf="loading">Cargando...</div>
+  <div *ngIf="error">{{error}}</div>
+  <table *ngIf="movimientos.length">
+    <thead>
+      <tr>
+        <th>Tipo</th>
+        <th>Bien</th>
+        <th>Responsable</th>
+        <th>Fecha</th>
+        <th>Descripción</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let mov of movimientos">
+        <td>{{mov.tipo}}</td>
+        <td>{{mov.bien}}</td>
+        <td>{{mov.responsable}}</td>
+        <td>{{mov.fecha | date:'short'}}</td>
+        <td>{{mov.descripcion}}</td>
+        <td>
+          <button (click)="verDetalle(mov.id)">Ver/Editar</button>
+          <button (click)="eliminarMovimiento(mov.id)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

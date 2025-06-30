@@ -1,12 +1,40 @@
-<p>ubicacion-detail works!</p>
 <div *ngIf="ubicacion">
-  <h2>Detalle de Ubicación: {{ ubicacion.codigo }}</h2>
-  <p><strong>Edificio:</strong> {{ ubicacion.edificio }}</p>
-  <p><strong>Piso:</strong> {{ ubicacion.piso }}</p>
-  <p><strong>Oficina:</strong> {{ ubicacion.oficina }}</p>
-  <p><strong>Dirección:</strong> {{ ubicacion.direccion }}</p>
-  <p><strong>Capacidad:</strong> {{ ubicacion.capacidad }}</p>
-  <p><strong>Ocupados:</strong> {{ ubicacion.ocupados }}</p>
+  <h2>{{ esNuevo ? 'Nueva Ubicación' : 'Detalle de Ubicación: ' + ubicacion.codigo }}</h2>
+  <form (ngSubmit)="guardar()">
+    <label>Código:
+      <input [(ngModel)]="ubicacion.codigo" name="codigo" required [readonly]="!esNuevo">
+    </label>
+    <br>
+    <label>Edificio:
+      <input [(ngModel)]="ubicacion.edificio" name="edificio" required>
+    </label>
+    <br>
+    <label>Piso:
+      <input [(ngModel)]="ubicacion.piso" name="piso" required>
+    </label>
+    <br>
+    <label>Oficina:
+      <input [(ngModel)]="ubicacion.oficina" name="oficina" required>
+    </label>
+    <br>
+    <label>Dirección:
+      <input [(ngModel)]="ubicacion.direccion" name="direccion" required>
+    </label>
+    <br>
+    <label>Capacidad:
+      <input type="number" [(ngModel)]="ubicacion.capacidad" name="capacidad" required>
+    </label>
+    <br>
+    <label>Ocupados:
+      <input type="number" [(ngModel)]="ubicacion.ocupados" name="ocupados" required>
+    </label>
+    <br>
+    <div *ngIf="error" style="color:red">{{error}}</div>
+    <button type="submit">Guardar</button>
+    <button type="button" (click)="cancelar()">Cancelar</button>
+    <button *ngIf="!esNuevo" type="button" (click)="eliminar()">Eliminar</button>
+  </form>
+
   <h3>Bienes en esta ubicación</h3>
   <ul>
     <li *ngFor="let bien of bienes">

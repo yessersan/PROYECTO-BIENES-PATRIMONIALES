@@ -1,1 +1,44 @@
-<p>movimiento-detail works!</p>
+<div>
+  <h2>{{ esNuevo ? 'Nuevo Movimiento' : 'Editar Movimiento' }}</h2>
+  <form (ngSubmit)="guardar()">
+    <label>Tipo:
+      <select [(ngModel)]="movimiento.tipo" name="tipo" required>
+        <option value="ASIGNACION">Asignación</option>
+        <option value="TRASLADO">Traslado</option>
+        <option value="BAJA">Baja</option>
+        <option value="MANTENIMIENTO">Mantenimiento</option>
+        <option value="LIBERACION">Liberación</option>
+        <option value="REPARACION">Enviado a reparación</option>
+        <option value="RETORNO">Retorno de reparación</option>
+      </select>
+    </label>
+    <br>
+    <label>Bien (ID):
+      <input [(ngModel)]="movimiento.bien" name="bien" required>
+    </label>
+    <br>
+    <label>Responsable (ID):
+      <input [(ngModel)]="movimiento.responsable" name="responsable" required>
+    </label>
+    <br>
+    <label>Descripción:
+      <textarea [(ngModel)]="movimiento.descripcion" name="descripcion"></textarea>
+    </label>
+    <br>
+    <label>Observaciones:
+      <textarea [(ngModel)]="movimiento.observaciones" name="observaciones"></textarea>
+    </label>
+    <br>
+    <label>Origen (Ubicación ID):
+      <input [(ngModel)]="movimiento.origen" name="origen">
+    </label>
+    <br>
+    <label>Destino (Ubicación ID):
+      <input [(ngModel)]="movimiento.destino" name="destino">
+    </label>
+    <br>
+    <div *ngIf="error" style="color:red">{{error}}</div>
+    <button type="submit">Guardar</button>
+    <button type="button" (click)="cancelar()">Cancelar</button>
+  </form>
+</div>

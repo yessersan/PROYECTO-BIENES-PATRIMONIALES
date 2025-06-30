@@ -1,17 +1,16 @@
-<p>bien-mover works!</p>
 <div>
-    <h2>Mover Bien</h2>
-    <form (ngSubmit)="mover()">
-      <div>
-        <label>Nueva Ubicación:
-          <select [(ngModel)]="ubicacionId" name="ubicacionId" required>
-            <option value="" disabled>Seleccione una ubicación</option>
-            <option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion.id">
-              {{ ubicacion.edificio }} - {{ ubicacion.oficina }}
-            </option>
-          </select>
-        </label>
-      </div>
-      <button type="submit">Mover</button>
-<p *ngIf="success" style="color: green;">{{ success }}</p>    </form>
-  </div>
+  <h2>Mover Bien</h2>
+  <form (ngSubmit)="mover()">
+    <label>Selecciona nueva ubicación:
+      <select [(ngModel)]="ubicacionId" name="ubicacionId" required>
+        <option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion.id">
+          {{ubicacion.edificio}} - {{ubicacion.oficina}} ({{ubicacion.codigo}})
+        </option>
+      </select>
+    </label>
+    <br>
+    <button type="submit">Mover</button>
+  </form>
+  <div *ngIf="success" style="color:green">{{success}}</div>
+  <div *ngIf="error" style="color:red">{{error}}</div>
+</div>

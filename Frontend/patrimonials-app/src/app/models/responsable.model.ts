@@ -1,9 +1,10 @@
+import { Usuario } from "./usuario.model";
 export interface Responsable {
   id: number;
-  usuario: number; // ID of Usuario
-  nombre?: string;  // Agrega esta línea (puede ser opcional con ?)
+  usuario: Usuario; 
+  nombre?: string;  
   cargo: string;
   departamento: string;
-  fecha_asignacion: string; // ISO date string
+  fecha_asignacion: string; 
   activo: boolean;
 }

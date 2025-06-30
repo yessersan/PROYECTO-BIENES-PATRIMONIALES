@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
@@ -56,6 +56,13 @@ import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
+import { ToastModule } from 'primeng/toast';
+import { MessagesModule } from 'primeng/messages';
+import { MessageService } from 'primeng/api';
+import { DropdownModule } from 'primeng/dropdown';
+import { ReactiveFormsModule } from '@angular/forms';
+import { SelectModule } from 'primeng/select';
+
 
 @NgModule({
   declarations: [
@@ -113,7 +120,12 @@ import { ButtonModule } from 'primeng/button';
     BadgeModule,
     CardModule,
     MessageModule,
-    PasswordModule
+    PasswordModule,
+    ToastModule,
+    MessagesModule,
+    ReactiveFormsModule,
+    DropdownModule,
+    SelectModule
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
@@ -122,7 +134,8 @@ import { ButtonModule } from 'primeng/button';
       theme: {
         preset: Aura
       }
-    })
+    }),
+     MessageService 
   ],
   bootstrap: [AppComponent]
 })

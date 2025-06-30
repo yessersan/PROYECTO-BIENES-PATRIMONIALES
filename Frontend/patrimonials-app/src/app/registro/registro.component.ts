@@ -1,24 +1,32 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../core/auth.service';
-import { Registro } from '../models/registro'; 
+import { Registro } from '../models/registro';
 import { Router } from '@angular/router';
+import { MessageService } from 'primeng/api'; // Import MessageService
 
 @Component({
   selector: 'app-registro',
   standalone: false,
   templateUrl: './registro.component.html',
-  styleUrls: ['./registro.component.css'] 
+  styleUrls: ['./registro.component.css'],
+  providers: [MessageService], // Add MessageService to providers
 })
 export class RegistroComponent {
   registroForm: FormGroup;
   loading = false;
-  error = '';
+  roles = [
+    { label: 'Administrador', value: 'ADMIN' },
+    { label: 'Gestor', value: 'GESTOR' },
+    { label: 'Auditor', value: 'AUDITOR' },
+    { label: 'Consulta', value: 'CONSULTA' },
+  ];
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private messageService: MessageService // Inject MessageService
   ) {
     this.registroForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(4)]],
@@ -29,8 +37,8 @@ export class RegistroComponent {
       departamento: [''],
       telefono: [''],
       first_name: [''],
-      last_name: ['']
-    }, { validator: this.passwordMatchValidator });
+      last_name: [''],
+    }, { validators: this.passwordMatchValidator });
   }
 
   passwordMatchValidator(g: FormGroup) {
@@ -39,26 +47,41 @@ export class RegistroComponent {
       : { mismatch: true };
   }
 
+  isInvalid(controlName: string): boolean {
+    const control = this.registroForm.get(controlName);
+    return !!(control && control.invalid && control.touched);
+  }
+
+  passwordMismatch(): boolean {
+    return !!(this.registroForm.hasError('mismatch') && this.registroForm.get('confirmPassword')?.touched);
+  }
+
   onSubmit() {
     if (this.registroForm.invalid) {
-      console.log('Formulario inválido:', this.registroForm.errors);
+      this.registroForm.markAllAsTouched();
       return;
     }
 
     this.loading = true;
     const registroData: Registro = this.registroForm.value;
-    console.log('Datos de registro a enviar:', registroData);
     this.authService.registrar(registroData).subscribe({
-      next: (response) => {
-        console.log('Registro exitoso:', response);
+      next: () => {
         this.loading = false;
-        this.router.navigate(['/login']);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Registro exitoso',
+          detail: 'Usuario creado correctamente',
+        });
+        setTimeout(() => this.router.navigate(['/login']), 1000);
       },
-      error: (err) => {
-        console.error('Error en el registro:', err);
-        this.error = 'Error al registrar usuario. Por favor, inténtalo de nuevo.';
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo registrar el usuario',
+        });
         this.loading = false;
-      }
+      },
     });
   }
 }

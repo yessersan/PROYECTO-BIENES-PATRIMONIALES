@@ -1,1 +1,29 @@
-<p>categoria-list works!</p>
+<div>
+  <h2>Categorías</h2>
+  <button (click)="crearCategoria()">Nueva Categoría</button>
+  <div *ngIf="loading">Cargando...</div>
+  <div *ngIf="error">{{error}}</div>
+  <table *ngIf="categorias.length">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Vida útil</th>
+        <th>Tasa Depreciación</th>
+        <th>Activa</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let cat of categorias">
+        <td>{{cat.nombre}}</td>
+        <td>{{cat.vida_util}}</td>
+        <td>{{cat.tasa_depreciacion}}%</td>
+        <td>{{cat.activa ? 'Sí' : 'No'}}</td>
+        <td>
+          <button (click)="verDetalle(cat.id)">Editar</button>
+          <button (click)="eliminarCategoria(cat.id)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

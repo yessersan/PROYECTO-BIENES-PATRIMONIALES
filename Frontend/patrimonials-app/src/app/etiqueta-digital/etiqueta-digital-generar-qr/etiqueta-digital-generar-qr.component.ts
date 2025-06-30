@@ -24,10 +24,9 @@ export class EtiquetaDigitalGenerarQrComponent implements OnInit {
   generateQrCode() {
     this.apiService.generarQR(this.etiquetaId).subscribe({
       next: (response) => {
-        this.qrCodeUrl = response.imagen_qr; // Assumes API returns the QR code URL
-        console.log('QR code generated', response);
+        this.qrCodeUrl = response.qr_url || response.imagen_qr;
       },
-      error: (err) => this.error = 'Error generating QR code: ' + (err.error?.message || 'Unknown error')
+      error: (err) => this.error = 'Error generando QR: ' + (err.error?.message || 'Desconocido')
     });
   }
 }

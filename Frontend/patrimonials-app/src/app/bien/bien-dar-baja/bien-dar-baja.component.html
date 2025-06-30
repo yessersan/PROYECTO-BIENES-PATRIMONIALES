@@ -1,10 +1,13 @@
-<p>bien-dar-baja works!</p>
-<!-- bien-dar-baja.component.html -->
-<div class="container">
-  <h2>Dar de baja bien patrimonial</h2>
-  <div *ngIf="mensaje" class="success">{{ mensaje }}</div>
-  <div *ngIf="error" class="error">{{ error }}</div>
-<label>Motivo de baja</label>
-<textarea [(ngModel)]="motivo" name="motivo" class="form-control"></textarea>
-  <button mat-raised-button color="warn" (click)="darDeBaja()">Dar de baja</button>
+<div>
+  <h2>Dar de Baja Bien</h2>
+  <form (ngSubmit)="darDeBaja()">
+    <label>Motivo de baja:
+      <textarea [(ngModel)]="motivo" name="motivo" required></textarea>
+    </label>
+    <br>
+    <button type="submit">Dar de Baja</button>
+    <button type="button" (click)="router.navigate(['/bienes'])">Cancelar</button>
+  </form>
+  <div *ngIf="mensaje" style="color:green">{{mensaje}}</div>
+  <div *ngIf="error" style="color:red">{{error}}</div>
 </div>

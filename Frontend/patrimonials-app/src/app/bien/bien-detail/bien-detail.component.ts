@@ -23,13 +23,23 @@ export class BienDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
+    public router: Router,
     private apiService: ApiService
   ) {}
 
   ngOnInit() {
-    const id = +this.route.snapshot.paramMap.get('id')!;
-    this.loadBien(id);
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (idParam === 'nuevo') {
+      // Modo creación
+      this.editMode = true;
+      this.bien = null;
+      this.editedBien = {};
+      this.loading = false;
+    } else {
+      // Modo detalle/edición
+      const id = +idParam!;
+      this.loadBien(id);
+    }
   }
 
   loadBien(id: number) {
@@ -38,8 +48,17 @@ export class BienDetailComponent implements OnInit {
       next: (bien) => {
         this.bien = bien;
         this.editedBien = { 
-          descripcion: bien.descripcion, 
-          estado: bien.estado 
+          codigo: bien.codigo,
+          descripcion: bien.descripcion,
+          estado: bien.estado,
+          ubicacion: bien.ubicacion,
+          responsable: bien.responsable,
+          valor_adquisicion: bien.valor_adquisicion,
+          fecha_adquisicion: bien.fecha_adquisicion,
+          categoria: bien.categoria,
+          marca: bien.marca,
+          modelo: bien.modelo,
+          serie: bien.serie
         };
         
         // Cargar ubicación si existe
@@ -71,14 +90,35 @@ export class BienDetailComponent implements OnInit {
     this.editMode = !this.editMode;
     if (!this.editMode && this.bien) {
       this.editedBien = { 
-        descripcion: this.bien.descripcion, 
-        estado: this.bien.estado 
+        codigo: this.bien.codigo,
+        descripcion: this.bien.descripcion,
+        estado: this.bien.estado,
+        ubicacion: this.bien.ubicacion,
+        responsable: this.bien.responsable,
+        valor_adquisicion: this.bien.valor_adquisicion,
+        fecha_adquisicion: this.bien.fecha_adquisicion,
+        categoria: this.bien.categoria,
+        marca: this.bien.marca,
+        modelo: this.bien.modelo,
+        serie: this.bien.serie
       };
     }
   }
+crearNuevoBien() {
+  this.router.navigate(['/bienes/nuevo']);
+}
 
   saveChanges() {
-    if (this.bien) {
+    if (!this.bien) {
+      // Crear nuevo bien
+      this.apiService.createBien(this.editedBien).subscribe({
+        next: (bien) => {
+          this.router.navigate(['/bienes', bien.id]);
+        },
+        error: (err) => this.error = 'Error al crear bien: ' + (err.error?.message || 'Error desconocido')
+      });
+    } else {
+      // Actualizar bien existente
       this.apiService.updateBien(this.bien.id, this.editedBien).subscribe({
         next: (updatedBien) => {
           this.bien = updatedBien;

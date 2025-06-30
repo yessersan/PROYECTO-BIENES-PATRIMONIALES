@@ -16,7 +16,7 @@ export class BienDarBajaComponent {
   constructor(
     private apiService: ApiService,
     private route: ActivatedRoute,
-    private router: Router
+    public router: Router
   ) {}
 
   darDeBaja() {
