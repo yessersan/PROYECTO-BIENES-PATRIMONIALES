@@ -43,7 +43,19 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
+import { TableModule } from 'primeng/table';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { providePrimeNG } from 'primeng/config';
+import Aura from '@primeng/themes/aura';
+import { MenubarModule } from 'primeng/menubar';
+import { AvatarModule } from 'primeng/avatar';
+import { BadgeModule } from 'primeng/badge';
+import { PanelMenuModule } from 'primeng/panelmenu';
+import { MessageModule } from 'primeng/message';
+import { CardModule } from 'primeng/card';
+import { InputTextModule } from 'primeng/inputtext';
+import { PasswordModule } from 'primeng/password';
+import { ButtonModule } from 'primeng/button';
 
 @NgModule({
   declarations: [
@@ -67,7 +79,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     DocumentoListComponent,
     DocumentoDetailComponent,
     NotificacionListComponent,
-    UbicacionDetailComponent,
     MantenimientoListComponent,
     MantenimientoDetailComponent,
     MantenimientoIniciarComponent,
@@ -76,7 +87,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     EtiquetaDigitalDetailComponent,
     EtiquetaDigitalGenerarQrComponent,
     DashboardComponent,
-    RegistroComponent
+    RegistroComponent,
   ],
   imports: [
     BrowserModule,
@@ -92,11 +103,26 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatIconModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    AppRoutingModule
-  
+    AppRoutingModule,
+    ButtonModule,
+    TableModule,
+    InputTextModule,
+    MenubarModule,
+    AvatarModule,
+    PanelMenuModule,
+    BadgeModule,
+    CardModule,
+    MessageModule,
+    PasswordModule
   ],
   providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    provideAnimationsAsync(),
+    providePrimeNG({
+      theme: {
+        preset: Aura
+      }
+    })
   ],
   bootstrap: [AppComponent]
 })
