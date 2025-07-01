@@ -6,9 +6,19 @@ class PatrimonialsMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # Verificar API key aquí, porque aquí sí existe 'request'
-        api_key = request.headers.get('X-API-KEY')
-        if api_key and api_key == settings.API_KEY:
+        # Permitir acceso a archivos de media sin API key
+        if request.path.startswith('/media/') or request.path.startswith('/admin/'):
             return self.get_response(request)
 
-        return JsonResponse({'error': "API key is missing or invalid."}, status=403)
+        # Permitir peticiones OPTIONS (preflight CORS)
+        if request.method == 'OPTIONS':
+            return self.get_response(request)
+
+        # Verificar API key en las rutas protegidas (por ejemplo, solo en /api/)
+        if request.path.startswith('/api/'):
+            api_key = request.headers.get('X-API-KEY')
+            if not api_key or api_key != settings.API_KEY:
+                return JsonResponse({'error': "API key is missing or invalid."}, status=403)
+
+        # Continuar con la respuesta normal
+        return self.get_response(request)

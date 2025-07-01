@@ -26,7 +26,9 @@ class RegistroSerializer(serializers.ModelSerializer):
             'first_name', 'last_name', 'rol', 'departamento', 'telefono'
         ]
         extra_kwargs = {
-            'password': {'write_only': True}
+            'password': {'write_only': True},
+            'departamento': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'telefono': {'required': False, 'allow_null': True, 'allow_blank': True}
         }
 
     def validate(self, data):
@@ -41,7 +43,7 @@ class RegistroSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
-    
+
 class CategoriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Categoria

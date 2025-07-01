@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Reporte } from '../../models/reporte.model';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 
 @Component({
@@ -13,7 +13,7 @@ export class ReporteDetailComponent implements OnInit {
   reporte?: Reporte;
   loading = false;
 
-  constructor(private route: ActivatedRoute, private api: ApiService) {}
+  constructor(private route: ActivatedRoute, private api: ApiService, private router: Router) {}
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -25,5 +25,9 @@ export class ReporteDetailComponent implements OnInit {
       },
       error: () => { this.loading = false; }
     });
+    
+  }
+   volver() {
+    this.router.navigate(['/reportes']);
   }
 }
