@@ -108,6 +108,9 @@ patch(url: string, body: any): Observable<any> {
   deleteResponsable(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}responsables/${id}/`);
   }
+  getUsuariosDisponibles(): Observable<Usuario[]> {
+  return this.http.get<Usuario[]>(`${this.apiUrl}usuarios/disponibles/`);
+}
 
   // Bienes
   getBienes(): Observable<Bien[]> {
@@ -170,6 +173,15 @@ patch(url: string, body: any): Observable<any> {
   getHistorialAuditoria(): Observable<HistorialAuditoria[]> {
     return this.http.get<HistorialAuditoria[]>(`${this.apiUrl}historial-auditoria/`);
   }
+  createHistorialAuditoria(historial: Partial<HistorialAuditoria>): Observable<HistorialAuditoria> {
+  return this.http.post<HistorialAuditoria>(`${this.apiUrl}historial-auditoria/`, historial);
+}
+updateHistorialAuditoria(id: number, historial: Partial<HistorialAuditoria>): Observable<HistorialAuditoria> {
+  return this.http.put<HistorialAuditoria>(`${this.apiUrl}historial-auditoria/${id}/`, historial);
+}
+deleteHistorialAuditoria(id: number): Observable<void> {
+  return this.http.delete<void>(`${this.apiUrl}historial-auditoria/${id}/`);
+}
 
   // Documentos
   getDocumentos(): Observable<Documento[]> {

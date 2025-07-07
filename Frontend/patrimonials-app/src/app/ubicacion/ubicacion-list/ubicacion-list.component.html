@@ -21,6 +21,8 @@
       <td>{{ ubicacion.capacidad }}</td>
       <td>{{ ubicacion.ocupados }}</td>
       <td>
+        <button (click)="nuevaUbicacion()">Nueva ubicación</button>
+
         <button (click)="verDetalle(ubicacion.id)">Ver detalle</button>
       </td>
     </tr>

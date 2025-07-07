@@ -1,6 +1,8 @@
-from django.urls import path
+from django.db import router
+from rest_framework.routers import DefaultRouter
+from django.urls import include, path
 from .views import (
-    LoginView, UsuarioActualView, UsuarioListCreateView, UsuarioRetrieveUpdateDestroyView,
+    HistorialAuditoriaViewSet, LoginView, UsuarioActualView, UsuarioListCreateView, UsuarioRetrieveUpdateDestroyView,
     CategoriaListCreateView, CategoriaRetrieveUpdateDestroyView,
     UbicacionListCreateView, UbicacionRetrieveUpdateDestroyView,
     ResponsableListCreateView, ResponsableRetrieveUpdateDestroyView,
@@ -14,13 +16,17 @@ from .views import (
     MantenimientoListCreateView, MantenimientoRetrieveUpdateDestroyView,
     MantenimientoIniciarView, MantenimientoFinalizarView,
     EtiquetaDigitalListCreateView, EtiquetaDigitalRetrieveUpdateDestroyView,
-    EtiquetaDigitalGenerarQRView,RegistroUsuarioAPIView
+    EtiquetaDigitalGenerarQRView, RegistroUsuarioAPIView
 )
+from . import views
+router = DefaultRouter()
+router.register(r'historial-auditoria', HistorialAuditoriaViewSet, basename='historial-auditoria')
 
 urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('usuarios/', UsuarioListCreateView.as_view(), name='usuario-list-create'),
     path('usuarios/<int:pk>/', UsuarioRetrieveUpdateDestroyView.as_view(), name='usuario-detail'),
+    path('usuarios/disponibles/', views.get_usuarios_disponibles, name='usuarios-disponibles'),
     path('categorias/', CategoriaListCreateView.as_view(), name='categoria-list-create'),
     path('categorias/<int:pk>/', CategoriaRetrieveUpdateDestroyView.as_view(), name='categoria-detail'),
     path('ubicaciones/', UbicacionListCreateView.as_view(), name='ubicacion-list-create'),
@@ -35,7 +41,7 @@ urlpatterns = [
     path('movimientos/<int:pk>/', MovimientoRetrieveUpdateDestroyView.as_view(), name='movimiento-detail'),
     path('reportes/', ReporteListCreateView.as_view(), name='reporte-list-create'),
     path('reportes/<int:pk>/', ReporteRetrieveUpdateDestroyView.as_view(), name='reporte-detail'),
-    path('historial-auditoria/', HistorialAuditoriaListView.as_view(), name='historial-auditoria-list'),
+    #path('historial-auditoria/', HistorialAuditoriaListView.as_view(), name='historial-auditoria-list'),
     path('documentos/', DocumentoAdjuntoListCreateView.as_view(), name='documento-list-create'),
     path('documentos/<int:pk>/', DocumentoAdjuntoRetrieveUpdateDestroyView.as_view(), name='documento-detail'),
     path('notificaciones/', NotificacionListCreateView.as_view(), name='notificacion-list-create'),
@@ -48,5 +54,7 @@ urlpatterns = [
     path('etiquetas-digitales/<int:pk>/', EtiquetaDigitalRetrieveUpdateDestroyView.as_view(), name='etiqueta-digital-detail'),
     path('auth/registro/', RegistroUsuarioAPIView.as_view(), name='registro'),
     path('etiquetas-digitales/<int:pk>/generar-qr/', EtiquetaDigitalGenerarQRView.as_view(), name='etiqueta-digital-generar-qr'),
-     path('auth/usuario/', UsuarioActualView.as_view(), name='usuario-actual'),
+    path('auth/usuario/', UsuarioActualView.as_view(), name='usuario-actual'),
+    path('', include(router.urls)),
+
 ]

@@ -4,8 +4,13 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from django.contrib.auth import authenticate
+from rest_framework.decorators import api_view, permission_classes
+
 from patrimonials.models import (
     Usuario, Categoria, Ubicacion, Responsable, BienPatrimonial,
     Movimiento, Reporte, HistorialAuditoria, DocumentoAdjunto,
@@ -69,6 +74,13 @@ class UsuarioListCreateView(generics.ListCreateAPIView):
             bien=None
         )
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_usuarios_disponibles(request):
+    usuarios_con_responsable = Responsable.objects.values_list('usuario_id', flat=True)
+    usuarios_disponibles = Usuario.objects.exclude(id__in=usuarios_con_responsable)
+    serializer = UsuarioSerializer(usuarios_disponibles, many=True)
+    return Response(serializer.data)
 class UsuarioRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
@@ -234,6 +246,11 @@ class ReporteRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticatedWithPermission]
 
 class HistorialAuditoriaListView(generics.ListAPIView):
+    queryset = HistorialAuditoria.objects.all()
+    serializer_class = HistorialAuditoriaSerializer
+    permission_classes = [IsAuthenticatedWithPermission]
+
+class HistorialAuditoriaViewSet(viewsets.ModelViewSet):
     queryset = HistorialAuditoria.objects.all()
     serializer_class = HistorialAuditoriaSerializer
     permission_classes = [IsAuthenticatedWithPermission]

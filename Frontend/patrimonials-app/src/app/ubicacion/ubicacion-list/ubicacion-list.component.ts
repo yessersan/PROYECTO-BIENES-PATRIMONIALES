@@ -29,4 +29,7 @@ export class UbicacionListComponent implements OnInit {
   verDetalle(id: number) {
     this.router.navigate(['/ubicaciones', id]);
   }
+  nuevaUbicacion() {
+  this.router.navigate(['/ubicaciones', 'nuevo']);
+}
 }

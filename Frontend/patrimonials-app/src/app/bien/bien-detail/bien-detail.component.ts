@@ -4,6 +4,7 @@ import { ApiService } from '../../core/api.service';
 import { Bien } from '../../models/bien.model';
 import { Ubicacion } from '../../models/ubicacion.model';
 import { Responsable } from '../../models/responsable.model';
+import { Categoria } from '../../models/categoria.model';
 
 @Component({
   selector: 'app-bien-detail',
@@ -15,11 +16,15 @@ export class BienDetailComponent implements OnInit {
   bien: Bien | null = null;
   ubicacion?: Ubicacion;
   responsable?: Responsable;
+  categoria?: Categoria;
   editMode = false;
   editedBien: Partial<Bien> = {};
   error: string | null = null;
   showDeleteConfirm = false;
   loading = true;
+  categorias: Categoria[] = [];
+  ubicaciones: Ubicacion[] = [];
+  responsables: Responsable[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -28,18 +33,40 @@ export class BienDetailComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.loadCategorias();
+    this.loadUbicaciones();
+    this.loadResponsables();
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam === 'nuevo') {
-      // Modo creación
       this.editMode = true;
       this.bien = null;
-      this.editedBien = {};
+      this.editedBien = { estado: 'BUENO', activo: true };
       this.loading = false;
     } else {
-      // Modo detalle/edición
       const id = +idParam!;
       this.loadBien(id);
     }
+  }
+
+  loadCategorias() {
+    this.apiService.getCategorias().subscribe({
+      next: (categorias) => this.categorias = categorias,
+      error: (err) => console.error('Error cargando categorías:', err)
+    });
+  }
+
+  loadUbicaciones() {
+    this.apiService.getUbicaciones().subscribe({
+      next: (ubicaciones) => this.ubicaciones = ubicaciones,
+      error: (err) => console.error('Error cargando ubicaciones:', err)
+    });
+  }
+
+  loadResponsables() {
+    this.apiService.getResponsables().subscribe({
+      next: (responsables) => this.responsables = responsables,
+      error: (err) => console.error('Error cargando responsables:', err)
+    });
   }
 
   loadBien(id: number) {
@@ -58,10 +85,10 @@ export class BienDetailComponent implements OnInit {
           categoria: bien.categoria,
           marca: bien.marca,
           modelo: bien.modelo,
-          serie: bien.serie
+          serie: bien.serie,
+          activo: bien.activo
         };
         
-        // Cargar ubicación si existe
         if (bien.ubicacion) {
           this.apiService.getUbicacion(bien.ubicacion).subscribe({
             next: (ubicacion) => this.ubicacion = ubicacion,
@@ -69,11 +96,17 @@ export class BienDetailComponent implements OnInit {
           });
         }
         
-        // Cargar responsable si existe
         if (bien.responsable) {
           this.apiService.getResponsable(bien.responsable).subscribe({
             next: (responsable) => this.responsable = responsable,
             error: (err) => console.error('Error cargando responsable:', err)
+          });
+        }
+        
+        if (bien.categoria) {
+          this.apiService.getCategoria(bien.categoria).subscribe({
+            next: (categoria) => this.categoria = categoria,
+            error: (err) => console.error('Error cargando categoría:', err)
           });
         }
         
@@ -100,13 +133,11 @@ export class BienDetailComponent implements OnInit {
         categoria: this.bien.categoria,
         marca: this.bien.marca,
         modelo: this.bien.modelo,
-        serie: this.bien.serie
+        serie: this.bien.serie,
+        activo: this.bien.activo
       };
     }
   }
-crearNuevoBien() {
-  this.router.navigate(['/bienes/nuevo']);
-}
 
   saveChanges() {
     if (!this.bien) {
@@ -159,6 +190,12 @@ crearNuevoBien() {
   moveBien() {
     if (this.bien) {
       this.router.navigate(['/bienes', this.bien.id, 'mover']);
+    }
+  }
+
+  darBaja() {
+    if (this.bien) {
+      this.router.navigate(['/bienes', this.bien.id, 'dar-baja']);
     }
   }
 }

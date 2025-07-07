@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
@@ -30,10 +30,10 @@ import { MantenimientoFinalizarComponent } from './mantenimiento/mantenimiento-f
 import { EtiquetaDigitalListComponent } from './etiqueta-digital/etiqueta-digital-list/etiqueta-digital-list.component';
 import { EtiquetaDigitalDetailComponent } from './etiqueta-digital/etiqueta-digital-detail/etiqueta-digital-detail.component';
 import { EtiquetaDigitalGenerarQrComponent } from './etiqueta-digital/etiqueta-digital-generar-qr/etiqueta-digital-generar-qr.component';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AuthInterceptor } from './core/auth.interceptor';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { RegistroComponent } from './registro/registro.component';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './core/auth.interceptor';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
@@ -44,9 +44,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TableModule } from 'primeng/table';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';
 import { MenubarModule } from 'primeng/menubar';
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
@@ -58,10 +55,13 @@ import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MessagesModule } from 'primeng/messages';
-import { MessageService } from 'primeng/api';
 import { DropdownModule } from 'primeng/dropdown';
-import { ReactiveFormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { providePrimeNG } from 'primeng/config';
+import { MessageService } from 'primeng/api';
+import Aura from '@primeng/themes/aura';
+import { TagModule } from 'primeng/tag';
 
 
 @NgModule({
@@ -94,13 +94,14 @@ import { SelectModule } from 'primeng/select';
     EtiquetaDigitalDetailComponent,
     EtiquetaDigitalGenerarQrComponent,
     DashboardComponent,
-    RegistroComponent,
+    RegistroComponent
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
+    AppRoutingModule,
     MatFormFieldModule,
     MatSelectModule,
     MatOptionModule,
@@ -110,21 +111,21 @@ import { SelectModule } from 'primeng/select';
     MatIconModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    AppRoutingModule,
-    ButtonModule,
     TableModule,
-    InputTextModule,
     MenubarModule,
     AvatarModule,
-    PanelMenuModule,
     BadgeModule,
-    CardModule,
+    PanelMenuModule,
     MessageModule,
+    CardModule,
+    InputTextModule,
     PasswordModule,
+    ButtonModule,
     ToastModule,
     MessagesModule,
-    ReactiveFormsModule,
     DropdownModule,
+    SelectModule,
+    TagModule,
     SelectModule
   ],
   providers: [
@@ -135,7 +136,7 @@ import { SelectModule } from 'primeng/select';
         preset: Aura
       }
     }),
-     MessageService 
+    MessageService
   ],
   bootstrap: [AppComponent]
 })
