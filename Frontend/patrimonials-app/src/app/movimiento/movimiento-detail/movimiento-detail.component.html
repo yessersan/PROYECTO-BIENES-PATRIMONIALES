@@ -1,8 +1,10 @@
-<div>
-  <h2>{{ esNuevo ? 'Nuevo Movimiento' : 'Editar Movimiento' }}</h2>
-  <form (ngSubmit)="guardar()">
+<div *ngIf="loading">Cargando...</div>
+<div *ngIf="!loading">
+  <h2>{{ esNuevo ? 'Nuevo Movimiento' : 'Detalle de Movimiento: ' + (movimiento?.id || '') }}</h2>
+  <form [formGroup]="movimientoForm" (ngSubmit)="guardar()">
     <label>Tipo:
-      <select [(ngModel)]="movimiento.tipo" name="tipo" required>
+      <select formControlName="tipo" required>
+        <option value="" disabled>Seleccione un tipo</option>
         <option value="ASIGNACION">Asignación</option>
         <option value="TRASLADO">Traslado</option>
         <option value="BAJA">Baja</option>
@@ -11,34 +13,53 @@
         <option value="REPARACION">Enviado a reparación</option>
         <option value="RETORNO">Retorno de reparación</option>
       </select>
-    </label>
-    <br>
-    <label>Bien (ID):
-      <input [(ngModel)]="movimiento.bien" name="bien" required>
-    </label>
-    <br>
-    <label>Responsable (ID):
-      <input [(ngModel)]="movimiento.responsable" name="responsable" required>
+      <span *ngIf="isFieldInvalid('tipo')" style="color:red">El tipo es requerido.</span>
     </label>
     <br>
     <label>Descripción:
-      <textarea [(ngModel)]="movimiento.descripcion" name="descripcion"></textarea>
+      <textarea formControlName="descripcion" required></textarea>
+      <span *ngIf="isFieldInvalid('descripcion')" style="color:red">La descripción es requerida.</span>
     </label>
     <br>
     <label>Observaciones:
-      <textarea [(ngModel)]="movimiento.observaciones" name="observaciones"></textarea>
+      <textarea formControlName="observaciones"></textarea>
     </label>
     <br>
-    <label>Origen (Ubicación ID):
-      <input [(ngModel)]="movimiento.origen" name="origen">
+    <label>Bien:
+      <select formControlName="bien" required>
+        <option value="" disabled>Seleccione un bien</option>
+        <option *ngFor="let bien of bienes" [value]="bien.codigo">{{ bien.codigo }} - {{ bien.descripcion | slice:0:50 }}</option>
+      </select>
+      <span *ngIf="isFieldInvalid('bien')" style="color:red">El bien es requerido.</span>
     </label>
     <br>
-    <label>Destino (Ubicación ID):
-      <input [(ngModel)]="movimiento.destino" name="destino">
+    <label>Responsable:
+      <select formControlName="responsable" required>
+        <option value="" disabled>Seleccione un responsable</option>
+        <option *ngFor="let resp of responsables" [value]="resp.usuario.username">
+          {{ (resp.usuario.first_name || '') + ' ' + (resp.usuario.last_name || '') || resp.usuario.username }} ({{ resp.cargo }})
+        </option>
+      </select>
+      <span *ngIf="isFieldInvalid('responsable')" style="color:red">El responsable es requerido.</span>
     </label>
     <br>
-    <div *ngIf="error" style="color:red">{{error}}</div>
-    <button type="submit">Guardar</button>
-    <button type="button" (click)="cancelar()">Cancelar</button>
+    <label>Origen:
+      <select formControlName="origen">
+        <option value="">Ninguno</option>
+        <option *ngFor="let ubi of ubicaciones" [value]="ubi.codigo">{{ ubi.codigo }} - {{ ubi.edificio }}</option>
+      </select>
+    </label>
+    <br>
+    <label>Destino:
+      <select formControlName="destino">
+        <option value="">Ninguno</option>
+        <option *ngFor="let ubi of ubicaciones" [value]="ubi.codigo">{{ ubi.codigo }} - {{ ubi.edificio }}</option>
+      </select>
+    </label>
+    <br>
+    <div *ngIf="error" style="color:red">{{ error }}</div>
+    <button type="submit" [disabled]="movimientoForm.invalid || loading || !usuarioActual">Guardar</button>
+    <button type="button" (click)="cancelar()" [disabled]="loading">Cancelar</button>
+    <button *ngIf="!esNuevo" type="button" (click)="eliminar()" [disabled]="loading">Eliminar</button>
   </form>
 </div>

@@ -8,7 +8,7 @@ from patrimonials.models import (
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['id', 'username', 'email', 'rol', 'departamento', 'telefono', 'fecha_creacion', 'ultimo_acceso']
+        fields = ['id', 'username', 'email', 'rol', 'departamento', 'telefono', 'fecha_creacion', 'ultimo_acceso', 'first_name', 'last_name']
         read_only_fields = ['fecha_creacion', 'ultimo_acceso']
 
     def validate_rol(self, value):
@@ -86,18 +86,15 @@ class BienPatrimonialSerializer(serializers.ModelSerializer):
         return value
 
 class MovimientoSerializer(serializers.ModelSerializer):
-    bien = serializers.PrimaryKeyRelatedField(queryset=BienPatrimonial.objects.all())
-    responsable = serializers.PrimaryKeyRelatedField(queryset=Responsable.objects.all())
-    origen = serializers.PrimaryKeyRelatedField(queryset=Ubicacion.objects.all(), allow_null=True)
-    destino = serializers.PrimaryKeyRelatedField(queryset=Ubicacion.objects.all(), allow_null=True)
-    usuario_registro = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
+    bien = serializers.SlugRelatedField(slug_field='codigo', queryset=BienPatrimonial.objects.all())
+    responsable = serializers.SlugRelatedField(slug_field='usuario__username', queryset=Responsable.objects.all())
+    origen = serializers.SlugRelatedField(slug_field='codigo', queryset=Ubicacion.objects.all(), allow_null=True)
+    destino = serializers.SlugRelatedField(slug_field='codigo', queryset=Ubicacion.objects.all(), allow_null=True)
+    usuario_registro = serializers.SlugRelatedField(slug_field='username', queryset=Usuario.objects.all())
 
     class Meta:
         model = Movimiento
-        fields = [
-            'id', 'tipo', 'fecha', 'descripcion', 'observaciones', 'bien', 'responsable',
-            'origen', 'destino', 'usuario_registro'
-        ]
+        fields = ['id', 'tipo', 'fecha', 'descripcion', 'observaciones', 'bien', 'responsable', 'origen', 'destino', 'usuario_registro']
         read_only_fields = ['fecha']
 
     def validate_tipo(self, value):

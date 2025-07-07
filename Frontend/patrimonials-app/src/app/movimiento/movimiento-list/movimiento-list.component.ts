@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
   selector: 'app-movimiento-list',
   standalone: false,
   templateUrl: './movimiento-list.component.html',
-  styleUrl: './movimiento-list.component.css'
+  styleUrls: ['./movimiento-list.component.css']
 })
 export class MovimientoListComponent implements OnInit {
   movimientos: Movimiento[] = [];
@@ -23,8 +23,14 @@ export class MovimientoListComponent implements OnInit {
   getMovimientos() {
     this.loading = true;
     this.api.getMovimientos().subscribe({
-      next: (data) => { this.movimientos = data; this.loading = false; },
-      error: () => { this.error = 'Error al cargar movimientos'; this.loading = false; }
+      next: (data) => {
+        this.movimientos = data;
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Error al cargar movimientos';
+        this.loading = false;
+      }
     });
   }
 
@@ -36,7 +42,9 @@ export class MovimientoListComponent implements OnInit {
     if (confirm('¿Eliminar este movimiento?')) {
       this.api.deleteMovimiento(id).subscribe({
         next: () => this.getMovimientos(),
-        error: () => alert('No se pudo eliminar el movimiento')
+        error: () => {
+          this.error = 'No se pudo eliminar el movimiento';
+        }
       });
     }
   }

@@ -9,7 +9,7 @@ import { MessageService } from 'primeng/api';
   standalone: false,
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
-  providers: [MessageService], // Provide MessageService for p-toast
+  providers: [MessageService], 
 })
 export class LoginComponent {
   loginForm: FormGroup;

@@ -1,18 +1,44 @@
 <div *ngIf="loading">Cargando...</div>
-<div *ngIf="reporte">
-  <h2>Detalle de Reporte #{{ reporte.id }}</h2>
-  <p><strong>Tipo:</strong> {{ reporte.tipo || '-' }}</p>
-  <p><strong>Fecha de generación:</strong> {{ reporte.fecha_generacion ? (reporte.fecha_generacion | date:'short') : '-' }}</p>
-  <p><strong>Formato:</strong> {{ reporte.formato || '-' }}</p>
-  <p><strong>Usuario ID:</strong> {{ reporte.usuario || '-' }}</p>
-  <p><strong>Parámetros:</strong>
-    <span *ngIf="reporte.parametros && (reporte.parametros | json) !== '{}'">{{ reporte.parametros | json }}</span>
-    <span *ngIf="!reporte.parametros || (reporte.parametros | json) === '{}'">-</span>
-  </p>
-  <p><strong>Archivo:</strong>
-    <a *ngIf="reporte.archivo" [href]="reporte.archivo" target="_blank">Descargar</a>
-    <span *ngIf="!reporte.archivo">-</span>
-  </p>
-  <p><strong>Contenido:</strong> {{ reporte.contenido || '-' }}</p>
-  <button (click)="volver()">Volver</button>
+<div *ngIf="!loading">
+  <h2>{{ esNuevo ? 'Nuevo Reporte' : 'Detalle de Reporte: ' + (reporte?.id || '') }}</h2>
+  <form [formGroup]="reporteForm" (ngSubmit)="guardar()">
+    <label>Tipo:
+      <select formControlName="tipo" required>
+        <option value="" disabled>Seleccione un tipo</option>
+        <option value="INVENTARIO">Inventario</option>
+        <option value="DEPRECIACION">Depreciación</option>
+        <option value="ESTADO">Estado</option>
+        <option value="MOVIMIENTOS">Movimientos</option>
+        <option value="BAJAS">Bajas</option>
+        <option value="MANTENIMIENTOS">Mantenimientos</option>
+      </select>
+      <span *ngIf="isFieldInvalid('tipo')" style="color:red">El tipo es requerido.</span>
+    </label>
+    <br>
+    <label>Formato:
+      <select formControlName="formato" required>
+        <option value="" disabled>Seleccione un formato</option>
+        <option value="PDF">PDF</option>
+        <option value="EXCEL">Excel</option>
+        <option value="HTML">HTML</option>
+        <option value="CSV">CSV</option>
+      </select>
+      <span *ngIf="isFieldInvalid('formato')" style="color:red">El formato es requerido.</span>
+    </label>
+    <br>
+    <label>Contenido:
+      <textarea formControlName="contenido" [readonly]="!esNuevo"></textarea>
+      <span *ngIf="isFieldInvalid('contenido')" style="color:red">El contenido es requerido.</span>
+    </label>
+    <br>
+    <label *ngIf="!esNuevo">Archivo generado:
+      <a *ngIf="reporte?.archivo" [href]="reporte!.archivo" target="_blank">Descargar</a>
+      <span *ngIf="!reporte?.archivo">No hay archivo disponible</span>
+    </label>
+    <br>
+    <div *ngIf="error" style="color:red">{{ error }}</div>
+    <button type="submit" [disabled]="reporteForm.invalid || loading || !usuarioActual">Guardar</button>
+    <button type="button" (click)="volver()" [disabled]="loading">Volver</button>
+    <button *ngIf="!esNuevo" type="button" (click)="eliminar()" [disabled]="loading">Eliminar</button>
+  </form>
 </div>

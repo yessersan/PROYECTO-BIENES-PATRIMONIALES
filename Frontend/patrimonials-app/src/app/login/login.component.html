@@ -8,7 +8,6 @@
     [style]="{'border-radius': '12px', 'background': 'linear-gradient(145deg, #ffffff, #f8fafc)'}"
   >
     <form [formGroup]="loginForm" (ngSubmit)="login()" class="p-fluid p-4">
-      <!-- Username Field -->
       <div class="p-field mb-4">
         <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
         <span class="p-input-icon-left">
@@ -30,7 +29,6 @@
         >
       </div>
 
-      <!-- Password Field -->
       <div class="p-field mb-4">
         <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
         <span class="p-input-icon-left">
@@ -52,7 +50,6 @@
         >
       </div>
 
-      <!-- Submit Button -->
       <p-button
         type="submit"
         label="Iniciar Sesión"
@@ -63,7 +60,6 @@
         [style]="{'border-radius': '8px', 'background': 'linear-gradient(90deg, #0284c7, #0ea5e9)', 'transition': 'all 0.3s'}"
       ></p-button>
 
-      <!-- Register Link -->
       <div class="mt-4 text-center">
         <a
           (click)="goToRegistro()"

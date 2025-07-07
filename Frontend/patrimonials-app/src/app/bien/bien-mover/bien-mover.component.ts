@@ -26,12 +26,12 @@ export class BienMoverComponent implements OnInit {
     });
   }
 
-mover() {
-  if (this.ubicacionId) {
-    this.apiService.moverBien(this.bienId, { nueva_ubicacion_id: this.ubicacionId }).subscribe({
-      next: () => this.success = 'Bien movido correctamente',
-      error: (err) => this.error = 'Error moving bien: ' + (err.error?.message || 'Unknown error')
-    });
+  mover() {
+    if (this.ubicacionId) {
+      this.apiService.moverBien(this.bienId, { nueva_ubicacion_id: this.ubicacionId }).subscribe({
+        next: () => this.success = 'Bien movido correctamente',
+        error: (err) => this.error = 'Error al mover el bien: ' + (err.error?.message || 'Error desconocido')
+      });
+    }
   }
-}
 }
