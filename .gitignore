@@ -1,0 +1,84 @@
+# === Django ===
+*.pyc
+__pycache__/
+db.sqlite3
+*.log
+local_settings.py
+media/
+staticfiles/
+.env
+.env.*
+
+# VS Code config
+.vscode/
+
+# Django migrations
+**/migrations/
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Django cache
+*.mo
+*.pot
+
+# === Angular ===
+# Compiled output
+/dist/
+/out-tsc/
+/tmp/
+/angular/cache/
+
+# Dependencies
+/node_modules/
+
+# Environment files
+/src/environments/environment.ts
+/src/environments/environment.prod.ts
+
+# Angular build artifacts
+/.angular/cache/
+/.angular/
+
+# IDE config
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# NPM logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# === General ===
+*.swp
+*.bak
+*.tmp
+
+# Coverage reports
+coverage/
+*.lcov
+
+# PyCharm config
+.idea/
+
+# JetBrains
+*.iml
+
+# Backup files
+*~
+
+# Testing / Reports
+test-output/
+tests/__pycache__/
+htmlcov/

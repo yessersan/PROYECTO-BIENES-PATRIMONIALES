@@ -1,0 +1,29 @@
+<div>
+  <h2>{{ esNuevo ? 'Nueva Categoría' : 'Editar Categoría' }}</h2>
+  <form (ngSubmit)="guardar()">
+    <label>Nombre:
+      <input [(ngModel)]="categoria.nombre" name="nombre" required>
+    </label>
+    <br>
+    <label>Descripción:
+      <textarea [(ngModel)]="categoria.descripcion" name="descripcion"></textarea>
+    </label>
+    <br>
+    <label>Vida útil (años):
+      <input type="number" [(ngModel)]="categoria.vida_util" name="vida_util" required>
+    </label>
+    <br>
+    <label>Tasa de depreciación (%):
+      <input type="number" [(ngModel)]="categoria.tasa_depreciacion" name="tasa_depreciacion" required>
+    </label>
+    <br>
+    <label>
+      <input type="checkbox" [(ngModel)]="categoria.activa" name="activa">
+      Activa
+    </label>
+    <br>
+    <div *ngIf="error" style="color:red">{{error}}</div>
+    <button type="submit">Guardar</button>
+    <button type="button" (click)="cancelar()">Cancelar</button>
+  </form>
+</div>

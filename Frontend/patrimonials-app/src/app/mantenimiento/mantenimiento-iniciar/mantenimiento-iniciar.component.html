@@ -1,0 +1,6 @@
+<h2>Iniciar Mantenimiento</h2>
+<div *ngIf="loading">Procesando...</div>
+<div *ngIf="error" style="color:red">{{ error }}</div>
+<div *ngIf="success" style="color:green">{{ success }}</div>
+<button (click)="iniciar()" [disabled]="loading">Confirmar Inicio</button>
+<button (click)="volver()">Volver</button>

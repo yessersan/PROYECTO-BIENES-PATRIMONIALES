@@ -1,0 +1,29 @@
+<div class="bien-list-container">
+  <h2>Listado de Bienes</h2>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+  <button (click)="createNewBien()">Crear Nuevo Bien</button>
+  <table *ngIf="bienes.length; else noData">
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Descripción</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let bien of bienes">
+        <td>{{ bien.codigo }}</td>
+        <td>{{ bien.descripcion }}</td>
+        <td>{{ bien.estado }}</td>
+        <td>
+          <button (click)="viewDetails(bien.id)">Detalles</button>
+          <button (click)="moveBien(bien.id)">Mover</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <ng-template #noData>
+    <p>No hay bienes registrados.</p>
+  </ng-template>
+</div>

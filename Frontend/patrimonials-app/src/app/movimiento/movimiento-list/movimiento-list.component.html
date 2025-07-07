@@ -1,0 +1,37 @@
+<div *ngIf="loading">Cargando...</div>
+<div *ngIf="!loading">
+  <h2>Lista de Movimientos</h2>
+  <button (click)="crearMovimiento()">Crear Movimiento</button>
+  <div *ngIf="error" style="color:red">{{ error }}</div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Tipo</th>
+        <th>Fecha</th>
+        <th>Descripción</th>
+        <th>Bien</th>
+        <th>Responsable</th>
+        <th>Origen</th>
+        <th>Destino</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let mov of movimientos">
+        <td>{{ mov.id }}</td>
+        <td>{{ mov.tipo }}</td>
+        <td>{{ mov.fecha | date:'short' }}</td>
+        <td>{{ mov.descripcion | slice:0:50 }}</td>
+        <td>{{ mov.bien }}</td>
+        <td>{{ mov.responsable }}</td>
+        <td>{{ mov.origen || 'N/A' }}</td>
+        <td>{{ mov.destino || 'N/A' }}</td>
+        <td>
+          <button (click)="verDetalle(mov.id)">Ver</button>
+          <button (click)="eliminarMovimiento(mov.id)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

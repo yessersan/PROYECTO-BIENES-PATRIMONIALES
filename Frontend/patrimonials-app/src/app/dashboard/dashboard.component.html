@@ -1,0 +1,204 @@
+<!-- Header -->
+<div class="layout-topbar">
+  <div class="layout-topbar-logo">
+    <i class="pi pi-building text-primary text-2xl"></i>
+    <span class="layout-topbar-title">Sistema de Bienes</span>
+  </div>
+  
+  <div class="layout-topbar-menu">
+    <!-- User info -->
+    <div class="layout-topbar-user" *ngIf="usuario">
+      <div class="user-info">
+        <span class="user-name">{{ usuario.nombre || 'Usuario' }}</span>
+        <span class="user-role">{{ usuario.rol || 'Sin rol' }}</span>
+      </div>
+      <p-avatar 
+        [label]="(usuario.nombre ? usuario.nombre.charAt(0) : 'U').toUpperCase()" 
+        shape="circle" 
+        styleClass="user-avatar">
+      </p-avatar>
+    </div>
+    
+    <!-- Mobile menu button -->
+    <button 
+      type="button" 
+      class="layout-topbar-menu-button p-link" 
+      (click)="toggleMobileMenu()">
+      <i class="pi pi-bars"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<div class="layout-sidebar" [class.layout-sidebar-active]="mobileMenuOpen">
+  <div class="layout-sidebar-content">
+    <!-- User profile card -->
+    <div class="user-profile-card" *ngIf="usuario">
+      <div class="user-profile-header">
+        <p-avatar 
+          [label]="(usuario.nombre ? usuario.nombre.charAt(0) : 'U').toUpperCase()" 
+          size="large" 
+          shape="circle" 
+          styleClass="profile-avatar">
+        </p-avatar>
+        <div class="user-profile-info">
+          <h4>{{ usuario.nombre || 'Usuario' }}</h4>
+          <p-tag 
+            [value]="usuario.rol || 'Sin rol'" 
+            [severity]="getRoleSeverity(usuario.rol)"
+            styleClass="role-tag">
+          </p-tag>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Navigation menu -->
+    <p-panelMenu 
+      [model]="panelMenuItems" 
+      styleClass="navigation-menu"
+      (click)="closeMobileMenu()">
+    </p-panelMenu>
+    
+    <!-- Logout button -->
+    <div class="logout-section">
+      <p-button 
+        label="Cerrar Sesión" 
+        icon="pi pi-sign-out" 
+        styleClass="p-button-danger p-button-outlined logout-button"
+        (click)="cerrarSesion()">
+      </p-button>
+    </div>
+  </div>
+</div>
+
+<!-- Main content -->
+<div class="layout-main" [class.layout-main-mobile-active]="mobileMenuOpen">
+  <!-- Mobile overlay -->
+  <div class="layout-mask" 
+       [class.layout-mask-active]="mobileMenuOpen" 
+       (click)="closeMobileMenu()">
+  </div>
+  
+  <!-- Content area -->
+  <div class="layout-content">
+    <!-- Access denied message -->
+    <div *ngIf="accesoDenegado" class="access-denied">
+      <p-card>
+        <div class="text-center">
+          <i class="pi pi-exclamation-triangle text-6xl text-red-500 mb-4"></i>
+          <h2 class="text-red-600 mb-3">Acceso Denegado</h2>
+          <p class="text-600 mb-4">
+            No tienes permisos para acceder a este sistema o no se encontró información de usuario.
+          </p>
+          <p-button 
+            label="Ir al Login" 
+            icon="pi pi-sign-in" 
+            (click)="router.navigate(['/login'])">
+          </p-button>
+        </div>
+      </p-card>
+    </div>
+    
+    <!-- Dashboard content -->
+    <div *ngIf="!accesoDenegado" class="dashboard-content">
+      <!-- Welcome section -->
+      <div class="welcome-section mb-4">
+        <h1 class="dashboard-title">
+          <i class="pi pi-home mr-2"></i>
+          Dashboard
+        </h1>
+        <p class="dashboard-subtitle">
+          Bienvenido, {{ usuario?.nombre || 'Usuario' }}. Gestiona tus bienes y recursos desde aquí.
+        </p>
+      </div>
+      
+      <!-- Quick access cards -->
+      <div class="quick-access-grid">
+        <div class="quick-access-card" 
+             *ngFor="let item of menuItems" 
+             [class.card-hidden]="item.visible === false"
+             (click)="navigateToRoute(item.routerLink)">
+          <p-card styleClass="quick-card h-full">
+            <div class="card-content">
+              <div class="card-icon">
+                <i [class]="item.icon" class="text-4xl"></i>
+              </div>
+              <div class="card-info">
+                <h3>{{ item.label }}</h3>
+                <p-badge 
+                  *ngIf="item.badge" 
+                  [value]="item.badge" 
+                  severity="info">
+                </p-badge>
+              </div>
+            </div>
+          </p-card>
+        </div>
+      </div>
+      
+      <!-- Stats section -->
+      <div class="stats-section mt-6">
+        <div class="grid">
+          <div class="col-12 md:col-6 lg:col-3">
+            <p-card styleClass="stats-card">
+              <div class="stat-content">
+                <div class="stat-icon bg-blue-100">
+                  <i class="pi pi-box text-blue-600"></i>
+                </div>
+                <div class="stat-info">
+                  <h3>Total Bienes</h3>
+                  <p class="stat-number">1,234</p>
+                </div>
+              </div>
+            </p-card>
+          </div>
+          
+          <div class="col-12 md:col-6 lg:col-3">
+            <p-card styleClass="stats-card">
+              <div class="stat-content">
+                <div class="stat-icon bg-green-100">
+                  <i class="pi pi-check-circle text-green-600"></i>
+                </div>
+                <div class="stat-info">
+                  <h3>Activos</h3>
+                  <p class="stat-number">1,180</p>
+                </div>
+              </div>
+            </p-card>
+          </div>
+          
+          <div class="col-12 md:col-6 lg:col-3">
+            <p-card styleClass="stats-card">
+              <div class="stat-content">
+                <div class="stat-icon bg-orange-100">
+                  <i class="pi pi-exclamation-triangle text-orange-600"></i>
+                </div>
+                <div class="stat-info">
+                  <h3>Mantenimiento</h3>
+                  <p class="stat-number">42</p>
+                </div>
+              </div>
+            </p-card>
+          </div>
+          
+          <div class="col-12 md:col-6 lg:col-3">
+            <p-card styleClass="stats-card">
+              <div class="stat-content">
+                <div class="stat-icon bg-red-100">
+                  <i class="pi pi-times-circle text-red-600"></i>
+                </div>
+                <div class="stat-info">
+                  <h3>Inactivos</h3>
+                  <p class="stat-number">12</p>
+                </div>
+              </div>
+            </p-card>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Messages -->
+<p-toast></p-toast>

@@ -1,0 +1,49 @@
+<div *ngIf="loading">Cargando reportes...</div>
+<div *ngIf="error" style="color:red">{{ error }}</div>
+<div *ngIf="success" style="color:green">{{ success }}</div>
+
+<!-- Formulario rápido para crear un reporte -->
+<form (ngSubmit)="crearReporte()" *ngIf="!loading">
+  <label>Tipo:</label>
+  <select [(ngModel)]="nuevoReporte.tipo" name="tipo">
+    <option value="INVENTARIO">Inventario</option>
+    <option value="DEPRECIACION">Depreciación</option>
+    <option value="ESTADO">Estado</option>
+    <option value="MOVIMIENTOS">Movimientos</option>
+    <option value="BAJAS">Bajas</option>
+    <option value="MANTENIMIENTOS">Mantenimientos</option>
+  </select>
+  <label>Formato:</label>
+  <select [(ngModel)]="nuevoReporte.formato" name="formato">
+    <option value="PDF">PDF</option>
+    <option value="EXCEL">Excel</option>
+    <option value="HTML">HTML</option>
+    <option value="CSV">CSV</option>
+  </select>
+  <button type="submit" [disabled]="loading">Crear Reporte</button>
+</form>
+
+<table *ngIf="!loading && reportes.length">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Tipo</th>
+      <th>Fecha</th>
+      <th>Formato</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let r of reportes">
+      <td>{{ r.id }}</td>
+      <td>{{ r.tipo }}</td>
+      <td>{{ r.fecha_generacion | date:'short' }}</td>
+      <td>{{ r.formato }}</td>
+      <td>
+        <button (click)="verDetalle(r.id)">Ver</button>
+        <button (click)="eliminarReporte(r.id)">Eliminar</button>
+        <a *ngIf="r.archivo" [href]="r.archivo" target="_blank">Descargar</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
