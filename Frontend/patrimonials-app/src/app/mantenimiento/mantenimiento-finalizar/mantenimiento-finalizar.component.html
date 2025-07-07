@@ -1,1 +1,18 @@
+<<<<<<< HEAD
 <p>mantenimiento-finalizar works!</p>
+=======
+<h2>Finalizar Mantenimiento</h2>
+<div *ngIf="loading">Procesando...</div>
+<div *ngIf="error" style="color:red">{{ error }}</div>
+<div *ngIf="success" style="color:green">{{ success }}</div>
+<form (ngSubmit)="finalizar()">
+  <label>Observaciones:</label>
+  <textarea [(ngModel)]="observaciones" name="observaciones"></textarea>
+  <br>
+  <label>Costo:</label>
+  <input type="number" [(ngModel)]="costo" name="costo" min="0" step="0.01">
+  <br>
+  <button type="submit" [disabled]="loading">Confirmar Finalización</button>
+  <button type="button" (click)="volver()">Volver</button>
+</form>
+>>>>>>> origin/yezer

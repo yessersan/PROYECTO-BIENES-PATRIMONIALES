@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div class="container">
   <h2>Detalles del Bien</h2>
   <div *ngIf="!loading; else loadingIndicator">
@@ -71,5 +72,96 @@
       <button (click)="deleteBien()">Sí, Eliminar</button>
       <button (click)="cancelDelete()">Cancelar</button>
     </div>
+=======
+<div class="bien-detail-container">
+  <h2>{{ bien ? 'Detalles del Bien' : 'Crear Nuevo Bien' }}</h2>
+  <div *ngIf="loading" class="loading">Cargando...</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+
+  <div *ngIf="!loading && !editMode && bien" class="bien-details">
+    <p><strong>Código:</strong> {{ bien.codigo }}</p>
+    <p><strong>Descripción:</strong> {{ bien.descripcion }}</p>
+    <p><strong>Estado:</strong> {{ bien.estado }}</p>
+    <p><strong>Valor Adquisición:</strong> {{ bien.valor_adquisicion | currency }}</p>
+    <p><strong>Fecha Adquisición:</strong> {{ bien.fecha_adquisicion | date }}</p>
+    <p><strong>Categoría:</strong> {{ categoria?.nombre || 'Cargando...' }}</p>
+    <p><strong>Ubicación:</strong> {{ ubicacion?.edificio }} - {{ ubicacion?.oficina }}</p>
+    <p><strong>Responsable:</strong> {{ responsable?.usuario?.username || 'Sin responsable' }}</p>
+    <p><strong>Marca:</strong> {{ bien.marca || 'N/A' }}</p>
+    <p><strong>Modelo:</strong> {{ bien.modelo || 'N/A' }}</p>
+    <p><strong>Serie:</strong> {{ bien.serie || 'N/A' }}</p>
+    <button (click)="toggleEdit()">Editar</button>
+    <button (click)="moveBien()">Mover</button>
+    <button (click)="darBaja()">Dar de Baja</button>
+    <button (click)="confirmDelete()">Eliminar</button>
+    <button (click)="goBack()">Volver</button>
+  </div>
+
+  <form *ngIf="editMode" (ngSubmit)="saveChanges()" class="bien-form">
+    <div>
+      <label>Código:</label>
+      <input [(ngModel)]="editedBien.codigo" name="codigo" required>
+    </div>
+    <div>
+      <label>Descripción:</label>
+      <textarea [(ngModel)]="editedBien.descripcion" name="descripcion" required></textarea>
+    </div>
+    <div>
+      <label>Estado:</label>
+      <select [(ngModel)]="editedBien.estado" name="estado" required>
+        <option value="BUENO">Bueno</option>
+        <option value="REGULAR">Regular</option>
+        <option value="MALO">Malo</option>
+        <option value="REPARACION">En Reparación</option>
+      </select>
+    </div>
+    <div>
+      <label>Valor Adquisición:</label>
+      <input type="number" [(ngModel)]="editedBien.valor_adquisicion" name="valor_adquisicion" required min="0">
+    </div>
+    <div>
+      <label>Fecha Adquisición:</label>
+      <input type="date" [(ngModel)]="editedBien.fecha_adquisicion" name="fecha_adquisicion" required>
+    </div>
+    <div>
+      <label>Categoría:</label>
+      <select [(ngModel)]="editedBien.categoria" name="categoria" required>
+        <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nombre }}</option>
+      </select>
+    </div>
+    <div>
+      <label>Ubicación:</label>
+      <select [(ngModel)]="editedBien.ubicacion" name="ubicacion" required>
+        <option *ngFor="let ubi of ubicaciones" [value]="ubi.id">{{ ubi.edificio }} - {{ ubi.oficina }} (Disponible: {{ ubi.capacidad - ubi.ocupados }})</option>
+      </select>
+    </div>
+    <div>
+      <label>Responsable:</label>
+      <select [(ngModel)]="editedBien.responsable" name="responsable">
+        <option value="">Sin responsable</option>
+        <option *ngFor="let resp of responsables" [value]="resp.id">{{ resp.usuario.username }}</option>
+      </select>
+    </div>
+    <div>
+      <label>Marca:</label>
+      <input [(ngModel)]="editedBien.marca" name="marca">
+    </div>
+    <div>
+      <label>Modelo:</label>
+      <input [(ngModel)]="editedBien.modelo" name="modelo">
+    </div>
+    <div>
+      <label>Serie:</label>
+      <input [(ngModel)]="editedBien.serie" name="serie">
+    </div>
+    <button type="submit">Guardar</button>
+    <button type="button" (click)="toggleEdit()">Cancelar</button>
+  </form>
+
+  <div *ngIf="showDeleteConfirm" class="confirm-dialog">
+    <p>¿Está seguro de que desea eliminar este bien?</p>
+    <button (click)="deleteBien()">Sí, eliminar</button>
+    <button (click)="cancelDelete()">Cancelar</button>
+>>>>>>> origin/yezer
   </div>
 </div>

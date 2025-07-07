@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <p>etiqueta-digital-generar-qr works!</p>
 <div>
     <h2>Generar Código QR</h2>
@@ -7,3 +8,14 @@
     <button (click)="generateQrCode()">Regenerar QR</button>
     <p *ngIf="error" style="color: red;">{{ error }}</p>
   </div>
+=======
+<div>
+  <h2>Generar Código QR</h2>
+  <div *ngIf="error" style="color:red">{{error}}</div>
+  <div *ngIf="qrCodeUrl">
+    <img [src]="qrCodeUrl" alt="Código QR" width="300">
+    <p><a [href]="qrCodeUrl" download>Descargar QR</a></p>
+  </div>
+  <div *ngIf="!qrCodeUrl && !error">Generando QR...</div>
+</div>
+>>>>>>> origin/yezer

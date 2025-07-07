@@ -16,7 +16,11 @@ export class BienDarBajaComponent {
   constructor(
     private apiService: ApiService,
     private route: ActivatedRoute,
+<<<<<<< HEAD
     private router: Router
+=======
+    public router: Router
+>>>>>>> origin/yezer
   ) {}
 
   darDeBaja() {
@@ -31,4 +35,8 @@ export class BienDarBajaComponent {
       }
     });
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/yezer

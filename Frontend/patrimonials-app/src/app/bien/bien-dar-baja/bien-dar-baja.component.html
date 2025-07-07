@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <p>bien-dar-baja works!</p>
 <!-- bien-dar-baja.component.html -->
 <div class="container">
@@ -9,4 +10,16 @@
     <textarea matInput [(ngModel)]="motivo"></textarea>
   </mat-form-field>
   <button mat-raised-button color="warn" (click)="darDeBaja()">Dar de baja</button>
+=======
+<div class="bien-dar-baja-container">
+  <h2>Dar de Baja Bien</h2>
+  <div *ngIf="mensaje" class="success-message">{{ mensaje }}</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+  <div>
+    <label>Motivo de Baja:</label>
+    <textarea [(ngModel)]="motivo" required placeholder="Ingrese el motivo de la baja"></textarea>
+  </div>
+  <button (click)="darDeBaja()" [disabled]="!motivo">Dar de Baja</button>
+  <button (click)="router.navigate(['/bienes'])">Cancelar</button>
+>>>>>>> origin/yezer
 </div>

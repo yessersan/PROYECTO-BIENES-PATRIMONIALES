@@ -8,7 +8,11 @@ from patrimonials.models import (
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
+<<<<<<< HEAD
         fields = ['id', 'username', 'email', 'rol', 'departamento', 'telefono', 'fecha_creacion', 'ultimo_acceso']
+=======
+        fields = ['id', 'username', 'email', 'rol', 'departamento', 'telefono', 'fecha_creacion', 'ultimo_acceso', 'first_name', 'last_name']
+>>>>>>> origin/yezer
         read_only_fields = ['fecha_creacion', 'ultimo_acceso']
 
     def validate_rol(self, value):
@@ -26,7 +30,13 @@ class RegistroSerializer(serializers.ModelSerializer):
             'first_name', 'last_name', 'rol', 'departamento', 'telefono'
         ]
         extra_kwargs = {
+<<<<<<< HEAD
             'password': {'write_only': True}
+=======
+            'password': {'write_only': True},
+            'departamento': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'telefono': {'required': False, 'allow_null': True, 'allow_blank': True}
+>>>>>>> origin/yezer
         }
 
     def validate(self, data):
@@ -41,7 +51,11 @@ class RegistroSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> origin/yezer
 class CategoriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Categoria
@@ -84,6 +98,7 @@ class BienPatrimonialSerializer(serializers.ModelSerializer):
         return value
 
 class MovimientoSerializer(serializers.ModelSerializer):
+<<<<<<< HEAD
     bien = serializers.PrimaryKeyRelatedField(queryset=BienPatrimonial.objects.all())
     responsable = serializers.PrimaryKeyRelatedField(queryset=Responsable.objects.all())
     origen = serializers.PrimaryKeyRelatedField(queryset=Ubicacion.objects.all(), allow_null=True)
@@ -96,6 +111,17 @@ class MovimientoSerializer(serializers.ModelSerializer):
             'id', 'tipo', 'fecha', 'descripcion', 'observaciones', 'bien', 'responsable',
             'origen', 'destino', 'usuario_registro'
         ]
+=======
+    bien = serializers.SlugRelatedField(slug_field='codigo', queryset=BienPatrimonial.objects.all())
+    responsable = serializers.SlugRelatedField(slug_field='usuario__username', queryset=Responsable.objects.all())
+    origen = serializers.SlugRelatedField(slug_field='codigo', queryset=Ubicacion.objects.all(), allow_null=True)
+    destino = serializers.SlugRelatedField(slug_field='codigo', queryset=Ubicacion.objects.all(), allow_null=True)
+    usuario_registro = serializers.SlugRelatedField(slug_field='username', queryset=Usuario.objects.all())
+
+    class Meta:
+        model = Movimiento
+        fields = ['id', 'tipo', 'fecha', 'descripcion', 'observaciones', 'bien', 'responsable', 'origen', 'destino', 'usuario_registro']
+>>>>>>> origin/yezer
         read_only_fields = ['fecha']
 
     def validate_tipo(self, value):
@@ -104,8 +130,12 @@ class MovimientoSerializer(serializers.ModelSerializer):
         return value
 
 class ReporteSerializer(serializers.ModelSerializer):
+<<<<<<< HEAD
     usuario = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
 
+=======
+    usuario = UsuarioSerializer(read_only=True)
+>>>>>>> origin/yezer
     class Meta:
         model = Reporte
         fields = ['id', 'tipo', 'fecha_generacion', 'contenido', 'formato', 'parametros', 'usuario', 'archivo']

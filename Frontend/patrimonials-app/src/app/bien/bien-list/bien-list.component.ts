@@ -29,4 +29,11 @@ export class BienListComponent implements OnInit {
   moveBien(id: number) {
     this.router.navigate(['/bienes', id, 'mover']);
   }
+<<<<<<< HEAD
+=======
+
+  createNewBien() {
+    this.router.navigate(['/bienes/nuevo']);
+  }
+>>>>>>> origin/yezer
 }

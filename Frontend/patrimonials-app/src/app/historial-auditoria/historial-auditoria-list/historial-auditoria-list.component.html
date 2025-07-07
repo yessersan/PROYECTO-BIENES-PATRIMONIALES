@@ -1,1 +1,59 @@
+<<<<<<< HEAD
 <p>historial-auditoria-list works!</p>
+=======
+<div *ngIf="loading">Cargando...</div>
+<div *ngIf="error" class="error">{{ error }}</div>
+
+<!-- Formulario de alta/edición -->
+<form (ngSubmit)="guardar()" *ngIf="editMode || !form.id">
+  <input type="date" [(ngModel)]="form.fecha" name="fecha" required placeholder="Fecha" />
+
+  <select [(ngModel)]="form.usuario" name="usuario" required>
+    <option [ngValue]="null">Seleccione usuario</option>
+    <option *ngFor="let u of usuarios" [ngValue]="u.id">{{ u.username }}</option>
+  </select>
+
+  <input type="text" [(ngModel)]="form.accion" name="accion" required placeholder="Acción" />
+  <input type="text" [(ngModel)]="form.detalle" name="detalle" required placeholder="Detalle" />
+
+  <select [(ngModel)]="form.bien" name="bien" required>
+    <option [ngValue]="null">Seleccione bien</option>
+    <option *ngFor="let b of bienes" [ngValue]="b.id">{{ b.codigo }}</option>
+  </select>
+
+  <input type="text" [(ngModel)]="form.ip" name="ip" placeholder="IP" />
+  <input type="text" [(ngModel)]="form.user_agent" name="user_agent" placeholder="User Agent" />
+  <button type="submit">{{ editMode ? 'Actualizar' : 'Crear' }}</button>
+  <button type="button" (click)="cancelar()">Cancelar</button>
+</form>
+
+<table *ngIf="!loading && historial.length">
+  <thead>
+    <tr>
+      <th>Fecha</th>
+      <th>Usuario</th>
+      <th>Acción</th>
+      <th>Detalle</th>
+      <th>Bien</th>
+      <th>IP</th>
+      <th>User Agent</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let h of historial">
+      <td>{{ h.fecha | date:'short' }}</td>
+      <td>{{ getUsuarioNombre(h.usuario) }}</td>
+      <td>{{ h.accion }}</td>
+      <td>{{ h.detalle }}</td>
+      <td>{{ getBienCodigo(h.bien) }}</td>
+      <td>{{ h.ip }}</td>
+      <td>{{ h.user_agent }}</td>
+      <td>
+        <button (click)="editar(h)">Editar</button>
+        <button (click)="eliminar(h.id)">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+>>>>>>> origin/yezer

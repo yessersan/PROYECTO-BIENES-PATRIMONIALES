@@ -1,0 +1,151 @@
+/* General wrapper styling */
+.login-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e5e7eb, #f3f4f6);
+  padding: 1rem;
+}
+
+/* PrimeNG card styling */
+.p-card {
+  max-width: 28rem;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.p-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.p-card .p-card-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: center;
+}
+
+.p-card .p-card-subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Form field styling */
+.p-fluid .p-field {
+  margin-bottom: 1.5rem;
+}
+
+.p-field label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.p-input-icon-left > .p-inputtext,
+.p-password {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.p-input-icon-left > .pi {
+  color: #6b7280;
+  left: 0.75rem;
+}
+
+.p-inputtext:focus,
+.p-password input:focus {
+  outline: none;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+}
+
+.ng-invalid.ng-dirty {
+  border-color: #dc2626;
+}
+
+.p-error {
+  font-size: 0.75rem;
+  color: #dc2626;
+  margin-top: 0.25rem;
+}
+
+/* Password toggle icon */
+.p-password .pi-eye,
+.p-password .pi-eye-slash {
+  color: #6b7280;
+  cursor: pointer;
+}
+
+/* Button styling */
+.p-button {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #0284c7, #0ea5e9);
+  border: none;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.p-button:hover {
+  background: linear-gradient(90deg, #026ca3, #0c91d1);
+  transform: translateY(-2px);
+}
+
+.p-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.p-button .pi-sign-in {
+  margin-right: 0.5rem;
+}
+
+/* Register link styling */
+.register-link {
+  font-size: 0.875rem;
+  color: #0284c7;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.register-link:hover {
+  color: #0ea5e9;
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .p-card {
+    max-width: 90%;
+  }
+
+  .p-card .p-card-title {
+    font-size: 1.25rem;
+  }
+
+  .p-card .p-card-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .p-button {
+    padding: 0.65rem;
+    font-size: 0.875rem;
+  }
+}

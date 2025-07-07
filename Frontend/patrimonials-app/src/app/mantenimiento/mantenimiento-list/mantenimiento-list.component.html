@@ -1,1 +1,33 @@
+<<<<<<< HEAD
 <p>mantenimiento-list works!</p>
+=======
+<div *ngIf="loading">Cargando mantenimientos...</div>
+<div *ngIf="error">{{ error }}</div>
+<table *ngIf="!loading && !error">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Tipo</th>
+      <th>Bien</th>
+      <th>Estado</th>
+      <th>Fecha Programada</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let m of mantenimientos">
+      <td>{{ m.id }}</td>
+      <td>{{ m.tipo }}</td>
+      <td>{{ m.bien }}</td>
+      <td>{{ m.estado }}</td>
+      <td>{{ m.fecha_programada }}</td>
+      <td>
+        <button (click)="verDetalle(m.id)">Ver</button>
+        <button (click)="iniciarMantenimiento(m.id)" *ngIf="m.estado === 'PENDIENTE'">Iniciar</button>
+        <button (click)="finalizarMantenimiento(m.id)" *ngIf="m.estado === 'EN_PROCESO'">Finalizar</button>
+        <button (click)="eliminarMantenimiento(m.id)">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+>>>>>>> origin/yezer

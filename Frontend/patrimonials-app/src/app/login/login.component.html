@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <router-outlet></router-outlet>
 
 <div class="login-container">
@@ -466,3 +467,80 @@
     outline: none;
   }
 </style>
+=======
+<p-toast></p-toast>
+
+<div class="login-wrapper flex align-items-center justify-content-center min-h-screen bg-gray-100">
+  <p-card
+    header="Iniciar Sesión"
+    subheader="Bienvenido al Sistema de Patrimoniales"
+    class="w-full max-w-md shadow-lg"
+    [style]="{'border-radius': '12px', 'background': 'linear-gradient(145deg, #ffffff, #f8fafc)'}"
+  >
+    <form [formGroup]="loginForm" (ngSubmit)="login()" class="p-fluid p-4">
+      <div class="p-field mb-4">
+        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+        <span class="p-input-icon-left">
+          <i class="pi pi-user"></i>
+          <input
+            pInputText
+            id="username"
+            formControlName="username"
+            type="text"
+            placeholder="Ingrese su usuario"
+            class="w-full p-inputtext-lg"
+            [ngClass]="{'ng-invalid ng-dirty': isInvalid('username')}"
+            [style]="{'border-radius': '8px'}"
+            aria-describedby="username-error"
+          />
+        </span>
+        <small *ngIf="isInvalid('username')" id="username-error" class="p-error block mt-1"
+          >Usuario debe tener al menos 4 caracteres</small
+        >
+      </div>
+
+      <div class="p-field mb-4">
+        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+        <span class="p-input-icon-left">
+          <i class="pi pi-lock"></i>
+          <p-password
+            id="password"
+            formControlName="password"
+            [toggleMask]="true"
+            [feedback]="false"
+            placeholder="Ingrese su contraseña"
+            class="w-full"
+            [style]="{'border-radius': '8px', 'width': '100%'}"
+            [ngClass]="{'ng-invalid ng-dirty': isInvalid('password')}"
+            aria-describedby="password-error"
+          ></p-password>
+        </span>
+        <small *ngIf="isInvalid('password')" id="password-error" class="p-error block mt-1"
+          >Contraseña debe tener al menos 8 caracteres</small
+        >
+      </div>
+
+      <p-button
+        type="submit"
+        label="Iniciar Sesión"
+        icon="pi pi-sign-in"
+        [loading]="loading"
+        [disabled]="loading || loginForm.invalid"
+        class="w-full p-button-lg p-button-raised p-button-info"
+        [style]="{'border-radius': '8px', 'background': 'linear-gradient(90deg, #0284c7, #0ea5e9)', 'transition': 'all 0.3s'}"
+      ></p-button>
+
+      <div class="mt-4 text-center">
+        <a
+          (click)="goToRegistro()"
+          class="register-link text-sm text-sky-600 hover:text-sky-800 font-medium cursor-pointer transition-colors"
+          role="button"
+          tabindex="0"
+          (keydown.enter)="goToRegistro()"
+          >¿No tienes cuenta? Regístrate</a
+        >
+      </div>
+    </form>
+  </p-card>
+</div>
+>>>>>>> origin/yezer

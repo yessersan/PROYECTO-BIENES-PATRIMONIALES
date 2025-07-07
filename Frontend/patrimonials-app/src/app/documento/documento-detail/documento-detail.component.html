@@ -1,1 +1,42 @@
+<<<<<<< HEAD
 <p>documento-detail works!</p>
+=======
+<div>
+  <h2>{{ esNuevo ? 'Nuevo Documento' : 'Editar Documento' }}</h2>
+  <form (ngSubmit)="guardar()">
+    <label>Tipo:
+      <select [(ngModel)]="documento.tipo" name="tipo" required>
+        <option value="FACTURA">Factura</option>
+        <option value="GARANTIA">Garantía</option>
+        <option value="CONTRATO">Contrato</option>
+        <option value="FOTO">Fotografía</option>
+        <option value="OTRO">Otro</option>
+      </select>
+    </label>
+    <br>
+    <label>Bien (ID):
+      <input [(ngModel)]="documento.bien" name="bien" required>
+    </label>
+    <br>
+    <label>Usuario (ID):
+      <input [(ngModel)]="documento.usuario" name="usuario" required>
+    </label>
+    <br>
+    <label>Descripción:
+      <textarea [(ngModel)]="documento.descripcion" name="descripcion"></textarea>
+    </label>
+    <br>
+    <label>Fecha del documento:
+      <input type="date" [(ngModel)]="documento.fecha_documento" name="fecha_documento">
+    </label>
+    <br>
+    <label>Archivo:
+      <input type="file" (change)="onFileChange($event)" [required]="esNuevo">
+    </label>
+    <br>
+    <div *ngIf="error" style="color:red">{{error}}</div>
+    <button type="submit">Guardar</button>
+    <button type="button" (click)="cancelar()">Cancelar</button>
+  </form>
+</div>
+>>>>>>> origin/yezer

@@ -30,10 +30,17 @@ import { MantenimientoFinalizarComponent } from './mantenimiento/mantenimiento-f
 import { EtiquetaDigitalListComponent } from './etiqueta-digital/etiqueta-digital-list/etiqueta-digital-list.component';
 import { EtiquetaDigitalDetailComponent } from './etiqueta-digital/etiqueta-digital-detail/etiqueta-digital-detail.component';
 import { EtiquetaDigitalGenerarQrComponent } from './etiqueta-digital/etiqueta-digital-generar-qr/etiqueta-digital-generar-qr.component';
+<<<<<<< HEAD
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './core/auth.interceptor';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { RegistroComponent } from './registro/registro.component';
+=======
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { RegistroComponent } from './registro/registro.component';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './core/auth.interceptor';
+>>>>>>> origin/yezer
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
@@ -43,6 +50,28 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+<<<<<<< HEAD
+=======
+import { TableModule } from 'primeng/table';
+import { MenubarModule } from 'primeng/menubar';
+import { AvatarModule } from 'primeng/avatar';
+import { BadgeModule } from 'primeng/badge';
+import { PanelMenuModule } from 'primeng/panelmenu';
+import { MessageModule } from 'primeng/message';
+import { CardModule } from 'primeng/card';
+import { InputTextModule } from 'primeng/inputtext';
+import { PasswordModule } from 'primeng/password';
+import { ButtonModule } from 'primeng/button';
+import { ToastModule } from 'primeng/toast';
+import { MessagesModule } from 'primeng/messages';
+import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { providePrimeNG } from 'primeng/config';
+import { MessageService } from 'primeng/api';
+import Aura from '@primeng/themes/aura';
+import { TagModule } from 'primeng/tag';
+>>>>>>> origin/yezer
 
 
 @NgModule({
@@ -67,7 +96,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     DocumentoListComponent,
     DocumentoDetailComponent,
     NotificacionListComponent,
+<<<<<<< HEAD
     UbicacionDetailComponent,
+=======
+>>>>>>> origin/yezer
     MantenimientoListComponent,
     MantenimientoDetailComponent,
     MantenimientoIniciarComponent,
@@ -83,6 +115,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
+<<<<<<< HEAD
+=======
+    AppRoutingModule,
+>>>>>>> origin/yezer
     MatFormFieldModule,
     MatSelectModule,
     MatOptionModule,
@@ -92,11 +128,40 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatIconModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+<<<<<<< HEAD
     AppRoutingModule
   
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+=======
+    TableModule,
+    MenubarModule,
+    AvatarModule,
+    BadgeModule,
+    PanelMenuModule,
+    MessageModule,
+    CardModule,
+    InputTextModule,
+    PasswordModule,
+    ButtonModule,
+    ToastModule,
+    MessagesModule,
+    DropdownModule,
+    SelectModule,
+    TagModule,
+    SelectModule
+  ],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    provideAnimationsAsync(),
+    providePrimeNG({
+      theme: {
+        preset: Aura
+      }
+    }),
+    MessageService
+>>>>>>> origin/yezer
   ],
   bootstrap: [AppComponent]
 })

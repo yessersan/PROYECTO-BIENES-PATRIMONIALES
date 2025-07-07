@@ -19,6 +19,10 @@ import { EtiquetaDigital } from '../models/etiqueta-digital.model';
   providedIn: 'root'
 })
 export class ApiService {
+<<<<<<< HEAD
+=======
+  apiService: any;
+>>>>>>> origin/yezer
 
  get<T>(url: string): Observable<T> {
   return this.http.get<T>(`${this.apiUrl}${url}`);
@@ -38,7 +42,11 @@ patch(url: string, body: any): Observable<any> {
   }
   registrar(usuario: Partial<Usuario>): Observable<Usuario> {
   return this.http.post<Usuario>(`${this.apiUrl}auth/registro/`, usuario);
+<<<<<<< HEAD
 }
+=======
+  }
+>>>>>>> origin/yezer
 
   // Usuarios
   getUsuarios(): Observable<Usuario[]> {
@@ -107,6 +115,12 @@ patch(url: string, body: any): Observable<any> {
   deleteResponsable(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}responsables/${id}/`);
   }
+<<<<<<< HEAD
+=======
+  getUsuariosDisponibles(): Observable<Usuario[]> {
+  return this.http.get<Usuario[]>(`${this.apiUrl}usuarios/disponibles/`);
+}
+>>>>>>> origin/yezer
 
   // Bienes
   getBienes(): Observable<Bien[]> {
@@ -124,9 +138,15 @@ patch(url: string, body: any): Observable<any> {
   deleteBien(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}bienes/${id}/`);
   }
+<<<<<<< HEAD
   moverBien(id: number, data: { ubicacion_id: number }): Observable<any> {
     return this.http.post(`${this.apiUrl}bienes/${id}/mover/`, data);
   }
+=======
+  moverBien(id: number, data: { nueva_ubicacion_id: number }): Observable<any> {
+    return this.http.post(`${this.apiUrl}bienes/${id}/mover/`, data);
+  } 
+>>>>>>> origin/yezer
   darBajaBien(id: number, data: { motivo: string; fecha_baja?: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}bienes/${id}/dar-baja/`, data);
   }
@@ -169,6 +189,18 @@ patch(url: string, body: any): Observable<any> {
   getHistorialAuditoria(): Observable<HistorialAuditoria[]> {
     return this.http.get<HistorialAuditoria[]>(`${this.apiUrl}historial-auditoria/`);
   }
+<<<<<<< HEAD
+=======
+  createHistorialAuditoria(historial: Partial<HistorialAuditoria>): Observable<HistorialAuditoria> {
+  return this.http.post<HistorialAuditoria>(`${this.apiUrl}historial-auditoria/`, historial);
+}
+updateHistorialAuditoria(id: number, historial: Partial<HistorialAuditoria>): Observable<HistorialAuditoria> {
+  return this.http.put<HistorialAuditoria>(`${this.apiUrl}historial-auditoria/${id}/`, historial);
+}
+deleteHistorialAuditoria(id: number): Observable<void> {
+  return this.http.delete<void>(`${this.apiUrl}historial-auditoria/${id}/`);
+}
+>>>>>>> origin/yezer
 
   // Documentos
   getDocumentos(): Observable<Documento[]> {

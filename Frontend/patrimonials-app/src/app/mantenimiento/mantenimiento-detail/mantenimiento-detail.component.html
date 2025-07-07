@@ -1,1 +1,20 @@
+<<<<<<< HEAD
 <p>mantenimiento-detail works!</p>
+=======
+<div *ngIf="loading">Cargando...</div>
+<div *ngIf="error">{{ error }}</div>
+<div *ngIf="mantenimiento">
+  <h2>Detalle de Mantenimiento #{{ mantenimiento.id }}</h2>
+  <p><strong>Tipo:</strong> {{ mantenimiento.tipo }}</p>
+  <p><strong>Descripción:</strong> {{ mantenimiento.descripcion }}</p>
+  <p><strong>Bien:</strong> {{ mantenimiento.bien }}</p>
+  <p><strong>Estado:</strong> {{ mantenimiento.estado }}</p>
+  <p><strong>Fecha Programada:</strong> {{ mantenimiento.fecha_programada }}</p>
+  <p><strong>Fecha Inicio:</strong> {{ mantenimiento.fecha_inicio || '-' }}</p>
+  <p><strong>Fecha Fin:</strong> {{ mantenimiento.fecha_fin || '-' }}</p>
+  <p><strong>Costo:</strong> {{ mantenimiento.costo || '-' }}</p>
+  <p><strong>Proveedor:</strong> {{ mantenimiento.proveedor || '-' }}</p>
+  <p><strong>Observaciones:</strong> {{ mantenimiento.observaciones || '-' }}</p>
+  <button (click)="volver()">Volver</button>
+</div>
+>>>>>>> origin/yezer

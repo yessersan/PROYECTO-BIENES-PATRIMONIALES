@@ -1,10 +1,24 @@
+<<<<<<< HEAD
+=======
+from datetime import date
+>>>>>>> origin/yezer
 from rest_framework import generics, permissions, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
+<<<<<<< HEAD
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
+=======
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.contrib.auth import authenticate
+from rest_framework.decorators import api_view, permission_classes
+
+>>>>>>> origin/yezer
 from patrimonials.models import (
     Usuario, Categoria, Ubicacion, Responsable, BienPatrimonial,
     Movimiento, Reporte, HistorialAuditoria, DocumentoAdjunto,
@@ -68,6 +82,16 @@ class UsuarioListCreateView(generics.ListCreateAPIView):
             bien=None
         )
 
+<<<<<<< HEAD
+=======
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_usuarios_disponibles(request):
+    usuarios_con_responsable = Responsable.objects.values_list('usuario_id', flat=True)
+    usuarios_disponibles = Usuario.objects.exclude(id__in=usuarios_con_responsable)
+    serializer = UsuarioSerializer(usuarios_disponibles, many=True)
+    return Response(serializer.data)
+>>>>>>> origin/yezer
 class UsuarioRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
@@ -77,6 +101,10 @@ class RegistroUsuarioAPIView(generics.CreateAPIView):
     queryset = Usuario.objects.all()
     serializer_class = RegistroSerializer
     permission_classes = [AllowAny]
+<<<<<<< HEAD
+=======
+    
+>>>>>>> origin/yezer
 
 class CategoriaListCreateView(generics.ListCreateAPIView):
     queryset = Categoria.objects.all()
@@ -172,12 +200,23 @@ class BienPatrimonialMoverView(generics.GenericAPIView):
             if not nueva_ubicacion_id:
                 return Response({'error': 'Se requiere nueva_ubicacion_id'}, status=status.HTTP_400_BAD_REQUEST)
             nueva_ubicacion = Ubicacion.objects.get(id=nueva_ubicacion_id)
+<<<<<<< HEAD
             success, message = bien.ubicacion.mover_bien(bien, nueva_ubicacion)
+=======
+            if not bien.ubicacion:
+                return Response({'error': 'El bien no tiene ubicación actual asignada'}, status=status.HTTP_400_BAD_REQUEST)        
+            success, message = bien.ubicacion.mover_bien(bien, nueva_ubicacion, request.user)
+>>>>>>> origin/yezer
             if not success:
                 return Response({'error': message}, status=status.HTTP_400_BAD_REQUEST)
             return Response({'message': message}, status=status.HTTP_200_OK)
         except Ubicacion.DoesNotExist:
             return Response({'error': 'Ubicación no encontrada'}, status=status.HTTP_404_NOT_FOUND)
+<<<<<<< HEAD
+=======
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+>>>>>>> origin/yezer
 
 class BienPatrimonialDarBajaView(generics.GenericAPIView):
     queryset = BienPatrimonial.objects.all()
@@ -232,6 +271,14 @@ class HistorialAuditoriaListView(generics.ListAPIView):
     serializer_class = HistorialAuditoriaSerializer
     permission_classes = [IsAuthenticatedWithPermission]
 
+<<<<<<< HEAD
+=======
+class HistorialAuditoriaViewSet(viewsets.ModelViewSet):
+    queryset = HistorialAuditoria.objects.all()
+    serializer_class = HistorialAuditoriaSerializer
+    permission_classes = [IsAuthenticatedWithPermission]
+
+>>>>>>> origin/yezer
 class DocumentoAdjuntoListCreateView(generics.ListCreateAPIView):
     queryset = DocumentoAdjunto.objects.all()
     serializer_class = DocumentoAdjuntoSerializer

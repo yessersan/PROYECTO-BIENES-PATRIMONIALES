@@ -2,7 +2,11 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { LoginComponent } from './login/login.component';
+<<<<<<< HEAD
 import { RegistroComponent } from './registro/registro.component'; // Nuevo import
+=======
+import { RegistroComponent } from './registro/registro.component';
+>>>>>>> origin/yezer
 
 import { BienListComponent } from './bien/bien-list/bien-list.component';
 import { BienDetailComponent } from './bien/bien-detail/bien-detail.component';
@@ -45,7 +49,11 @@ import { RoleGuard } from './core/role.guard';
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
+<<<<<<< HEAD
   { path: 'registro', component: RegistroComponent }, // Nueva ruta de registro
+=======
+  { path: 'registro', component: RegistroComponent }, 
+>>>>>>> origin/yezer
   
   // Rutas protegidas
   { 
@@ -77,7 +85,11 @@ const routes: Routes = [
     path: 'bienes/dar-baja/:id', 
     component: BienDarBajaComponent,
     canActivate: [AuthGuard, RoleGuard],
+<<<<<<< HEAD
     data: { roles: ['ADMIN'] } // Solo admin puede dar de baja
+=======
+    data: { roles: ['ADMIN', 'GESTOR'] } // Solo admin puede dar de baja
+>>>>>>> origin/yezer
   },
 
   // Rutas de responsables
