@@ -62,6 +62,10 @@ import { providePrimeNG } from 'primeng/config';
 import { MessageService } from 'primeng/api';
 import Aura from '@primeng/themes/aura';
 import { TagModule } from 'primeng/tag';
+import { ChipModule } from 'primeng/chip';
+import { MenuModule } from 'primeng/menu';
+import { RippleModule } from 'primeng/ripple';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 
 @NgModule({
@@ -126,7 +130,11 @@ import { TagModule } from 'primeng/tag';
     DropdownModule,
     SelectModule,
     TagModule,
-    SelectModule
+    SelectModule,
+    ChipModule,
+    MenuModule,
+    RippleModule,
+    InputNumberModule
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

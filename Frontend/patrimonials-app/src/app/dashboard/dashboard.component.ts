@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { MenuItem } from 'primeng/api';
 import { MessageService } from 'primeng/api';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,14 +13,16 @@ import { MessageService } from 'primeng/api';
   styleUrls: ['./dashboard.component.css'],
   providers: [MessageService]
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   mobileMenuOpen = false;
   usuario: any = null;
   rolesPermitidos: string[] = [];
   accesoDenegado: boolean = false;
+  currentRoute: string = '';
   
   menuItems: MenuItem[] = [];
   panelMenuItems: MenuItem[] = [];
+  private routerSubscription: Subscription = new Subscription();
 
   constructor(
     private authService: AuthService, 
@@ -33,9 +37,27 @@ export class DashboardComponent implements OnInit {
     if (!this.usuario) {
       this.accesoDenegado = true;
       console.error('No se encontró información de usuario');
+      return;
     }
 
+    this.initializeMenu();
+    this.subscribeToRouteChanges();
+  }
+
+  ngOnDestroy() {
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
+  }
+
+  private initializeMenu() {
     this.menuItems = [
+      {
+        label: 'Dashboard',
+        icon: 'pi pi-home',
+        routerLink: '/dashboard',
+        visible: true
+      },
       {
         label: 'Bienes',
         icon: 'pi pi-box',
@@ -88,7 +110,8 @@ export class DashboardComponent implements OnInit {
         label: 'Notificaciones',
         icon: 'pi pi-bell',
         routerLink: '/notificaciones',
-        badge: '3'
+        badge: '3',
+        visible: true
       },
       {
         label: 'Mantenimientos',
@@ -112,12 +135,29 @@ export class DashboardComponent implements OnInit {
     ];
   }
 
+  private subscribeToRouteChanges() {
+    this.routerSubscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.currentRoute = event.url;
+        this.closeMobileMenu(); // Cerrar menú móvil al cambiar de ruta
+      });
+  }
+
   toggleMobileMenu() {
     this.mobileMenuOpen = !this.mobileMenuOpen;
+    
+    // Prevenir scroll del body cuando el menú esté abierto
+    if (this.mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
   }
 
   closeMobileMenu() {
     this.mobileMenuOpen = false;
+    document.body.style.overflow = 'auto';
   }
 
   // Método para navegar a una ruta
@@ -144,13 +184,22 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // Método mejorado para cerrar sesión
   cerrarSesion() {
     this.authService.logout();
     this.messageService.add({
       severity: 'success',
       summary: 'Sesión cerrada',
-      detail: 'Has cerrado sesión exitosamente'
+      detail: 'Has cerrado sesión exitosamente',
+      life: 3000
     });
+    
+    // Limpiar cualquier estado del componente
+    this.usuario = null;
+    this.accesoDenegado = false;
+    this.closeMobileMenu();
+    
+    // Navegar al login
     this.router.navigate(['/login']);
   }
 
@@ -158,5 +207,27 @@ export class DashboardComponent implements OnInit {
   puedeAcceder(rolesRequeridos: string[]): boolean {
     if (!this.usuario || !this.usuario.rol) return false;
     return rolesRequeridos.some(r => r.toUpperCase() === this.usuario.rol.toUpperCase());
+  }
+
+  // Método para obtener el título de la página actual
+  getCurrentPageTitle(): string {
+    const currentItem = this.menuItems.find(item => item.routerLink === this.currentRoute);
+    return currentItem ? currentItem.label || 'Dashboard' : 'Dashboard';
+  }
+
+  // Método para verificar si una ruta está activa
+  isRouteActive(route: string): boolean {
+    return this.currentRoute === route;
+  }
+
+  // Método para obtener estadísticas del dashboard (ejemplo)
+  getDashboardStats() {
+    // Aquí puedes implementar la lógica para obtener estadísticas reales
+    return {
+      totalBienes: 1234,
+      totalResponsables: 56,
+      totalMovimientos: 89,
+      totalNotificaciones: 12
+    };
   }
 }

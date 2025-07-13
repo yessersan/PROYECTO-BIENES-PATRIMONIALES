@@ -1,29 +1,101 @@
-<div>
-  <h2>Categorías</h2>
-  <button (click)="crearCategoria()">Nueva Categoría</button>
-  <div *ngIf="loading">Cargando...</div>
-  <div *ngIf="error">{{error}}</div>
-  <table *ngIf="categorias.length">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Vida útil</th>
-        <th>Tasa Depreciación</th>
-        <th>Activa</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let cat of categorias">
-        <td>{{cat.nombre}}</td>
-        <td>{{cat.vida_util}}</td>
-        <td>{{cat.tasa_depreciacion}}%</td>
-        <td>{{cat.activa ? 'Sí' : 'No'}}</td>
-        <td>
-          <button (click)="verDetalle(cat.id)">Editar</button>
-          <button (click)="eliminarCategoria(cat.id)">Eliminar</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+<div class="dashboard-container">
+  <!-- Sidebar Estático -->
+  <div class="sidebar-container">
+    <div class="sidebar-header">
+      <div class="d-flex align-items-center mb-3">
+        <i class="pi pi-home text-primary me-2" style="font-size: 1.5rem;"></i>
+        <h4 class="mb-0 text-primary">Sistema</h4>
+      </div>
+    </div>
+
+    <!-- Navegación del Sidebar -->
+    <div class="sidebar-navigation">
+      <nav class="nav flex-column">
+        <ng-container *ngFor="let item of menuItems">
+          <a 
+            class="nav-link sidebar-nav-item"
+            [routerLink]="item.routerLink"
+            routerLinkActive="active"
+            (click)="navigateToRoute(item.routerLink)">
+            <i [class]="item.icon + ' me-3'"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        </ng-container>
+      </nav>
+    </div>
+
+    <!-- Footer del Sidebar -->
+    <div class="sidebar-footer">
+      <button type="button" class="btn btn-outline-danger w-100" (click)="cerrarSesion()">
+        <i class="pi pi-sign-out me-2"></i>
+        Cerrar Sesión
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenido Principal -->
+  <div class="main-content">
+    <!-- Header Superior -->
+    <div class="top-header">
+      <div class="container-fluid">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <h3 class="mb-0">Categorías</h3>
+          </div>
+          <div class="col-md-6 text-end">
+            <button pButton type="button" label="Volver" icon="pi pi-arrow-left" (click)="volver()" class="p-button-secondary"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Área de Contenido -->
+    <div class="content-area">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="content-wrapper">
+              <p-card>
+                <ng-template pTemplate="header">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h3>Categorías</h3>
+                    <button pButton label="Nueva Categoría" (click)="crearCategoria()" class="p-button-primary"></button>
+                  </div>
+                </ng-template>
+                <div *ngIf="loading" class="text-center">Cargando...</div>
+                <p-message *ngIf="error" severity="error" [text]="error" [style]="{'display': 'block'}"></p-message>
+                <p-table *ngIf="categorias.length" [value]="categorias" styleClass="p-datatable-sm">
+                  <ng-template pTemplate="header">
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Vida útil</th>
+                      <th>Tasa Depreciación</th>
+                      <th>Activa</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </ng-template>
+                  <ng-template pTemplate="body" let-cat>
+                    <tr>
+                      <td>{{cat.nombre}}</td>
+                      <td>{{cat.vida_util}}</td>
+                      <td>{{cat.tasa_depreciacion}}%</td>
+                      <td>{{cat.activa ? 'Sí' : 'No'}}</td>
+                      <td>
+                        <button pButton icon="pi pi-pencil" (click)="verDetalle(cat.id)" class="p-button-rounded p-button-success mr-2"></button>
+                        <button pButton icon="pi pi-trash" (click)="eliminarCategoria(cat.id)" class="p-button-rounded p-button-danger"></button>
+                      </td>
+                    </tr>
+                  </ng-template>
+                </p-table>
+                <div *ngIf="!categorias.length && !loading && !error" class="text-center">No hay categorías disponibles.</div>
+              </p-card>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- Toast para mensajes -->
+<p-toast></p-toast>

@@ -106,9 +106,9 @@ WSGI_APPLICATION = 'bienes.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bienespatrimonialesdb',
-        'USER': 'root',
-        'PASSWORD': 'santiago',
+        'NAME': 'patrimonialsdb',
+        'USER': 'santiago',
+        'PASSWORD': 'santiago123',
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {

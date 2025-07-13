@@ -1,29 +1,98 @@
-<div>
-  <h2>{{ esNuevo ? 'Nueva Categoría' : 'Editar Categoría' }}</h2>
-  <form (ngSubmit)="guardar()">
-    <label>Nombre:
-      <input [(ngModel)]="categoria.nombre" name="nombre" required>
-    </label>
-    <br>
-    <label>Descripción:
-      <textarea [(ngModel)]="categoria.descripcion" name="descripcion"></textarea>
-    </label>
-    <br>
-    <label>Vida útil (años):
-      <input type="number" [(ngModel)]="categoria.vida_util" name="vida_util" required>
-    </label>
-    <br>
-    <label>Tasa de depreciación (%):
-      <input type="number" [(ngModel)]="categoria.tasa_depreciacion" name="tasa_depreciacion" required>
-    </label>
-    <br>
-    <label>
-      <input type="checkbox" [(ngModel)]="categoria.activa" name="activa">
-      Activa
-    </label>
-    <br>
-    <div *ngIf="error" style="color:red">{{error}}</div>
-    <button type="submit">Guardar</button>
-    <button type="button" (click)="cancelar()">Cancelar</button>
-  </form>
+<div class="dashboard-container">
+  <!-- Sidebar Estático -->
+  <div class="sidebar-container">
+    <div class="sidebar-header">
+      <div class="d-flex align-items-center mb-3">
+        <i class="pi pi-home text-primary me-2" style="font-size: 1.5rem;"></i>
+        <h4 class="mb-0 text-primary">Sistema</h4>
+      </div>
+    </div>
+
+    <!-- Navegación del Sidebar -->
+    <div class="sidebar-navigation">
+      <nav class="nav flex-column">
+        <ng-container *ngFor="let item of menuItems">
+          <a 
+            class="nav-link sidebar-nav-item"
+            [routerLink]="item.routerLink"
+            routerLinkActive="active"
+            (click)="navigateToRoute(item.routerLink)">
+            <i [class]="item.icon + ' me-3'"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        </ng-container>
+      </nav>
+    </div>
+
+    <!-- Footer del Sidebar -->
+    <div class="sidebar-footer">
+      <button type="button" class="btn btn-outline-danger w-100" (click)="cerrarSesion()">
+        <i class="pi pi-sign-out me-2"></i>
+        Cerrar Sesión
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenido Principal -->
+  <div class="main-content">
+    <!-- Header Superior -->
+    <div class="top-header">
+      <div class="container-fluid">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <h3 class="mb-0">{{ esNuevo ? 'Nueva Categoría' : 'Editar Categoría' }}</h3>
+          </div>
+          <div class="col-md-6 text-end">
+            <button pButton type="button" label="Volver" icon="pi pi-arrow-left" (click)="volver()" class="p-button-secondary"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Área de Contenido -->
+    <div class="content-area">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="content-wrapper">
+              <p-card>
+                <ng-template pTemplate="header">
+                  <h3>{{ esNuevo ? 'Nueva Categoría' : 'Editar Categoría' }}</h3>
+                </ng-template>
+                <form (ngSubmit)="guardar()" *ngIf="!error">
+                  <div class="p-field">
+                    <label for="nombre">Nombre</label>
+                    <input pInputText id="nombre" [(ngModel)]="categoria.nombre" name="nombre" required>
+                  </div>
+                  <div class="p-field">
+                    <label for="descripcion">Descripción</label>
+                    <textarea pInputTextarea id="descripcion" [(ngModel)]="categoria.descripcion" name="descripcion" rows="3"></textarea>
+                  </div>
+                  <div class="p-field">
+                    <label for="vida_util">Vida útil (años)</label>
+                    <p-inputNumber id="vida_util" [(ngModel)]="categoria.vida_util" name="vida_util" required [min]="0"></p-inputNumber>
+                  </div>
+                  <div class="p-field">
+                    <label for="tasa_depreciacion">Tasa de depreciación (%)</label>
+                    <p-inputNumber id="tasa_depreciacion" [(ngModel)]="categoria.tasa_depreciacion" name="tasa_depreciacion" required [min]="0" [max]="100"></p-inputNumber>
+                  </div>
+                  <div class="p-field-checkbox">
+                    <p-checkbox [(ngModel)]="categoria.activa" name="activa" binary="true"></p-checkbox>
+                    <label for="activa">Activa</label>
+                  </div>
+                  <div class="p-field">
+  <button pButton type="submit" label="Guardar" class="p-button-primary"></button>
+  <button pButton type="button" label="Cancelar" (click)="cancelar()" class="p-button-secondary" style="margin-left: 1rem;"></button>
+  <button pButton type="button" label="Volver" icon="pi pi-arrow-left" (click)="volver()" class="p-button-secondary" style="margin-left: 1rem;"></button>
+</div>
+
+                </form>
+                <p-message *ngIf="error" severity="error" [text]="error" [style]="{'display': 'block'}"></p-message>
+              </p-card>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
