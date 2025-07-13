@@ -1,151 +1,192 @@
-/* General wrapper styling */
-.login-wrapper {
+body {
+  background: linear-gradient(135deg, #eacdbc, #d5b8a2);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.login-container {
+  display: flex;
+  width: 900px;
+  height: 520px;
+  margin: auto;
+  margin-top: 5vh;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* panel izquierdo */
+.login-form-panel {
+  flex: 1;
+  background: linear-gradient(rgba(30, 41, 59, 0.3), rgba(0, 0, 0, 0.5)),
+              url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e') center/cover no-repeat;
+  padding: 3rem;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+/* encabezado */
+.form-header h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+}
+
+.form-header .highlight {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.form-header p {
+  font-size: 1rem;
+  opacity: 0.85;
+  margin-bottom: 2rem;
+}
+
+/* campos */
+label {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.input-group {
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #e5e7eb, #f3f4f6);
-  padding: 1rem;
-}
-
-/* PrimeNG card styling */
-.p-card {
-  max-width: 28rem;
-  width: 100%;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(145deg, #ffffff, #f8fafc);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.p-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-}
-
-.p-card .p-card-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1f2937;
-  text-align: center;
-}
-
-.p-card .p-card-subtitle {
-  font-size: 1rem;
-  color: #6b7280;
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-/* Form field styling */
-.p-fluid .p-field {
-  margin-bottom: 1.5rem;
-}
-
-.p-field label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
-.p-input-icon-left > .p-inputtext,
-.p-password {
-  width: 100%;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 8px;
-  border: 1px solid #d1d5db;
-  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-  font-size: 1rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  padding: 0.5rem;
 }
 
-.p-input-icon-left > .pi {
-  color: #6b7280;
-  left: 0.75rem;
-}
-
-.p-inputtext:focus,
-.p-password input:focus {
-  outline: none;
-  border-color: #0284c7;
-  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
-}
-
-.ng-invalid.ng-dirty {
-  border-color: #dc2626;
-}
-
-.p-error {
-  font-size: 0.75rem;
-  color: #dc2626;
-  margin-top: 0.25rem;
-}
-
-/* Password toggle icon */
-.p-password .pi-eye,
-.p-password .pi-eye-slash {
-  color: #6b7280;
-  cursor: pointer;
-}
-
-/* Button styling */
-.p-button {
-  width: 100%;
-  padding: 0.75rem;
-  font-size: 1rem;
-  font-weight: 500;
-  border-radius: 8px;
-  background: linear-gradient(90deg, #0284c7, #0ea5e9);
+.input-group input {
+  flex: 1;
   border: none;
-  transition: background 0.3s, transform 0.3s;
+  outline: none;
+  background: transparent;
+  color: #fff;
+  font-size: 1rem;
+  padding: 0.25rem;
 }
 
-.p-button:hover {
-  background: linear-gradient(90deg, #026ca3, #0c91d1);
-  transform: translateY(-2px);
-}
-
-.p-button:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.p-button .pi-sign-in {
+.input-icon {
+  color: #e5e7eb;
   margin-right: 0.5rem;
 }
 
-/* Register link styling */
-.register-link {
+/* botón */
+.login-button {
+  margin-top: 2rem;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #0284c7, #0ea5e9);
+  color: white;
+  font-weight: 600;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  background: linear-gradient(90deg, #0369a1, #0c91d1);
+  transform: translateY(-2px);
+}
+
+/* errores */
+.p-error {
+  font-size: 0.75rem;
+  color: #fca5a5;
+  margin-top: 0.25rem;
+}
+
+/* volver */
+.back-btn {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
   font-size: 0.875rem;
-  color: #0284c7;
-  text-decoration: none;
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+/* registro */
+.register-section {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.register-link {
+  color: #bae6fd;
   font-weight: 500;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  cursor: pointer;
   transition: color 0.3s;
 }
 
 .register-link:hover {
-  color: #0ea5e9;
-  text-decoration: underline;
+  color: #7dd3fc;
 }
 
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .p-card {
-    max-width: 90%;
+/* panel derecho */
+.login-info-panel {
+  flex: 1;
+  background-color: #fef3c7;
+  background-image: url('https://images.unsplash.com/photo-1528722828814-77f06f0a27c7');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: white;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.login-info-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.login-info-panel .quote {
+  position: relative;
+  font-size: 1.4rem;
+  font-style: italic;
+  font-weight: 500;
+  z-index: 1;
+}
+
+.bottom-text {
+  position: absolute;
+  bottom: 1.5rem;
+  font-size: 0.85rem;
+  opacity: 0.9;
+  z-index: 1;
+}
+
+/* responsive */
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+    height: auto;
+    width: 95%;
   }
 
-  .p-card .p-card-title {
-    font-size: 1.25rem;
+  .login-form-panel,
+  .login-info-panel {
+    width: 100%;
+    height: auto;
   }
 
-  .p-card .p-card-subtitle {
-    font-size: 0.875rem;
-  }
-
-  .p-button {
-    padding: 0.65rem;
-    font-size: 0.875rem;
+  .form-header h2 {
+    font-size: 1.4rem;
   }
 }
