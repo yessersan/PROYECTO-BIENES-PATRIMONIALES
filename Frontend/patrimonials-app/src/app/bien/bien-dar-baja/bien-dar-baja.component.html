@@ -1,10 +1,49 @@
-<p>bien-dar-baja works!</p>
-<!-- bien-dar-baja.component.html -->
-<div class="container">
-  <h2>Dar de baja bien patrimonial</h2>
-  <div *ngIf="mensaje" class="success">{{ mensaje }}</div>
-  <div *ngIf="error" class="error">{{ error }}</div>
-<label>Motivo de baja</label>
-<textarea [(ngModel)]="motivo" name="motivo" class="form-control"></textarea>
-  <button mat-raised-button color="warn" (click)="darDeBaja()">Dar de baja</button>
+<div class="layout">
+  <!-- sidebar fijo -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <i class="pi pi-building text-2xl text-primary"></i>
+      <span class="sidebar-title">Sistema de Bienes</span>
+    </div>
+
+    <ul class="sidebar-menu">
+      <li *ngFor="let item of menuItems">
+        <a [routerLink]="item.routerLink" routerLinkActive="active">
+          <i class="{{ item.icon }}"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- contenido principal -->
+  <main class="main-content">
+    <div class="form-container">
+      <h2 class="form-title">Dar de baja bien patrimonial</h2>
+
+      <div *ngIf="mensaje" class="success-message">
+        <i class="pi pi-check-circle"></i> {{ mensaje }}
+      </div>
+
+      <div *ngIf="error" class="error-message">
+        <i class="pi pi-exclamation-triangle"></i> {{ error }}
+      </div>
+
+      <div class="form-group">
+        <label>Motivo de baja:</label>
+        <textarea
+          [(ngModel)]="motivo"
+          name="motivo"
+          rows="5"
+          class="textarea-motivo"
+          required
+        ></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="btn-baja" (click)="darDeBaja()">Dar de baja</button>
+        <button class="btn-cancel" (click)="router.navigate(['/bienes'])">Cancelar</button>
+      </div>
+    </div>
+  </main>
 </div>

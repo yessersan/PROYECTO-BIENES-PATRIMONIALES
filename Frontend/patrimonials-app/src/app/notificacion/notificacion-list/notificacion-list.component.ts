@@ -1,9 +1,9 @@
-// notificacion-list.component.ts
 import { Component, OnInit } from '@angular/core';
-import { ApiService } from '../../core/api.service'; 
-import { Notificacion } from '../../models/notificacion.model'; 
+import { ApiService } from '../../core/api.service';
+import { Notificacion } from '../../models/notificacion.model';
 import { AuthService } from '../../core/auth.service';
 import { PageEvent } from '@angular/material/paginator';
+import { Usuario } from '../../models/usuario.model';
 
 @Component({
   selector: 'app-notificacion-list',
@@ -16,15 +16,17 @@ export class NotificacionListComponent implements OnInit {
   isLoading = false;
   error: string | null = null;
 
-  // Paginación
   totalItems = 0;
   pageSize = 10;
   currentPage = 0;
 
-  // Filtros
   estados = ['TODOS', 'NO_LEIDO', 'LEIDO', 'ARCHIVADO'];
   estadoSeleccionado = 'NO_LEIDO';
   soloImportantes = false;
+
+  usuarioActual: Usuario | null = null;
+  rolUsuario = '';
+  menuItems: any[] = [];
 
   constructor(
     private apiService: ApiService,
@@ -32,7 +34,36 @@ export class NotificacionListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.cargarNotificaciones();
+    this.apiService.get<Usuario>('auth/usuario/').subscribe({
+      next: (user) => {
+        this.usuarioActual = user;
+        this.rolUsuario = user.rol;
+        this.filtrarMenuPorRol();
+        this.cargarNotificaciones();
+      },
+      error: () => {
+        this.error = 'No se pudo cargar el usuario';
+      }
+    });
+  }
+
+  filtrarMenuPorRol() {
+    const menuCompleto = [
+      { label: 'Dashboard', icon: 'pi pi-chart-bar', routerLink: '/dashboard', roles: ['ADMIN','AUDITOR','CONSULTA','GESTOR'] },
+      { label: 'Bienes', icon: 'pi pi-box', routerLink: '/bienes', roles: ['ADMIN','GESTOR'] },
+      { label: 'Categorías', icon: 'pi pi-list', routerLink: '/categorias', roles: ['ADMIN','GESTOR'] },
+      { label: 'Responsables', icon: 'pi pi-users', routerLink: '/responsables', roles: ['ADMIN','GESTOR'] },
+      { label: 'Movimientos', icon: 'pi pi-exchange', routerLink: '/movimientos', roles: ['ADMIN','AUDITOR','GESTOR'] },
+      { label: 'Reportes', icon: 'pi pi-chart-line', routerLink: '/reportes', roles: ['ADMIN', 'CONSULTA','AUDITOR','GESTOR'] },
+      { label: 'Historial de Auditoría', icon: 'pi pi-history', routerLink: '/historial-auditoria', roles: ['ADMIN','AUDITOR','GESTOR'] },
+      { label: 'Documentos', icon: 'pi pi-file', routerLink: '/documentos', roles: ['ADMIN','GESTOR'] },
+      { label: 'Notificaciones', icon: 'pi pi-bell', routerLink: '/notificaciones', roles: ['ADMIN', 'CONSULTA','AUDITOR','GESTOR'] },
+      { label: 'Etiquetas Digitales', icon: 'pi pi-qrcode', routerLink: '/etiquetas-digitales', roles: ['ADMIN','GESTOR'] },
+      { label: 'Ubicaciones', icon: 'pi pi-map-marker', routerLink: '/ubicaciones', roles: ['ADMIN','GESTOR'] },
+      { label: 'Mantenimientos', icon: 'pi pi-cog', routerLink: '/mantenimientos', roles: ['ADMIN','GESTOR'] },
+    ];
+
+    this.menuItems = menuCompleto.filter(item => item.roles.includes(this.rolUsuario));
   }
 
   cargarNotificaciones(): void {
@@ -40,22 +71,21 @@ export class NotificacionListComponent implements OnInit {
     this.error = null;
 
     let url = `notificaciones/?page=${this.currentPage + 1}&page_size=${this.pageSize}`;
-    
+
     if (this.estadoSeleccionado !== 'TODOS') {
       url += `&estado=${this.estadoSeleccionado}`;
     }
-    
+
     if (this.soloImportantes) {
       url += `&importante=true`;
     }
 
-   this.apiService.get(url).subscribe({
-  next: (response: any) => {
-    console.log('Respuesta del backend:', response);
-    this.notificaciones = response; 
-    this.totalItems = response.length; 
-    this.isLoading = false;
-  },
+    this.apiService.get(url).subscribe({
+      next: (response: any) => {
+        this.notificaciones = response.results ?? response;
+        this.totalItems = response.count ?? response.length;
+        this.isLoading = false;
+      },
       error: (err) => {
         this.error = 'Error al cargar notificaciones';
         this.isLoading = false;

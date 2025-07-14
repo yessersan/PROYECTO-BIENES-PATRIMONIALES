@@ -1,30 +1,55 @@
-<p>ubicacion-list works!</p>
-<h2>Ubicaciones</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Código</th>
-      <th>Edificio</th>
-      <th>Piso</th>
-      <th>Oficina</th>
-      <th>Capacidad</th>
-      <th>Ocupados</th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let ubicacion of ubicaciones">
-      <td>{{ ubicacion.codigo }}</td>
-      <td>{{ ubicacion.edificio }}</td>
-      <td>{{ ubicacion.piso }}</td>
-      <td>{{ ubicacion.oficina }}</td>
-      <td>{{ ubicacion.capacidad }}</td>
-      <td>{{ ubicacion.ocupados }}</td>
-      <td>
-        <button (click)="nuevaUbicacion()">Nueva ubicación</button>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <i class="pi pi-box"></i> Sistema
+    </div>
+    <ul class="menu">
+      <li *ngFor="let item of menuItems" routerLinkActive="active" [routerLink]="item.routerLink">
+        <i [class]="item.icon"></i> {{ item.label }}
+      </li>
+    </ul>
+  </aside>
 
-        <button (click)="verDetalle(ubicacion.id)">Ver detalle</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+  <!-- Contenido principal -->
+  <main class="content container">
+    <h2>Ubicaciones</h2>
+
+    <button class="btn btn-primary mb-3" (click)="nuevaUbicacion()">Nueva ubicación</button>
+
+    <table class="table table-striped" *ngIf="ubicaciones.length > 0">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Edificio</th>
+          <th>Piso</th>
+          <th>Oficina</th>
+          <th>Capacidad</th>
+          <th>Ocupados</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let ubicacion of ubicaciones">
+          <td>{{ ubicacion.codigo }}</td>
+          <td>{{ ubicacion.edificio }}</td>
+          <td>{{ ubicacion.piso }}</td>
+          <td>{{ ubicacion.oficina }}</td>
+          <td>{{ ubicacion.capacidad }}</td>
+          <td>{{ ubicacion.ocupados }}</td>
+          <td>
+            <button class="btn btn-secondary btn-sm" (click)="verDetalle(ubicacion.id)">Ver detalle</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="ubicaciones.length === 0 && !loading">
+      No hay ubicaciones disponibles.
+    </div>
+
+    <div *ngIf="loading" class="loading">
+      Cargando...
+    </div>
+  </main>
+</div>

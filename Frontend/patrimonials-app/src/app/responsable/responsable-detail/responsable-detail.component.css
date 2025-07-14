@@ -1,20 +1,164 @@
-.container {
-  padding: 20px;
+/* layout general */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f6fa;
+}
+
+/* sidebar */
+.sidebar {
+  width: 260px;
+  background: linear-gradient(135deg, #3a3a90, #6f75f3);
+  color: #fff;
+  padding: 2rem 1rem;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #ffd93d;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu li {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.menu li:hover,
+.menu li.active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* contenido */
+.content.container {
+  flex: 1;
+  padding: 2.5rem;
+  background-color: #fff;
+}
+
+/* título */
+.content h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #3a3a90;
+  margin-bottom: 1.5rem;
+}
+
+/* estados */
+.loading {
+  font-style: italic;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.alert.alert-danger {
+  background-color: #fdecea;
+  border: 1px solid #f5c6cb;
+  padding: 1rem;
+  border-radius: 8px;
+  color: #d93025;
+}
+
+/* detalle del responsable */
+.content p {
+  font-size: 1rem;
+  margin-bottom: 0.7rem;
+  color: #333;
+}
+
+strong {
+  color: #3a3a90;
+}
+
+/* botones */
+button {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-right: 0.7rem;
+  margin-top: 1rem;
+}
+
+.btn-primary {
+  background-color: #3a3a90;
+  color: #fff;
+}
+
+.btn-secondary {
+  background-color: #ccc;
+  color: #333;
+}
+
+.btn-success {
+  background-color: #2e7d32;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2e2e7d;
+}
+
+.btn-success:hover {
+  background-color: #256429;
+}
+
+.btn-secondary:hover {
+  background-color: #b0b0b0;
+}
+
+/* formulario de edición */
+form {
+  background-color: #fdfdfd;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+  max-width: 500px;
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
 }
 
-.btn {
-  margin-right: 10px;
+label {
+  font-weight: 600;
+  color: #3a3a90;
+  margin-bottom: 0.3rem;
 }
 
-.loading {
-  text-align: center;
-  padding: 20px;
+input[type="text"],
+input[type="number"],
+textarea {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #fff;
 }
 
-.alert {
-  margin-top: 10px;
+input[type="checkbox"] {
+  margin-right: 0.4rem;
+  vertical-align: middle;
 }

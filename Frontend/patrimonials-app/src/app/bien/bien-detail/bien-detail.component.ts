@@ -5,6 +5,7 @@ import { Bien } from '../../models/bien.model';
 import { Ubicacion } from '../../models/ubicacion.model';
 import { Responsable } from '../../models/responsable.model';
 import { Categoria } from '../../models/categoria.model';
+import { Usuario } from '../../models/usuario.model';
 
 @Component({
   selector: 'app-bien-detail',
@@ -27,6 +28,11 @@ export class BienDetailComponent implements OnInit {
   showDeleteConfirm = false;
   loading = true;
 
+  usuarioActual: Usuario | null = null;
+  rolUsuario = '';
+
+  menuItems: any[] = [];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -34,6 +40,46 @@ export class BienDetailComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.apiService.get<Usuario>('auth/usuario/').subscribe({
+      next: (user) => {
+        this.usuarioActual = user;
+        this.rolUsuario = user.rol;
+        this.verificarPermiso();
+        this.filtrarMenuPorRol();
+        this.cargarDatos();
+      },
+      error: () => {
+        this.error = 'error al obtener el usuario actual';
+        this.loading = false;
+      },
+    });
+  }
+
+  verificarPermiso() {
+    if (!['ADMIN', 'GESTOR'].includes(this.rolUsuario.toUpperCase())) {
+      this.router.navigate(['/dashboard']);
+    }
+  }
+
+  filtrarMenuPorRol() {
+    const menuCompleto = [
+      { label: 'Dashboard', icon: 'pi pi-chart-bar', routerLink: '/dashboard', roles: ['ADMIN', 'GESTOR'] },
+      { label: 'Bienes', icon: 'pi pi-box', routerLink: '/bienes', roles: ['ADMIN', 'GESTOR'] },
+      { label: 'Categorías', icon: 'pi pi-list', routerLink: '/categorias', roles: ['ADMIN', 'GESTOR'] },
+      { label: 'Responsables', icon: 'pi pi-users', routerLink: '/responsables', roles: ['ADMIN', 'GESTOR'] },
+      { label: 'Movimientos', icon: 'pi pi-exchange', routerLink: '/movimientos', roles: ['ADMIN', 'GESTOR'] },
+      { label: 'Reportes', icon: 'pi pi-chart-line', routerLink: '/reportes', roles: ['ADMIN', 'GESTOR'] },
+      { label: 'Historial de Auditoría', icon: 'pi pi-history', routerLink: '/historial-auditoria', roles: ['ADMIN', 'GESTOR'] },
+      { label: 'Documentos', icon: 'pi pi-file', routerLink: '/documentos', roles: ['ADMIN', 'GESTOR'] },
+      { label: 'Notificaciones', icon: 'pi pi-bell', routerLink: '/notificaciones', roles: ['ADMIN', 'GESTOR'] },
+      { label: 'Etiquetas Digitales', icon: 'pi pi-qrcode', routerLink: '/etiquetas-digitales', roles: ['ADMIN', 'GESTOR'] },
+      { label: 'Ubicaciones', icon: 'pi pi-map-marker', routerLink: '/ubicaciones', roles: ['ADMIN', 'GESTOR'] },
+      { label: 'Mantenimientos', icon: 'pi pi-cog', routerLink: '/mantenimientos', roles: ['ADMIN', 'GESTOR'] },
+    ];
+    this.menuItems = menuCompleto.filter(item => item.roles.includes(this.rolUsuario.toUpperCase()));
+  }
+
+  cargarDatos() {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (!idParam || isNaN(+idParam)) {
       this.error = 'ID de bien inválido';
@@ -127,56 +173,55 @@ export class BienDetailComponent implements OnInit {
       };
     }
   }
+
   saveChanges() {
-  if (this.bien) {
-    const payload: Bien = {
-      id: this.bien.id,
-      codigo: this.bien.codigo, // no editable
-      serie: this.bien.serie || null,
-      descripcion: this.editedBien.descripcion!,
-      marca: this.bien.marca || null,
-      modelo: this.bien.modelo || null,
-      valor_adquisicion: this.editedBien.valor_adquisicion!,
-      fecha_adquisicion: this.editedBien.fecha_adquisicion!,
-      estado: this.editedBien.estado!,
-      depreciacion: this.bien.depreciacion, // la calculas server-side normalmente
-      valor_residual: this.bien.valor_residual,
-      categoria: this.editedBien.categoria!,
-      ubicacion: this.editedBien.ubicacion!,
-      responsable: this.editedBien.responsable || null,
-      fecha_registro: this.bien.fecha_registro,
-      fecha_actualizacion: this.bien.fecha_actualizacion,
-      activo: this.bien.activo,
-    };
+    if (this.bien) {
+      const payload: Bien = {
+        id: this.bien.id,
+        codigo: this.bien.codigo,
+        serie: this.bien.serie || null,
+        descripcion: this.editedBien.descripcion!,
+        marca: this.bien.marca || null,
+        modelo: this.bien.modelo || null,
+        valor_adquisicion: this.editedBien.valor_adquisicion!,
+        fecha_adquisicion: this.editedBien.fecha_adquisicion!,
+        estado: this.editedBien.estado!,
+        depreciacion: this.bien.depreciacion,
+        valor_residual: this.bien.valor_residual,
+        categoria: this.editedBien.categoria!,
+        ubicacion: this.editedBien.ubicacion!,
+        responsable: this.editedBien.responsable || null,
+        fecha_registro: this.bien.fecha_registro,
+        fecha_actualizacion: this.bien.fecha_actualizacion,
+        activo: this.bien.activo,
+      };
 
-    console.log('Payload enviado:', payload);
+      this.apiService.updateBien(this.bien.id, payload).subscribe({
+        next: (updatedBien) => {
+          this.bien = updatedBien;
+          this.editMode = false;
+          this.error = null;
 
-    this.apiService.updateBien(this.bien.id, payload).subscribe({
-      next: (updatedBien) => {
-        this.bien = updatedBien;
-        this.editMode = false;
-        this.error = null;
+          if (updatedBien.ubicacion) {
+            this.apiService.getUbicacion(updatedBien.ubicacion).subscribe({
+              next: (ubicacion) => (this.ubicacion = ubicacion),
+            });
+          }
 
-        if (updatedBien.ubicacion) {
-          this.apiService.getUbicacion(updatedBien.ubicacion).subscribe({
-            next: (ubicacion) => (this.ubicacion = ubicacion),
-          });
-        }
-
-        if (updatedBien.responsable) {
-          this.apiService.getResponsable(updatedBien.responsable).subscribe({
-            next: (responsable) => (this.responsable = responsable),
-          });
-        }
-      },
-      error: (err) => {
-        this.error =
-          'Error al actualizar bien: ' +
-          (err.error?.message || 'Error desconocido');
-      },
-    });
+          if (updatedBien.responsable) {
+            this.apiService.getResponsable(updatedBien.responsable).subscribe({
+              next: (responsable) => (this.responsable = responsable),
+            });
+          }
+        },
+        error: (err) => {
+          this.error =
+            'Error al actualizar bien: ' +
+            (err.error?.message || 'Error desconocido');
+        },
+      });
+    }
   }
-}
 
   confirmDelete() {
     this.showDeleteConfirm = true;
@@ -207,7 +252,7 @@ export class BienDetailComponent implements OnInit {
   }
 
   moveBien() {
-    if (this.bien) {
+    if (this.bien && ['ADMIN', 'GESTOR'].includes(this.rolUsuario.toUpperCase())) {
       this.router.navigate(['/bienes', this.bien.id, 'mover']);
     }
   }

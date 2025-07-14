@@ -1,0 +1,139 @@
+/* layout base */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f7fc;
+}
+
+/* sidebar */
+.sidebar {
+  width: 260px;
+  background: linear-gradient(135deg, #3a3a90, #6f75f3);
+  color: white;
+  padding: 2rem 1rem;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ffd93d;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu li {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: background 0.2s ease;
+}
+
+.menu li:hover,
+.menu li.active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* contenido principal */
+.content {
+  flex: 1;
+  padding: 2.5rem;
+}
+
+/* encabezado y acciones */
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header-actions h2 {
+  color: #3a3a90;
+  font-weight: 700;
+}
+
+.header-actions button {
+  background-color: #3a3a90;
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.header-actions button:hover {
+  background-color: #2f2f78;
+}
+
+/* tabla */
+.etiquetas-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.etiquetas-table th,
+.etiquetas-table td {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e6f1;
+  font-size: 0.95rem;
+}
+
+.etiquetas-table th {
+  background-color: #f0f4ff;
+  color: #3a3a90;
+  font-weight: 600;
+}
+
+.etiquetas-table td button {
+  background-color: transparent;
+  border: 1px solid #3a3a90;
+  color: #3a3a90;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  margin-right: 0.3rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.etiquetas-table td button:hover {
+  background-color: #3a3a90;
+  color: #fff;
+}
+
+/* imagen qr */
+.etiquetas-table img {
+  border: 2px solid #3a3a90;
+  border-radius: 6px;
+}
+
+/* mensajes */
+.error-message {
+  background: #ffe0e0;
+  color: #b00020;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}

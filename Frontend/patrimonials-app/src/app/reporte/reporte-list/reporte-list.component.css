@@ -1,0 +1,178 @@
+/* estructura general */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f6fa;
+}
+
+/* sidebar */
+.sidebar {
+  width: 260px;
+  background: linear-gradient(135deg, #3a3a90, #6f75f3);
+  color: #fff;
+  padding: 2rem 1rem;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #ffd93d;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu li {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.menu li:hover,
+.menu li.active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* contenido */
+.content {
+  flex: 1;
+  padding: 2.5rem;
+  background-color: #fff;
+}
+
+/* título */
+.content h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #3a3a90;
+  margin-bottom: 1.5rem;
+}
+
+/* formulario rápido */
+.form-rapido {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  background: #fdfdfd;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.form-rapido label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  color: #333;
+  min-width: 200px;
+}
+
+.form-rapido select {
+  margin-top: 0.25rem;
+  padding: 0.55rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+}
+
+.form-rapido button {
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  background-color: #3a3a90;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.form-rapido button:hover {
+  background-color: #2e2e7d;
+}
+
+.form-rapido button[disabled] {
+  background-color: #bbb;
+  cursor: not-allowed;
+}
+
+/* tabla de reportes */
+.tabla-reportes {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tabla-reportes thead {
+  background-color: #3a3a90;
+  color: #fff;
+}
+
+.tabla-reportes th,
+.tabla-reportes td {
+  padding: 0.85rem 1rem;
+  text-align: left;
+}
+
+.tabla-reportes tbody tr:nth-child(even) {
+  background-color: #f8f8f8;
+}
+
+.tabla-reportes button {
+  margin-right: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #3a3a90;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.tabla-reportes button:hover {
+  background-color: #2f2f76;
+}
+
+.tabla-reportes a {
+  color: #3a3a90;
+  font-weight: 500;
+  text-decoration: underline;
+}
+
+/* estados */
+.loading,
+.empty {
+  font-size: 1rem;
+  color: #555;
+  padding: 1rem 0;
+}
+
+.error {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+.success {
+  color: #388e3c;
+  font-weight: 600;
+}

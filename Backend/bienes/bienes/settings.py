@@ -107,8 +107,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'patrimonialsdb',
-        'USER': 'santiago',
-        'PASSWORD': 'santiago123',
+        'USER': 'root',
+        'PASSWORD': 'rodrigo030404',
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {

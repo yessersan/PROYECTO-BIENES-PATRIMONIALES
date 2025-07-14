@@ -1,33 +1,52 @@
-<div>
-  <h2>Documentos Adjuntos</h2>
-  <button (click)="crearDocumento()">Nuevo Documento</button>
-  <div *ngIf="loading">Cargando...</div>
-  <div *ngIf="error">{{error}}</div>
-  <table *ngIf="documentos.length">
-    <thead>
-      <tr>
-        <th>Tipo</th>
-        <th>Bien</th>
-        <th>Usuario</th>
-        <th>Fecha</th>
-        <th>Archivo</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let doc of documentos">
-        <td>{{doc.tipo}}</td>
-        <td>{{doc.bien}}</td>
-        <td>{{doc.usuario}}</td>
-        <td>{{doc.fecha_registro | date:'short'}}</td>
-        <td>
-          <a [href]="doc.ruta_archivo" target="_blank">Ver archivo</a>
-        </td>
-        <td>
-          <button (click)="verDetalle(doc.id)">Editar</button>
-          <button (click)="eliminarDocumento(doc.id)">Eliminar</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <i class="pi pi-box"></i> Sistema
+    </div>
+    <ul class="menu">
+      <li *ngFor="let item of menuItems" routerLinkActive="active" [routerLink]="item.routerLink">
+        <i [class]="item.icon"></i> {{ item.label }}
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="content">
+    <div class="header-actions">
+      <h2>Documentos Adjuntos</h2>
+      <button (click)="crearDocumento()">+ Nuevo Documento</button>
+    </div>
+
+    <div *ngIf="loading">Cargando...</div>
+    <div *ngIf="error" class="error-message">{{ error }}</div>
+
+    <table *ngIf="documentos.length" class="document-table">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Bien</th>
+          <th>Usuario</th>
+          <th>Fecha</th>
+          <th>Archivo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let doc of documentos">
+          <td>{{ doc.tipo }}</td>
+          <td>{{ doc.bien }}</td>
+          <td>{{ doc.usuario }}</td>
+          <td>{{ doc.fecha_registro | date: 'short' }}</td>
+          <td>
+            <a [href]="doc.ruta_archivo" target="_blank">Ver archivo</a>
+          </td>
+          <td>
+            <button (click)="verDetalle(doc.id)">Editar</button>
+            <button (click)="eliminarDocumento(doc.id)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
 </div>

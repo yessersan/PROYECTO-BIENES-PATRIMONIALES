@@ -1,16 +1,16 @@
-/* Layout Principal */
+/* layout principal */
 .dashboard-container {
   display: flex;
   height: 100vh;
-  background-color: #f8f9fa;
-  overflow: hidden;
+  background-color: #f4f6fb;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Sidebar Estático */
+/* sidebar */
 .sidebar-container {
   width: 280px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #4e54c8, #8f94fb);
+  color: #fff;
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -26,6 +26,15 @@
   border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
+.sidebar-header .text-primary {
+  color: #ffd93d !important;
+}
+
+.sidebar-header h4 {
+  color: #fff;
+  margin: 0;
+}
+
 .sidebar-navigation {
   flex: 1;
   padding: 1rem 0;
@@ -33,28 +42,28 @@
 }
 
 .sidebar-nav-item {
-  color: rgba(255,255,255,0.8) !important;
+  color: rgba(255,255,255,0.85) !important;
   padding: 0.75rem 1.5rem;
   margin: 0.25rem 0;
-  border-radius: 0;
-  transition: all 0.3s ease;
-  text-decoration: none;
   display: flex;
   align-items: center;
+  text-decoration: none;
   border-left: 3px solid transparent;
+  transition: all 0.3s ease;
+  border-radius: 6px;
 }
 
 .sidebar-nav-item:hover {
   background-color: rgba(255,255,255,0.1);
-  color: white !important;
-  border-left-color: #fff;
+  color: #fff !important;
+  border-left-color: #ffd93d;
 }
 
 .sidebar-nav-item.active {
   background-color: rgba(255,255,255,0.2);
-  color: white !important;
-  border-left-color: #ffc107;
-  font-weight: 600;
+  color: #fff !important;
+  border-left-color: #ffd93d;
+  font-weight: bold;
 }
 
 .sidebar-footer {
@@ -65,6 +74,7 @@
 .sidebar-footer .btn-outline-danger {
   border-color: rgba(255,255,255,0.3);
   color: rgba(255,255,255,0.9);
+  transition: all 0.3s ease;
 }
 
 .sidebar-footer .btn-outline-danger:hover {
@@ -73,7 +83,7 @@
   color: white;
 }
 
-/* Contenido Principal */
+/* contenido */
 .main-content {
   flex: 1;
   margin-left: 280px;
@@ -81,39 +91,104 @@
   flex-direction: column;
   height: 100vh;
   overflow-y: auto;
-  position: relative;
-  z-index: 1;
+  padding-bottom: 2rem;
 }
 
 .top-header {
-  background: white;
+  background: #fff;
   border-bottom: 1px solid #e9ecef;
-  padding: 1rem 0;
+  padding: 1.5rem 2rem;
   position: sticky;
   top: 0;
   z-index: 900;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.top-header h3 {
+  color: #4e54c8;
+  font-weight: 700;
 }
 
 .content-area {
   flex: 1;
-  padding: 2rem 0;
-  overflow-y: auto;
+  padding: 2rem;
 }
 
 .content-wrapper {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-  min-height: 400px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+/* campos */
+.p-field {
+  margin-bottom: 1.5rem;
+}
+
+.p-field label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+  color: #333;
+}
+
+.p-field input,
+.p-field textarea {
   width: 100%;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
 }
 
-.p-field, .p-field-checkbox {
-  margin-bottom: 1rem;
+.p-field input:focus,
+.p-field textarea:focus {
+  border-color: #4e54c8;
+  box-shadow: 0 0 0 3px rgba(78, 84, 200, 0.2);
+  outline: none;
 }
 
-.p-card {
-  margin-bottom: 2rem;
+.p-field-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+/* botones */
+.p-field button {
+  margin-right: 1rem;
+}
+
+.p-button-primary {
+  background-color: #4e54c8 !important;
+  border: none !important;
+  padding: 0.7rem 1.5rem;
+  font-weight: 600;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.p-button-primary:hover {
+  background-color: #3f47b1 !important;
+}
+
+.p-button-secondary {
+  background-color: #6c757d !important;
+  border: none !important;
+  padding: 0.7rem 1.5rem;
+  font-weight: 500;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.p-button-secondary:hover {
+  background-color: #5a6268 !important;
+}
+
+/* mensaje error */
+p-message {
+  margin-top: 1.5rem;
+  font-size: 1rem;
 }

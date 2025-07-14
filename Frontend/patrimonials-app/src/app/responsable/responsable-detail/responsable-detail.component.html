@@ -1,43 +1,60 @@
-<div class="container">
-  <h2>Detalles del Responsable</h2>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <i class="pi pi-box"></i> Sistema
+    </div>
+    <ul class="menu">
+      <li *ngFor="let item of menuItems" routerLinkActive="active" [routerLink]="item.routerLink">
+        <i [class]="item.icon"></i> {{ item.label }}
+      </li>
+    </ul>
+  </aside>
 
-  <div *ngIf="loading" class="loading">Cargando...</div>
-  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <!-- Contenido principal -->
+  <main class="content container">
+    <h2>Detalles del Responsable</h2>
 
-  <div *ngIf="responsable && !loading">
-    <div *ngIf="!isEditing">
-      <p><strong>ID:</strong> {{ responsable.id }}</p>
-      <p><strong>Usuario:</strong> {{ isUsuarioObject(responsable.usuario) ? responsable.usuario.username : 'N/A' }}</p>
-      <p><strong>Cargo:</strong> {{ responsable.cargo }}</p>
-      <p><strong>Departamento:</strong> {{ responsable.departamento }}</p>
-      <p><strong>Activo:</strong> {{ responsable.activo ? 'Sí' : 'No' }}</p>
-      <button (click)="toggleEdit()" class="btn btn-primary">Editar</button>
-      <button (click)="router.navigate(['/responsables'])" class="btn btn-secondary">Volver</button>
+    <div *ngIf="loading" class="loading">Cargando...</div>
+    <div *ngIf="error" class="alert alert-danger" style="color:red; margin-bottom: 1rem;">
+      {{ error }}
     </div>
 
-    <!-- Formulario de edición -->
-    <div *ngIf="isEditing">
-      <form [formGroup]="editForm" (ngSubmit)="updateResponsable()">
-        <div class="form-group">
-          <label for="usuario_id">Usuario ID</label>
-          <input type="number" id="usuario_id" formControlName="usuario_id" class="form-control" />
-        </div>
-        <div class="form-group">
-          <label for="cargo">Cargo</label>
-          <input type="text" id="cargo" formControlName="cargo" class="form-control" />
-        </div>
-        <div classRouteParams="form-group">
-          <label for="departamento">Departamento</label>
-          <input type="text" id="departamento" formControlName="departamento" class="form-control" />
-        </div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" formControlName="activo" /> Activo
-          </label>
-        </div>
-        <button type="submit" class="btn btn-success" [disabled]="editForm.invalid">Guardar</button>
-        <button type="button" (click)="toggleEdit()" class="btn btn-secondary">Cancelar</button>
-      </form>
+    <div *ngIf="responsable && !loading">
+      <div *ngIf="!isEditing">
+        <p><strong>ID:</strong> {{ responsable.id }}</p>
+        <p><strong>Usuario:</strong> {{ isUsuarioObject(responsable.usuario) ? responsable.usuario.username : 'N/A' }}</p>
+        <p><strong>Cargo:</strong> {{ responsable.cargo }}</p>
+        <p><strong>Departamento:</strong> {{ responsable.departamento }}</p>
+        <p><strong>Activo:</strong> {{ responsable.activo ? 'Sí' : 'No' }}</p>
+        <button (click)="toggleEdit()" class="btn btn-primary">Editar</button>
+        <button (click)="router.navigate(['/responsables'])" class="btn btn-secondary">Volver</button>
+      </div>
+
+      <!-- Formulario de edición -->
+      <div *ngIf="isEditing">
+        <form [formGroup]="editForm" (ngSubmit)="updateResponsable()">
+          <div class="form-group">
+            <label for="usuario_id">Usuario ID</label>
+            <input type="number" id="usuario_id" formControlName="usuario_id" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="cargo">Cargo</label>
+            <input type="text" id="cargo" formControlName="cargo" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="departamento">Departamento</label>
+            <input type="text" id="departamento" formControlName="departamento" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label>
+              <input type="checkbox" formControlName="activo" /> Activo
+            </label>
+          </div>
+          <button type="submit" class="btn btn-success" [disabled]="editForm.invalid">Guardar</button>
+          <button type="button" (click)="toggleEdit()" class="btn btn-secondary">Cancelar</button>
+        </form>
+      </div>
     </div>
-  </div>
+  </main>
 </div>

@@ -1,14 +1,35 @@
-<h2>Finalizar Mantenimiento</h2>
-<div *ngIf="loading">Procesando...</div>
-<div *ngIf="error" style="color:red">{{ error }}</div>
-<div *ngIf="success" style="color:green">{{ success }}</div>
-<form (ngSubmit)="finalizar()">
-  <label>Observaciones:</label>
-  <textarea [(ngModel)]="observaciones" name="observaciones"></textarea>
-  <br>
-  <label>Costo:</label>
-  <input type="number" [(ngModel)]="costo" name="costo" min="0" step="0.01">
-  <br>
-  <button type="submit" [disabled]="loading">Confirmar Finalización</button>
-  <button type="button" (click)="volver()">Volver</button>
-</form>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <i class="pi pi-box"></i> Sistema
+    </div>
+    <ul class="menu">
+      <li *ngFor="let item of menuItems" routerLinkActive="active" [routerLink]="item.routerLink">
+        <i [class]="item.icon"></i> {{ item.label }}
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="content">
+    <h2>Finalizar Mantenimiento</h2>
+
+    <div *ngIf="loading">Procesando...</div>
+    <div *ngIf="error" class="error-message">{{ error }}</div>
+    <div *ngIf="success" class="success-message">{{ success }}</div>
+
+    <form (ngSubmit)="finalizar()">
+      <label>Observaciones:</label><br>
+      <textarea [(ngModel)]="observaciones" name="observaciones" rows="4" cols="50"></textarea>
+      <br><br>
+
+      <label>Costo:</label><br>
+      <input type="number" [(ngModel)]="costo" name="costo" min="0" step="0.01">
+      <br><br>
+
+      <button type="submit" [disabled]="loading">Confirmar Finalización</button>
+      <button type="button" (click)="volver()">Volver</button>
+    </form>
+  </main>
+</div>

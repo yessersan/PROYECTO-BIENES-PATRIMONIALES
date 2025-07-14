@@ -18,6 +18,8 @@ export class ReporteDetailComponent implements OnInit {
   error = '';
   esNuevo = false;
   usuarioActual: Usuario | null = null;
+  rolUsuario = '';
+  menuItems: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -28,16 +30,17 @@ export class ReporteDetailComponent implements OnInit {
     this.reporteForm = this.fb.group({
       tipo: ['', [Validators.required]],
       formato: ['', [Validators.required]],
-      contenido: ['', [Validators.required]] // Obligatorio según modelo Django
+      contenido: ['', [Validators.required]]
     });
   }
 
   ngOnInit(): void {
-    // Obtener usuario actual
     this.loading = true;
     this.api.get<Usuario>('auth/usuario/').subscribe({
       next: (user) => {
         this.usuarioActual = user;
+        this.rolUsuario = user.rol; // <-- importante: se obtiene el rol
+        this.filtrarMenuPorRol();
         this.loading = false;
       },
       error: () => {
@@ -68,6 +71,25 @@ export class ReporteDetailComponent implements OnInit {
     }
   }
 
+  filtrarMenuPorRol() {
+    const todoElMenu = [
+      { label: 'Dashboard', icon: 'pi pi-chart-bar', routerLink: '/dashboard', roles: ['ADMIN','AUDITOR','CONSULTA','GESTOR'] },
+      { label: 'Bienes', icon: 'pi pi-box', routerLink: '/bienes', roles: ['ADMIN','GESTOR'] },
+      { label: 'Categorías', icon: 'pi pi-list', routerLink: '/categorias', roles: ['ADMIN','GESTOR'] },
+      { label: 'Responsables', icon: 'pi pi-users', routerLink: '/responsables', roles: ['ADMIN','GESTOR'] },
+      { label: 'Movimientos', icon: 'pi pi-exchange', routerLink: '/movimientos', roles: ['ADMIN', 'AUDITOR','GESTOR'] },
+      { label: 'Reportes', icon: 'pi pi-chart-line', routerLink: '/reportes', roles: ['ADMIN', 'CONSULTA','AUDITOR','GESTOR'] },
+      { label: 'Historial de Auditoría', icon: 'pi pi-history', routerLink: '/historial-auditoria', roles: ['ADMIN','AUDITOR','GESTOR'] },
+      { label: 'Documentos', icon: 'pi pi-file', routerLink: '/documentos', roles: ['ADMIN','GESTOR'] },
+      { label: 'Notificaciones', icon: 'pi pi-bell', routerLink: '/notificaciones', roles: ['ADMIN', 'CONSULTA','AUDITOR','GESTOR'] },
+      { label: 'Etiquetas Digitales', icon: 'pi pi-qrcode', routerLink: '/etiquetas-digitales', roles: ['ADMIN','GESTOR'] },
+      { label: 'Ubicaciones', icon: 'pi pi-map-marker', routerLink: '/ubicaciones', roles: ['ADMIN','GESTOR'] },
+      { label: 'Mantenimientos', icon: 'pi pi-cog', routerLink: '/mantenimientos', roles: ['ADMIN','GESTOR' ] }
+    ];
+
+    this.menuItems = todoElMenu.filter(item => item.roles.includes(this.rolUsuario));
+  }
+
   guardar() {
     if (this.reporteForm.invalid) {
       this.reporteForm.markAllAsTouched();
@@ -85,7 +107,7 @@ export class ReporteDetailComponent implements OnInit {
       formato: this.reporteForm.value.formato,
       contenido: this.reporteForm.value.contenido,
       usuario: this.usuarioActual.id,
-      parametros: {} // Enviar objeto JSON vacío por defecto
+      parametros: {}
     };
 
     this.loading = true;
@@ -97,8 +119,7 @@ export class ReporteDetailComponent implements OnInit {
         },
         error: (err) => {
           this.loading = false;
-          this.error = err.error?.message || 'No se pudo crear el reporte. Verifique los datos.';
-          console.error('Error del servidor:', err.error);
+          this.error = err.error?.message || 'No se pudo crear el reporte.';
         }
       });
     } else if (this.reporte?.id) {
@@ -109,8 +130,7 @@ export class ReporteDetailComponent implements OnInit {
         },
         error: (err) => {
           this.loading = false;
-          this.error = err.error?.message || 'No se pudo actualizar el reporte. Verifique los datos.';
-          console.error('Error del servidor:', err.error);
+          this.error = err.error?.message || 'No se pudo actualizar el reporte.';
         }
       });
     }

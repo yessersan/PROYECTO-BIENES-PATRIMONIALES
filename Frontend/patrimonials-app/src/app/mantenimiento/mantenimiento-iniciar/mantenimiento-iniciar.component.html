@@ -1,6 +1,25 @@
-<h2>Iniciar Mantenimiento</h2>
-<div *ngIf="loading">Procesando...</div>
-<div *ngIf="error" style="color:red">{{ error }}</div>
-<div *ngIf="success" style="color:green">{{ success }}</div>
-<button (click)="iniciar()" [disabled]="loading">Confirmar Inicio</button>
-<button (click)="volver()">Volver</button>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <i class="pi pi-box"></i> Sistema
+    </div>
+    <ul class="menu">
+      <li *ngFor="let item of menuItems" routerLinkActive="active" [routerLink]="item.routerLink">
+        <i [class]="item.icon"></i> {{ item.label }}
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="content">
+    <h2>Iniciar Mantenimiento</h2>
+
+    <div *ngIf="loading">Procesando...</div>
+    <div *ngIf="error" class="error-message">{{ error }}</div>
+    <div *ngIf="success" class="success-message">{{ success }}</div>
+
+    <button (click)="iniciar()" [disabled]="loading">Confirmar Inicio</button>
+    <button (click)="volver()">Volver</button>
+  </main>
+</div>

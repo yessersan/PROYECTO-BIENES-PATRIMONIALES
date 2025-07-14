@@ -1,0 +1,147 @@
+/* estructura general */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f6fa;
+}
+
+/* sidebar */
+.sidebar {
+  width: 260px;
+  background: linear-gradient(135deg, #3a3a90, #6f75f3);
+  color: #fff;
+  padding: 2rem 1rem;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #ffd93d;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu li {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.menu li:hover,
+.menu li.active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* contenido */
+.content {
+  flex: 1;
+  padding: 2.5rem;
+  background-color: #fff;
+}
+
+/* título */
+.content h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #3a3a90;
+  margin-bottom: 1.5rem;
+}
+
+/* formulario */
+form {
+  background: #fdfdfd;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  color: #444;
+}
+
+select,
+textarea,
+input[type="text"],
+input[type="number"],
+input[type="date"] {
+  width: 100%;
+  padding: 0.65rem;
+  margin-top: 0.25rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  background-color: #fff;
+  transition: border 0.3s ease;
+}
+
+select:focus,
+textarea:focus,
+input:focus {
+  border-color: #6f75f3;
+  outline: none;
+}
+
+/* mensaje de error */
+.error-msg,
+span[style*="color:red"] {
+  font-size: 0.85rem;
+  color: #d32f2f;
+  margin-top: 0.2rem;
+}
+
+/* enlace de archivo */
+a {
+  color: #3a3a90;
+  font-weight: 500;
+  text-decoration: underline;
+}
+
+/* botones */
+button {
+  margin-top: 1.5rem;
+  margin-right: 1rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  color: #fff;
+  background-color: #3a3a90;
+}
+
+button:hover {
+  background-color: #2e2e7d;
+}
+
+button[disabled] {
+  background-color: #bbb;
+  cursor: not-allowed;
+}
+
+/* carga */
+.loading {
+  color: #444;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}

@@ -1,0 +1,107 @@
+/* layout general */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f8fc;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* sidebar */
+.sidebar {
+  width: 260px;
+  background: linear-gradient(135deg, #3a3a90, #6f75f3);
+  color: white;
+  padding: 2rem 1rem;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ffd93d;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu li {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.menu li:hover,
+.menu li.active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* contenido principal */
+.content {
+  flex: 1;
+  padding: 2.5rem;
+}
+
+/* mensajes de estado */
+.error-message {
+  background: #ffe0e0;
+  color: #b00020;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.detalle-container {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  color: #333;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.detalle-container h2 {
+  color: #3a3a90;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+
+.detalle-container p {
+  margin: 0.6rem 0;
+  font-size: 1rem;
+}
+
+.detalle-container strong {
+  color: #555;
+  font-weight: 600;
+}
+
+/* botón volver */
+.detalle-container button {
+  margin-top: 2rem;
+  background-color: #3a3a90;
+  color: white;
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.detalle-container button:hover {
+  background-color: #2c2c72;
+}
