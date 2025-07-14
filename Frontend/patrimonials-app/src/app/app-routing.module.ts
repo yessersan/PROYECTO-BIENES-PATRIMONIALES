@@ -42,6 +42,7 @@ import { EtiquetaDigitalGenerarQrComponent } from './etiqueta-digital/etiqueta-d
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AuthGuard } from './core/auth.guard';
 import { RoleGuard } from './core/role.guard';
+import { BienCreateComponent } from './bien/bien-create/bien-create.component';
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
@@ -61,6 +62,12 @@ const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['ADMIN', 'GESTOR'] } 
   },
+    { 
+    path: 'bienes/crear', 
+    component: BienCreateComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
   { 
     path: 'bienes/:id', 
     component: BienDetailComponent,
@@ -79,7 +86,6 @@ const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['ADMIN', 'GESTOR'] } // Solo admin puede dar de baja
   },
-
   // Rutas de responsables
   { 
     path: 'responsables', 

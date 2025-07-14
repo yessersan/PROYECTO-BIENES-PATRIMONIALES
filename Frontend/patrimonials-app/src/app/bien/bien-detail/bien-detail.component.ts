@@ -8,65 +8,43 @@ import { Categoria } from '../../models/categoria.model';
 
 @Component({
   selector: 'app-bien-detail',
+  standalone: false,
   templateUrl: './bien-detail.component.html',
   styleUrls: ['./bien-detail.component.css'],
-  standalone: false
 })
 export class BienDetailComponent implements OnInit {
   bien: Bien | null = null;
   ubicacion?: Ubicacion;
   responsable?: Responsable;
-  categoria?: Categoria;
+
+  categorias: Categoria[] = [];
+  ubicaciones: Ubicacion[] = [];
+  responsables: Responsable[] = [];
+
   editMode = false;
   editedBien: Partial<Bien> = {};
   error: string | null = null;
   showDeleteConfirm = false;
   loading = true;
-  categorias: Categoria[] = [];
-  ubicaciones: Ubicacion[] = [];
-  responsables: Responsable[] = [];
 
   constructor(
     private route: ActivatedRoute,
-    public router: Router,
+    private router: Router,
     private apiService: ApiService
   ) {}
 
   ngOnInit() {
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (!idParam || isNaN(+idParam)) {
+      this.error = 'ID de bien inválido';
+      this.loading = false;
+      return;
+    }
+    const id = +idParam;
+    this.loadBien(id);
     this.loadCategorias();
     this.loadUbicaciones();
     this.loadResponsables();
-    const idParam = this.route.snapshot.paramMap.get('id');
-    if (idParam === 'nuevo') {
-      this.editMode = true;
-      this.bien = null;
-      this.editedBien = { estado: 'BUENO', activo: true };
-      this.loading = false;
-    } else {
-      const id = +idParam!;
-      this.loadBien(id);
-    }
-  }
-
-  loadCategorias() {
-    this.apiService.getCategorias().subscribe({
-      next: (categorias) => this.categorias = categorias,
-      error: (err) => console.error('Error cargando categorías:', err)
-    });
-  }
-
-  loadUbicaciones() {
-    this.apiService.getUbicaciones().subscribe({
-      next: (ubicaciones) => this.ubicaciones = ubicaciones,
-      error: (err) => console.error('Error cargando ubicaciones:', err)
-    });
-  }
-
-  loadResponsables() {
-    this.apiService.getResponsables().subscribe({
-      next: (responsables) => this.responsables = responsables,
-      error: (err) => console.error('Error cargando responsables:', err)
-    });
   }
 
   loadBien(id: number) {
@@ -74,92 +52,131 @@ export class BienDetailComponent implements OnInit {
     this.apiService.getBien(id).subscribe({
       next: (bien) => {
         this.bien = bien;
-        this.editedBien = { 
-          codigo: bien.codigo,
+        this.editedBien = {
           descripcion: bien.descripcion,
           estado: bien.estado,
-          ubicacion: bien.ubicacion,
-          responsable: bien.responsable,
           valor_adquisicion: bien.valor_adquisicion,
           fecha_adquisicion: bien.fecha_adquisicion,
           categoria: bien.categoria,
-          marca: bien.marca,
-          modelo: bien.modelo,
-          serie: bien.serie,
-          activo: bien.activo
+          ubicacion: bien.ubicacion,
+          responsable: bien.responsable,
         };
-        
+
         if (bien.ubicacion) {
           this.apiService.getUbicacion(bien.ubicacion).subscribe({
-            next: (ubicacion) => this.ubicacion = ubicacion,
-            error: (err) => console.error('Error cargando ubicación:', err)
+            next: (ubicacion) => (this.ubicacion = ubicacion),
+            error: (err) =>
+              console.error('Error cargando ubicación:', err),
           });
         }
-        
+
         if (bien.responsable) {
           this.apiService.getResponsable(bien.responsable).subscribe({
-            next: (responsable) => this.responsable = responsable,
-            error: (err) => console.error('Error cargando responsable:', err)
+            next: (responsable) => (this.responsable = responsable),
+            error: (err) =>
+              console.error('Error cargando responsable:', err),
           });
         }
-        
-        if (bien.categoria) {
-          this.apiService.getCategoria(bien.categoria).subscribe({
-            next: (categoria) => this.categoria = categoria,
-            error: (err) => console.error('Error cargando categoría:', err)
-          });
-        }
-        
+
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Error al cargar bien: ' + (err.error?.message || 'Error desconocido');
+        this.error =
+          'Error al cargar bien: ' +
+          (err.error?.message || 'Error desconocido');
         this.loading = false;
-      }
+      },
+    });
+  }
+
+  loadCategorias() {
+    this.apiService.getCategorias().subscribe({
+      next: (categorias) => (this.categorias = categorias),
+      error: (err) =>
+        console.error('Error cargando categorías:', err),
+    });
+  }
+
+  loadUbicaciones() {
+    this.apiService.getUbicaciones().subscribe({
+      next: (ubicaciones) => (this.ubicaciones = ubicaciones),
+      error: (err) =>
+        console.error('Error cargando ubicaciones:', err),
+    });
+  }
+
+  loadResponsables() {
+    this.apiService.getResponsables().subscribe({
+      next: (responsables) => (this.responsables = responsables),
+      error: (err) =>
+        console.error('Error cargando responsables:', err),
     });
   }
 
   toggleEdit() {
     this.editMode = !this.editMode;
     if (!this.editMode && this.bien) {
-      this.editedBien = { 
-        codigo: this.bien.codigo,
+      this.editedBien = {
         descripcion: this.bien.descripcion,
         estado: this.bien.estado,
-        ubicacion: this.bien.ubicacion,
-        responsable: this.bien.responsable,
         valor_adquisicion: this.bien.valor_adquisicion,
         fecha_adquisicion: this.bien.fecha_adquisicion,
         categoria: this.bien.categoria,
-        marca: this.bien.marca,
-        modelo: this.bien.modelo,
-        serie: this.bien.serie,
-        activo: this.bien.activo
+        ubicacion: this.bien.ubicacion,
+        responsable: this.bien.responsable,
       };
     }
   }
-
   saveChanges() {
-    if (!this.bien) {
-      // Crear nuevo bien
-      this.apiService.createBien(this.editedBien).subscribe({
-        next: (bien) => {
-          this.router.navigate(['/bienes', bien.id]);
-        },
-        error: (err) => this.error = 'Error al crear bien: ' + (err.error?.message || 'Error desconocido')
-      });
-    } else {
-      // Actualizar bien existente
-      this.apiService.updateBien(this.bien.id, this.editedBien).subscribe({
-        next: (updatedBien) => {
-          this.bien = updatedBien;
-          this.editMode = false;
-          this.error = null;
-        },
-        error: (err) => this.error = 'Error al actualizar bien: ' + (err.error?.message || 'Error desconocido')
-      });
-    }
+  if (this.bien) {
+    const payload: Bien = {
+      id: this.bien.id,
+      codigo: this.bien.codigo, // no editable
+      serie: this.bien.serie || null,
+      descripcion: this.editedBien.descripcion!,
+      marca: this.bien.marca || null,
+      modelo: this.bien.modelo || null,
+      valor_adquisicion: this.editedBien.valor_adquisicion!,
+      fecha_adquisicion: this.editedBien.fecha_adquisicion!,
+      estado: this.editedBien.estado!,
+      depreciacion: this.bien.depreciacion, // la calculas server-side normalmente
+      valor_residual: this.bien.valor_residual,
+      categoria: this.editedBien.categoria!,
+      ubicacion: this.editedBien.ubicacion!,
+      responsable: this.editedBien.responsable || null,
+      fecha_registro: this.bien.fecha_registro,
+      fecha_actualizacion: this.bien.fecha_actualizacion,
+      activo: this.bien.activo,
+    };
+
+    console.log('Payload enviado:', payload);
+
+    this.apiService.updateBien(this.bien.id, payload).subscribe({
+      next: (updatedBien) => {
+        this.bien = updatedBien;
+        this.editMode = false;
+        this.error = null;
+
+        if (updatedBien.ubicacion) {
+          this.apiService.getUbicacion(updatedBien.ubicacion).subscribe({
+            next: (ubicacion) => (this.ubicacion = ubicacion),
+          });
+        }
+
+        if (updatedBien.responsable) {
+          this.apiService.getResponsable(updatedBien.responsable).subscribe({
+            next: (responsable) => (this.responsable = responsable),
+          });
+        }
+      },
+      error: (err) => {
+        this.error =
+          'Error al actualizar bien: ' +
+          (err.error?.message || 'Error desconocido');
+      },
+    });
   }
+}
 
   confirmDelete() {
     this.showDeleteConfirm = true;
@@ -176,9 +193,11 @@ export class BienDetailComponent implements OnInit {
           this.router.navigate(['/bienes']);
         },
         error: (err) => {
-          this.error = 'Error al eliminar bien: ' + (err.error?.message || 'Error desconocido');
+          this.error =
+            'Error al eliminar bien: ' +
+            (err.error?.message || 'Error desconocido');
           this.showDeleteConfirm = false;
-        }
+        },
       });
     }
   }
@@ -190,12 +209,6 @@ export class BienDetailComponent implements OnInit {
   moveBien() {
     if (this.bien) {
       this.router.navigate(['/bienes', this.bien.id, 'mover']);
-    }
-  }
-
-  darBaja() {
-    if (this.bien) {
-      this.router.navigate(['/bienes', this.bien.id, 'dar-baja']);
     }
   }
 }

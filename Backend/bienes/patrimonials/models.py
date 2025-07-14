@@ -258,12 +258,16 @@ class BienPatrimonial(models.Model):
         self.save()
         
         # Registrar en historial
-        HistorialAuditoria.objects.create(
-            usuario=Usuario.objects.get(username='sistema'),
-            accion="CÁLCULO DEPRECIACIÓN",
-            detalle=f"Depreciación calculada: {self.depreciacion}",
+        try:
+            usuario_sistema = Usuario.objects.get(username='sistema')
+            HistorialAuditoria.objects.create(
+                usuario=usuario_sistema,
+                accion="CÁLCULO DEPRECIACIÓN",
+                detalle=f"Depreciación calculada: {self.depreciacion}",
             bien=self
         )
+        except Usuario.DoesNotExist:
+            pass    
         
         return self.depreciacion
 

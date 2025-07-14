@@ -66,12 +66,14 @@ import { ChipModule } from 'primeng/chip';
 import { MenuModule } from 'primeng/menu';
 import { RippleModule } from 'primeng/ripple';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { BienCreateComponent } from './bien/bien-create/bien-create.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
+    BienCreateComponent,
     BienListComponent,
     BienDetailComponent,
     BienMoverComponent,
@@ -98,7 +100,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
     EtiquetaDigitalDetailComponent,
     EtiquetaDigitalGenerarQrComponent,
     DashboardComponent,
-    RegistroComponent
+    RegistroComponent,
+    BienCreateComponent
   ],
   imports: [
     BrowserModule,
