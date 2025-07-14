@@ -1,123 +1,153 @@
-<div class="container">
-  <h2>Detalles del Bien</h2>
-  <div *ngIf="!loading; else loadingIndicator">
-    <div *ngIf="bien; else noBien">
-      <div *ngIf="!editMode; else editForm">
-        <p><strong>Código:</strong> {{ bien.codigo }}</p>
-        <p><strong>Descripción:</strong> {{ bien.descripcion }}</p>
-        <p><strong>Estado:</strong> {{ bien.estado }}</p>
-        <p><strong>Ubicación:</strong> 
-          <span *ngIf="ubicacion; else noUbicacion">
-            {{ ubicacion.edificio }} - {{ ubicacion.oficina }} (Piso {{ ubicacion.piso }})
-          </span>
-          <ng-template #noUbicacion>
-            <span *ngIf="bien.ubicacion">Cargando ubicación...</span>
-            <span *ngIf="!bien.ubicacion">No asignada</span>
+<div class="layout">
+  <!-- sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <i class="pi pi-building text-2xl text-primary"></i>
+      <span class="sidebar-title">Sistema de Bienes</span>
+    </div>
+
+    <ul class="sidebar-menu">
+      <li *ngFor="let item of menuItems">
+        <a [routerLink]="item.routerLink" routerLinkActive="active">
+          <i class="{{ item.icon }}"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- contenido principal -->
+  <main class="main-content">
+    <div class="form-container">
+      <h2 class="form-title">Detalles del Bien</h2>
+
+      <ng-container *ngIf="!loading; else loadingIndicator">
+        <ng-container *ngIf="bien; else noBien">
+
+          <!-- vista normal -->
+          <div *ngIf="!editMode; else editForm">
+            <div class="detalle-item"><strong>Código:</strong> {{ bien.codigo }}</div>
+            <div class="detalle-item"><strong>Descripción:</strong> {{ bien.descripcion }}</div>
+            <div class="detalle-item"><strong>Estado:</strong> {{ bien.estado }}</div>
+            <div class="detalle-item"><strong>Ubicación:</strong>
+              <ng-container *ngIf="ubicacion; else noUbicacion">
+                {{ ubicacion.edificio }} - {{ ubicacion.oficina }} (Piso {{ ubicacion.piso }})
+              </ng-container>
+              <ng-template #noUbicacion>
+                <span *ngIf="bien.ubicacion">Cargando ubicación...</span>
+                <span *ngIf="!bien.ubicacion">No asignada</span>
+              </ng-template>
+            </div>
+
+            <div class="detalle-item"><strong>Responsable:</strong>
+              <ng-container *ngIf="bien.responsable; else noResponsable">
+                <span *ngIf="responsable; else cargandoResponsable">
+                  {{ responsable.usuario.username }}
+                </span>
+                <ng-template #cargandoResponsable>Cargando responsable...</ng-template>
+              </ng-container>
+              <ng-template #noResponsable>No asignado</ng-template>
+            </div>
+
+            <div class="detalle-item"><strong>Fecha de Adquisición:</strong> {{ bien.fecha_adquisicion | date:'shortDate' }}</div>
+            <div class="detalle-item"><strong>Valor de Adquisición:</strong> {{ bien.valor_adquisicion | currency }}</div>
+            <div class="detalle-item"><strong>Depreciación:</strong> {{ bien.depreciacion | currency }}</div>
+            <div class="detalle-item"><strong>Valor Residual:</strong> {{ bien.valor_residual | currency }}</div>
+
+            <div class="actions">
+              <button class="btn-secondary" (click)="goBack()">Volver</button>
+              <button class="btn-primary" [routerLink]="['/bienes/mover', bien.id]">Mover Bien</button>
+              <button class="btn-warning" (click)="toggleEdit()">Editar</button>
+              <button class="btn-danger" (click)="confirmDelete()">Eliminar</button>
+              <a [routerLink]="['/bienes/dar-baja', bien.id]" class="btn-danger-alt">Dar de baja</a>
+            </div>
+          </div>
+
+          <!-- formulario de edición -->
+          <ng-template #editForm>
+            <form (ngSubmit)="saveChanges()">
+              <div class="form-group">
+                <label>Descripción:</label>
+                <input [(ngModel)]="editedBien.descripcion" name="descripcion" required />
+              </div>
+
+              <div class="form-group">
+                <label>Estado:</label>
+                <select [(ngModel)]="editedBien.estado" name="estado" required>
+                  <option value="BUENO">Bueno</option>
+                  <option value="REGULAR">Regular</option>
+                  <option value="MALO">Malo</option>
+                  <option value="BAJA">Baja</option>
+                  <option value="REPARACION">Reparación</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Valor de Adquisición:</label>
+                <input type="number" [(ngModel)]="editedBien.valor_adquisicion" name="valor_adquisicion" required />
+              </div>
+
+              <div class="form-group">
+                <label>Fecha de Adquisición:</label>
+                <input type="date" [(ngModel)]="editedBien.fecha_adquisicion" name="fecha_adquisicion" required />
+              </div>
+
+              <div class="form-group">
+                <label>Categoría:</label>
+                <select [(ngModel)]="editedBien.categoria" name="categoria" required>
+                  <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nombre }}</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Ubicación:</label>
+                <select [(ngModel)]="editedBien.ubicacion" name="ubicacion" required>
+                  <option *ngFor="let ubi of ubicaciones" [value]="ubi.id">
+                    {{ ubi.edificio }} - {{ ubi.oficina }} (Piso {{ ubi.piso }})
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Responsable:</label>
+                <select [(ngModel)]="editedBien.responsable" name="responsable">
+                  <option [ngValue]="null">Sin responsable</option>
+                  <option *ngFor="let resp of responsables" [ngValue]="resp.id">
+                    {{ resp.usuario.username }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="actions">
+                <button type="submit" class="btn-primary">Guardar</button>
+                <button type="button" class="btn-secondary" (click)="toggleEdit()">Cancelar</button>
+                <button type="button" class="btn-light" (click)="goBack()">Volver</button>
+              </div>
+              <p *ngIf="error" class="error-message">{{ error }}</p>
+            </form>
           </ng-template>
-        </p>
-        <p><strong>Responsable:</strong> 
-  <ng-container *ngIf="bien.responsable; else noResponsable">
-    <span *ngIf="responsable; else cargandoResponsable">
-  {{ responsable.usuario.username }}
-</span>
 
-    <ng-template #cargandoResponsable>Cargando responsable...</ng-template>
-  </ng-container>
-  <ng-template #noResponsable>No asignado</ng-template>
-</p>
+        </ng-container>
+        <ng-template #noBien>
+          <p>Bien no encontrado.</p>
+        </ng-template>
+      </ng-container>
 
-        <p><strong>Fecha de Adquisición:</strong> {{ bien.fecha_adquisicion | date:'shortDate' }}</p>
-        <p><strong>Valor de Adquisición:</strong> {{ bien.valor_adquisicion | currency }}</p>
-        <p><strong>Depreciación:</strong> {{ bien.depreciacion | currency }}</p>
-        <p><strong>Valor Residual:</strong> {{ bien.valor_residual | currency }}</p>
-        <div class="actions">
-          <button (click)="goBack()">Volver a la Lista</button>
-          <button [routerLink]="['/bienes/mover', bien.id]">Mover Bien</button>
-          <button (click)="toggleEdit()">Editar</button>
-          <button (click)="confirmDelete()">Eliminar</button>
-          <a [routerLink]="['/bienes/dar-baja', bien.id]" class="btn btn-warning">
-    Dar de baja
-  </a>
+      <ng-template #loadingIndicator>
+        <p>Cargando detalles del bien...</p>
+      </ng-template>
+
+      <!-- mensaje de error general -->
+      <p *ngIf="error" class="error-message">{{ error }}</p>
+
+      <!-- confirmación de eliminación -->
+      <div *ngIf="showDeleteConfirm" class="confirm-dialog">
+        <div class="dialog-content">
+          <p>¿Está seguro de que desea eliminar este bien?</p>
+          <button class="btn-danger" (click)="deleteBien()">Sí, eliminar</button>
+          <button class="btn-secondary" (click)="cancelDelete()">Cancelar</button>
         </div>
       </div>
-<ng-template #editForm>
-  <form (ngSubmit)="saveChanges()">
-    <div class="form-group">
-      <label>Descripción:
-        <input [(ngModel)]="editedBien.descripcion" name="descripcion" required>
-      </label>
     </div>
-    <div class="form-group">
-      <label>Estado:
-        <select [(ngModel)]="editedBien.estado" name="estado" required>
-          <option value="BUENO">Bueno</option>
-          <option value="REGULAR">Regular</option>
-          <option value="MALO">Malo</option>
-          <option value="BAJA">Baja</option>
-          <option value="REPARACION">Reparación</option>
-        </select>
-      </label>
-    </div>
-    <div class="form-group">
-      <label>Valor de Adquisición:
-        <input type="number" [(ngModel)]="editedBien.valor_adquisicion" name="valor_adquisicion" required>
-      </label>
-    </div>
-    <div class="form-group">
-      <label>Fecha de Adquisición:
-        <input type="date" [(ngModel)]="editedBien.fecha_adquisicion" name="fecha_adquisicion" required>
-      </label>
-    </div>
-    <div class="form-group">
-      <label>Categoría:
-        <select [(ngModel)]="editedBien.categoria" name="categoria" required>
-          <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nombre }}</option>
-        </select>
-      </label>
-    </div>
-    <div class="form-group">
-      <label>Ubicación:
-        <select [(ngModel)]="editedBien.ubicacion" name="ubicacion" required>
-          <option *ngFor="let ubi of ubicaciones" [value]="ubi.id">
-            {{ ubi.edificio }} - {{ ubi.oficina }} (Piso {{ ubi.piso }})
-          </option>
-        </select>
-      </label>
-    </div>
-    <div class="form-group">
-      <label>Responsable:
-        <select [(ngModel)]="editedBien.responsable" name="responsable">
-          <option [ngValue]="null">Sin responsable</option>
-          <option *ngFor="let resp of responsables" [ngValue]="resp.id">
-            {{ resp.usuario.username }}
-          </option>
-        </select>
-      </label>
-    </div>
-    <div class="actions">
-      <button type="submit">Guardar</button>
-      <button type="button" (click)="toggleEdit()">Cancelar</button>
-      <button type="button" (click)="goBack()">Volver</button>
-    </div>
-    <p *ngIf="error" class="error">{{ error }}</p>
-  </form>
-</ng-template>
-<!-- ...existing code... -->
-    </div>
-    <ng-template #noBien>
-      <p>Bien no encontrado.</p>
-    </ng-template>
-  </div>
-  <ng-template #loadingIndicator>
-    <p>Cargando detalles del bien...</p>
-  </ng-template>
-  <p *ngIf="error" class="error">{{ error }}</p>
-
-  <div *ngIf="showDeleteConfirm" class="confirm-dialog">
-    <div class="dialog-content">
-      <p>¿Está seguro de que desea eliminar este bien?</p>
-      <button (click)="deleteBien()">Sí, Eliminar</button>
-      <button (click)="cancelDelete()">Cancelar</button>
-    </div>
-  </div>
+  </main>
 </div>

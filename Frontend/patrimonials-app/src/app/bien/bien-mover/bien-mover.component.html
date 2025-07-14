@@ -1,17 +1,53 @@
-<p>bien-mover works!</p>
-<div>
-    <h2>Mover Bien</h2>
-    <form (ngSubmit)="mover()">
-      <div>
-        <label>Nueva Ubicación:
-          <select [(ngModel)]="ubicacionId" name="ubicacionId" required>
-            <option value="" disabled>Seleccione una ubicación</option>
-            <option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion.id">
-              {{ ubicacion.edificio }} - {{ ubicacion.oficina }}
+<div class="layout">
+  <!-- sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <i class="pi pi-building text-2xl text-primary"></i>
+      <span class="sidebar-title">Sistema de Bienes</span>
+    </div>
+
+    <ul class="sidebar-menu">
+      <li *ngFor="let item of menuItems">
+        <a [routerLink]="item.routerLink" routerLinkActive="active">
+          <i class="{{ item.icon }}"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- contenido principal -->
+  <main class="main-content">
+    <div class="form-container">
+      <h2 class="form-title">Mover Bien Patrimonial</h2>
+
+      <form (ngSubmit)="mover()">
+        <div class="form-group">
+          <label for="ubicacionId">Nueva Ubicación:</label>
+          <select
+            [(ngModel)]="ubicacionId"
+            name="ubicacionId"
+            id="ubicacionId"
+            required
+          >
+            <option value="" disabled selected>Seleccione una ubicación</option>
+            <option
+              *ngFor="let ubicacion of ubicaciones"
+              [value]="ubicacion.id"
+            >
+              {{ ubicacion.edificio }} - {{ ubicacion.oficina }} (Piso
+              {{ ubicacion.piso }})
             </option>
           </select>
-        </label>
-      </div>
-      <button type="submit">Mover</button>
-<p *ngIf="success" style="color: green;">{{ success }}</p>    </form>
-  </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary">Mover Bien</button>
+        </div>
+
+        <p *ngIf="success" class="success-message">{{ success }}</p>
+        <p *ngIf="error" class="error-message">{{ error }}</p>
+      </form>
+    </div>
+  </main>
+</div>

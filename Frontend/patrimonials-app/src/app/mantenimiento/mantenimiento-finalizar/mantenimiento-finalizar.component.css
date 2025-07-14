@@ -1,0 +1,144 @@
+/* layout general */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f6f9fc;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* sidebar */
+.sidebar {
+  width: 260px;
+  background: linear-gradient(135deg, #3a3a90, #6f75f3);
+  color: white;
+  padding: 2rem 1rem;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ffd93d;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu li {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.menu li:hover,
+.menu li.active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* contenido principal */
+.content {
+  flex: 1;
+  padding: 2.5rem;
+}
+
+/* título */
+.content h2 {
+  font-size: 1.6rem;
+  color: #3a3a90;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+/* mensajes */
+.error-message {
+  background: #ffe0e0;
+  color: #b00020;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.success-message {
+  background: #e0ffe4;
+  color: #157347;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+/* formulario */
+form {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  max-width: 600px;
+}
+
+form label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #444;
+}
+
+form textarea,
+form input[type="number"] {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  box-sizing: border-box;
+}
+
+form textarea:focus,
+form input:focus {
+  outline: none;
+  border-color: #3a3a90;
+  box-shadow: 0 0 0 2px rgba(58, 58, 144, 0.2);
+}
+
+/* botones */
+form button {
+  padding: 0.6rem 1.4rem;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 8px;
+  margin-right: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+form button[type="submit"] {
+  background-color: #3a3a90;
+  color: white;
+}
+
+form button[type="submit"]:hover {
+  background-color: #2c2c72;
+}
+
+form button[type="button"] {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+form button[type="button"]:hover {
+  background-color: #d0d0d0;
+}

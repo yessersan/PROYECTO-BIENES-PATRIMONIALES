@@ -18,6 +18,20 @@ export class ResponsableListComponent implements OnInit {
   error: string | null = null;
   createForm: FormGroup;
   showCreateForm = false;
+  menuItems = [
+    { label: 'Dashboard', icon: 'pi pi-chart-bar', routerLink: '/dashboard' },
+    { label: 'Bienes', icon: 'pi pi-box', routerLink: '/bienes' },
+    { label: 'Categorías', icon: 'pi pi-list', routerLink: '/categorias' },
+    { label: 'Responsables', icon: 'pi pi-users', routerLink: '/responsables' },
+    { label: 'Movimientos', icon: 'pi pi-exchange', routerLink: '/movimientos' },
+    { label: 'Reportes', icon: 'pi pi-chart-line', routerLink: '/reportes' },
+    { label: 'Historial de Auditoría', icon: 'pi pi-history', routerLink: '/historial-auditoria' },
+    { label: 'Documentos', icon: 'pi pi-file', routerLink: '/documentos' },
+    { label: 'Notificaciones', icon: 'pi pi-bell', routerLink: '/notificaciones' },
+    { label: 'Etiquetas Digitales', icon: 'pi pi-qrcode', routerLink: '/etiquetas-digitales' },
+    {label: 'Ubicaciones', icon: 'pi pi-map-marker',routerLink: '/ubicaciones'},
+    {label: 'Mantenimientos', icon: 'pi pi-cog', routerLink: '/mantenimientos'},
+  ];
 
   constructor(
     private apiService: ApiService,

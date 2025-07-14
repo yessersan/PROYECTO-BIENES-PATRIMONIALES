@@ -1,0 +1,148 @@
+/* layout general */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f7f9fc;
+}
+
+/* sidebar */
+.sidebar {
+  width: 260px;
+  background: linear-gradient(135deg, #3a3a90, #6f75f3);
+  color: white;
+  padding: 2rem 1rem;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ffd93d;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu li {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: white;
+  transition: background 0.2s ease;
+}
+
+.menu li:hover,
+.menu li.active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* contenido principal */
+.content {
+  flex: 1;
+  padding: 2.5rem;
+}
+
+.content h2 {
+  color: #3a3a90;
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+/* formulario */
+.documento-form {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  display: block;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="file"],
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #6f75f3;
+  outline: none;
+}
+
+/* acciones */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  justify-content: flex-end;
+}
+
+.form-actions button {
+  padding: 0.6rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.form-actions button[type="submit"] {
+  background: #3a3a90;
+  color: white;
+}
+
+.form-actions button[type="submit"]:hover {
+  background: #2e2e7a;
+}
+
+.form-actions button[type="button"] {
+  background: #f1f1f1;
+  color: #333;
+}
+
+.form-actions button[type="button"]:hover {
+  background: #e0e0e0;
+}
+
+/* mensaje de error */
+.error-message {
+  background: #ffe0e0;
+  color: #b00020;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}

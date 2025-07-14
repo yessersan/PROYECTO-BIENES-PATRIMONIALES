@@ -21,9 +21,11 @@ export class MovimientoDetailComponent implements OnInit {
   responsables: Responsable[] = [];
   ubicaciones: Ubicacion[] = [];
   usuarioActual: Usuario | null = null;
+  rolUsuario = '';
   loading = false;
   error = '';
   esNuevo = false;
+  menuItems: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -43,68 +45,75 @@ export class MovimientoDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Cargar usuario actual
     this.loading = true;
     this.api.get<Usuario>('auth/usuario/').subscribe({
       next: (user) => {
         this.usuarioActual = user;
+        this.rolUsuario = user.rol;
+        this.filtrarMenuPorRol();
         this.loadData();
+
+        const id = this.route.snapshot.paramMap.get('id');
+        this.esNuevo = id === 'nuevo';
+        if (!this.esNuevo && id) {
+          this.api.getMovimiento(Number(id)).subscribe({
+            next: (mov) => {
+              this.movimiento = mov;
+              this.movimientoForm.patchValue({
+                tipo: mov.tipo,
+                descripcion: mov.descripcion,
+                observaciones: mov.observaciones || '',
+                bien: mov.bien,
+                responsable: mov.responsable,
+                origen: mov.origen || '',
+                destino: mov.destino || ''
+              });
+              this.loading = false;
+            },
+            error: () => {
+              this.error = 'No se pudo cargar el movimiento';
+              this.loading = false;
+            }
+          });
+        }
       },
       error: () => {
         this.error = 'No se pudo cargar el usuario actual';
         this.loading = false;
       }
     });
+  }
 
-    const id = this.route.snapshot.paramMap.get('id');
-    this.esNuevo = id === 'nuevo';
-    if (!this.esNuevo && id) {
-      this.api.getMovimiento(Number(id)).subscribe({
-        next: (mov) => {
-          this.movimiento = mov;
-          this.movimientoForm.patchValue({
-            tipo: mov.tipo,
-            descripcion: mov.descripcion,
-            observaciones: mov.observaciones || '',
-            bien: mov.bien,
-            responsable: mov.responsable,
-            origen: mov.origen || '',
-            destino: mov.destino || ''
-          });
-          this.loading = false;
-        },
-        error: () => {
-          this.error = 'No se pudo cargar el movimiento';
-          this.loading = false;
-        }
-      });
-    } else {
-      this.loadData();
-    }
+  filtrarMenuPorRol() {
+    const menuCompleto = [
+      { label: 'Dashboard', icon: 'pi pi-chart-bar', routerLink: '/dashboard', roles: ['ADMIN','AUDITOR','GESTOR'] },
+      { label: 'Bienes', icon: 'pi pi-box', routerLink: '/bienes', roles: ['ADMIN','GESTOR'] },
+      { label: 'Categorías', icon: 'pi pi-list', routerLink: '/categorias', roles: ['ADMIN','GESTOR'] },
+      { label: 'Responsables', icon: 'pi pi-users', routerLink: '/responsables', roles: ['ADMIN','GESTOR'] },
+      { label: 'Movimientos', icon: 'pi pi-exchange', routerLink: '/movimientos', roles: ['ADMIN', 'AUDITOR','GESTOR'] },
+      { label: 'Reportes', icon: 'pi pi-chart-line', routerLink: '/reportes', roles: ['ADMIN', 'AUDITOR','GESTOR'] },
+      { label: 'Historial de Auditoría', icon: 'pi pi-history', routerLink: '/historial-auditoria', roles: ['ADMIN', 'AUDITOR','GESTOR'] },
+      { label: 'Documentos', icon: 'pi pi-file', routerLink: '/documentos', roles: ['ADMIN','GESTOR'] },
+      { label: 'Notificaciones', icon: 'pi pi-bell', routerLink: '/notificaciones', roles: ['ADMIN', 'AUDITOR','GESTOR'] },
+      { label: 'Etiquetas Digitales', icon: 'pi pi-qrcode', routerLink: '/etiquetas-digitales', roles: ['ADMIN','GESTOR'] },
+      { label: 'Ubicaciones', icon: 'pi pi-map-marker', routerLink: '/ubicaciones', roles: ['ADMIN','GESTOR'] },
+      { label: 'Mantenimientos', icon: 'pi pi-cog', routerLink: '/mantenimientos', roles: ['ADMIN','GESTOR'] },
+    ];
+
+    this.menuItems = menuCompleto.filter(item => item.roles.includes(this.rolUsuario));
   }
 
   loadData() {
-    // Cargar bienes
     this.api.getBienes().subscribe({
-      next: (bienes) => {
-        this.bienes = bienes;
-      },
-      error: () => {
-        this.error = 'No se pudieron cargar los bienes';
-      }
+      next: (bienes) => this.bienes = bienes,
+      error: () => this.error = 'No se pudieron cargar los bienes'
     });
 
-    // Cargar responsables
     this.api.getResponsables().subscribe({
-      next: (responsables) => {
-        this.responsables = responsables;
-      },
-      error: () => {
-        this.error = 'No se pudieron cargar los responsables';
-      }
+      next: (responsables) => this.responsables = responsables,
+      error: () => this.error = 'No se pudieron cargar los responsables'
     });
 
-    // Cargar ubicaciones
     this.api.getUbicaciones().subscribe({
       next: (ubicaciones) => {
         this.ubicaciones = ubicaciones;
@@ -118,55 +127,56 @@ export class MovimientoDetailComponent implements OnInit {
   }
 
   guardar() {
-  if (this.movimientoForm.invalid) {
-    this.movimientoForm.markAllAsTouched();
-    this.error = 'Por favor, complete todos los campos requeridos correctamente.';
-    return;
+    if (this.movimientoForm.invalid) {
+      this.movimientoForm.markAllAsTouched();
+      this.error = 'Por favor, complete todos los campos requeridos correctamente.';
+      return;
+    }
+
+    if (!this.usuarioActual?.username) {
+      this.error = 'Usuario no autenticado';
+      return;
+    }
+
+    const movimiento: Partial<Movimiento> = {
+      tipo: this.movimientoForm.value.tipo,
+      descripcion: this.movimientoForm.value.descripcion,
+      observaciones: this.movimientoForm.value.observaciones || undefined,
+      bien: this.movimientoForm.value.bien,
+      responsable: this.movimientoForm.value.responsable,
+      origen: this.movimientoForm.value.origen || undefined,
+      destino: this.movimientoForm.value.destino || undefined,
+      usuario_registro: this.usuarioActual.username
+    };
+
+    this.loading = true;
+    if (this.esNuevo) {
+      this.api.createMovimiento(movimiento).subscribe({
+        next: () => {
+          this.loading = false;
+          this.router.navigate(['/movimientos']);
+        },
+        error: (err) => {
+          this.loading = false;
+          this.error = err.error?.message || 'No se pudo crear el movimiento. Verifique los datos.';
+          console.error('Error del servidor:', err.error);
+        }
+      });
+    } else if (this.movimiento?.id) {
+      this.api.updateMovimiento(this.movimiento.id, movimiento).subscribe({
+        next: () => {
+          this.loading = false;
+          this.router.navigate(['/movimientos']);
+        },
+        error: (err) => {
+          this.loading = false;
+          this.error = err.error?.message || 'No se pudo actualizar el movimiento. Verifique los datos.';
+          console.error('Error del servidor:', err.error);
+        }
+      });
+    }
   }
 
-  if (!this.usuarioActual?.username) { // Verificar username en lugar de id
-    this.error = 'Usuario no autenticado';
-    return;
-  }
-
-  const movimiento: Partial<Movimiento> = {
-    tipo: this.movimientoForm.value.tipo,
-    descripcion: this.movimientoForm.value.descripcion,
-    observaciones: this.movimientoForm.value.observaciones || undefined,
-    bien: this.movimientoForm.value.bien, // Enviar el código como string
-    responsable: this.movimientoForm.value.responsable, // Enviar el username como string
-    origen: this.movimientoForm.value.origen || undefined,
-    destino: this.movimientoForm.value.destino || undefined,
-    usuario_registro: this.usuarioActual.username // Enviar username, no id
-  };
-
-  this.loading = true;
-  if (this.esNuevo) {
-    this.api.createMovimiento(movimiento).subscribe({
-      next: () => {
-        this.loading = false;
-        this.router.navigate(['/movimientos']);
-      },
-      error: (err) => {
-        this.loading = false;
-        this.error = err.error?.message || 'No se pudo crear el movimiento. Verifique los datos.';
-        console.error('Error del servidor:', err.error);
-      }
-    });
-  } else if (this.movimiento?.id) {
-    this.api.updateMovimiento(this.movimiento.id, movimiento).subscribe({
-      next: () => {
-        this.loading = false;
-        this.router.navigate(['/movimientos']);
-      },
-      error: (err) => {
-        this.loading = false;
-        this.error = err.error?.message || 'No se pudo actualizar el movimiento. Verifique los datos.';
-        console.error('Error del servidor:', err.error);
-      }
-    });
-  }
-}
   eliminar() {
     if (this.movimiento?.id && confirm('¿Seguro que desea eliminar este movimiento?')) {
       this.loading = true;

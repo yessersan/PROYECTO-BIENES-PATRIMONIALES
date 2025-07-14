@@ -1,0 +1,129 @@
+/* layout general */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f6fa;
+}
+
+/* sidebar */
+.sidebar {
+  width: 260px;
+  background: linear-gradient(135deg, #3a3a90, #6f75f3);
+  color: #fff;
+  padding: 2rem 1rem;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #ffd93d;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu li {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.menu li:hover,
+.menu li.active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* contenido */
+.content {
+  flex: 1;
+  padding: 2.5rem;
+  background-color: #fff;
+}
+
+.content h2 {
+  font-size: 1.6rem;
+  color: #3a3a90;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+button {
+  background-color: #3a3a90;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #2e2e70;
+}
+
+/* tabla */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #f9f9ff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
+
+thead {
+  background-color: #3a3a90;
+  color: white;
+}
+
+th, td {
+  padding: 0.9rem 1rem;
+  text-align: left;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #ddd;
+}
+
+tbody tr:hover {
+  background-color: #f0f4ff;
+}
+
+td button {
+  background-color: #6f75f3;
+  color: white;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.85rem;
+  border-radius: 5px;
+  margin-right: 0.4rem;
+}
+
+td button:last-child {
+  background-color: #dc3545;
+}
+
+td button:hover {
+  opacity: 0.9;
+}
+
+/* errores */
+.error-msg {
+  color: #d32f2f;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}

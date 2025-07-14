@@ -1,49 +1,60 @@
-<p>notificacion-detail works!</p>
-<!-- notificacion-detail.component.html -->
-<div class="container">
-  <button mat-button (click)="location.back()" class="back-button">
-    <mat-icon>arrow_back</mat-icon> Volver
-  </button>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <i class="pi pi-box"></i> Sistema
+    </div>
+    <ul class="menu">
+      <li *ngFor="let item of menuItems" routerLinkActive="active" [routerLink]="item.routerLink">
+        <i [class]="item.icon"></i> {{ item.label }}
+      </li>
+    </ul>
+  </aside>
 
-  <div *ngIf="isLoading" class="loading">
-    <mat-spinner diameter="50"></mat-spinner>
-    <span>Cargando notificación...</span>
-  </div>
+  <!-- Contenido principal -->
+  <main class="content">
+    <h2>Lista de Notificaciones</h2>
 
-  <div *ngIf="error" class="error">
-    {{ error }}
-  </div>
+    <div class="filters">
+      <label>
+        Estado:
+        <select [(ngModel)]="estadoSeleccionado" (change)="aplicarFiltros()">
+          <option *ngFor="let estado of estados" [value]="estado">{{ estado }}</option>
+        </select>
+      </label>
+      <label>
+        <input type="checkbox" [(ngModel)]="soloImportantes" (change)="aplicarFiltros()" />
+        Sólo importantes
+      </label>
+    </div>
 
-  <mat-card *ngIf="notificacion && !isLoading" class="notificacion-card">
-    <mat-card-header>
-      <mat-card-title>
-        <span *ngIf="notificacion.importante" class="badge-importante">IMPORTANTE</span>
-        Detalles de la notificación
-      </mat-card-title>
-      <mat-card-subtitle>
-        Estado: {{ notificacion.estado | titlecase }} | 
-        Fecha: {{ notificacion.fecha_envio | date:'medium' }}
-      </mat-card-subtitle>
-    </mat-card-header>
+    <div *ngIf="isLoading" class="loading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <span>Cargando notificaciones...</span>
+    </div>
 
-    <mat-card-content>
-      <div class="mensaje">
-        {{ notificacion.mensaje }}
-      </div>
+    <div *ngIf="error" class="error-msg">{{ error }}</div>
 
-      <div *ngIf="notificacion.url" class="url">
-        <strong>Enlace relacionado:</strong> 
-        <a [href]="notificacion.url" target="_blank">{{ notificacion.url }}</a>
-      </div>
-    </mat-card-content>
+    <mat-list *ngIf="!isLoading && !error">
+      <mat-list-item *ngFor="let notificacion of notificaciones">
+        <div mat-line>
+          <strong *ngIf="notificacion.importante" class="badge-importante">IMPORTANTE</strong>
+          {{ notificacion.mensaje | slice:0:80 }}...
+        </div>
+        <div mat-line>
+          Estado: {{ notificacion.estado | titlecase }} | Fecha: {{ notificacion.fecha_envio | date:'short' }}
+        </div>
+        <button mat-button (click)="marcarComoLeido(notificacion)" *ngIf="notificacion.estado !== 'LEIDO'">
+          Marcar como leído
+        </button>
+      </mat-list-item>
+    </mat-list>
 
-    <mat-card-actions align="end">
-      <button mat-button color="primary" (click)="navegarSiHayURL()" *ngIf="notificacion.url">
-        <mat-icon>open_in_new</mat-icon> Abrir enlace
-      </button>
-      <button mat-button color="warn" (click)="archivar()">
-        <mat-icon>archive</mat-icon> Archivar
-      </button>
-    </mat-card-actions>
-  </mat-card>
+    <mat-paginator
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageIndex]="currentPage"
+      (page)="cambiarPagina($event)">
+    </mat-paginator>
+  </main>
 </div>

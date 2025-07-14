@@ -1,62 +1,89 @@
-<div>
-  <h2>Lista de Responsables</h2>
-  <button (click)="toggleCreateForm()">Crear Responsable</button>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <i class="pi pi-box"></i> Sistema
+    </div>
+    <ul class="menu">
+      <li *ngFor="let item of menuItems" routerLinkActive="active" [routerLink]="item.routerLink">
+        <i [class]="item.icon"></i> {{ item.label }}
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="content container">
+    <div class="header">
+      <h2>Lista de Responsables</h2>
+      <button (click)="toggleCreateForm()" class="btn btn-primary">
+        {{ showCreateForm ? 'Cerrar formulario' : 'Crear Responsable' }}
+      </button>
+    </div>
+
+    <!-- Formulario de creación -->
+    <section *ngIf="showCreateForm" class="create-form">
+      <h3>Crear Nuevo Responsable</h3>
+      <form [formGroup]="createForm" (ngSubmit)="createResponsable()">
+        <div class="form-group">
+          <label>Usuario:</label>
+          <select formControlName="usuario_id" class="form-control">
+            <option value="" disabled>Selecciona un usuario</option>
+            <option *ngFor="let usuario of usuarios" [value]="usuario.id">
+              {{ usuario.username }} ({{ usuario.email }})
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Cargo:</label>
+          <input type="text" formControlName="cargo" placeholder="Cargo" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Departamento:</label>
+          <input type="text" formControlName="departamento" placeholder="Departamento" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" formControlName="activo" /> Activo
+          </label>
+        </div>
+        <button type="submit" class="btn btn-success" [disabled]="createForm.invalid">Crear</button>
+        <button type="button" (click)="toggleCreateForm()" class="btn btn-secondary">Cancelar</button>
+      </form>
+    </section>
+
+    <!-- Mensajes de error y carga -->
+    <div *ngIf="error" class="error" style="color:red; margin-top: 1rem;">{{ error }}</div>
+    <div *ngIf="loading" class="loading" style="margin-top: 1rem;">Cargando...</div>
+
+    <!-- Tabla de responsables -->
+    <table *ngIf="!loading && responsables.length" class="table table-striped" style="margin-top: 1.5rem;">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Usuario</th>
+          <th>Cargo</th>
+          <th>Departamento</th>
+          <th>Activo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let responsable of responsables">
+          <td>{{ responsable.id }}</td>
+          <td>{{ isUsuarioObject(responsable.usuario) ? responsable.usuario.username : 'N/A' }}</td>
+          <td>{{ responsable.cargo }}</td>
+          <td>{{ responsable.departamento }}</td>
+          <td>{{ responsable.activo ? 'Sí' : 'No' }}</td>
+          <td>
+            <button (click)="navigateToDetail(responsable.id)" class="btn btn-info btn-sm">Ver Detalle</button>
+            <button (click)="deleteResponsable(responsable.id)" class="btn btn-danger btn-sm">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!loading && responsables.length === 0" style="margin-top: 1rem;">
+      No hay responsables para mostrar.
+    </div>
+  </main>
 </div>
-
-<div *ngIf="showCreateForm">
-  <h3>Crear Nuevo Responsable</h3>
-  <form [formGroup]="createForm" (ngSubmit)="createResponsable()">
-    <div>
-      <label>Usuario:</label>
-      <select formControlName="usuario_id">
-        <option value="" disabled>Selecciona un usuario</option>
-        <option *ngFor="let usuario of usuarios" [value]="usuario.id">
-          {{ usuario.username }} ({{ usuario.email }})
-        </option>
-      </select>
-    </div>
-    <div>
-      <label>Cargo:</label>
-      <input type="text" formControlName="cargo" placeholder="Cargo">
-    </div>
-    <div>
-      <label>Departamento:</label>
-      <input type="text" formControlName="departamento" placeholder="Departamento">
-    </div>
-    <div>
-      <label><input type="checkbox" formControlName="activo"> Activo</label>
-    </div>
-    <button type="submit" [disabled]="createForm.invalid">Crear</button>
-    <button type="button" (click)="toggleCreateForm()">Cancelar</button>
-  </form>
-</div>
-
-<div *ngIf="error" class="error">{{ error }}</div>
-
-<div *ngIf="loading">Cargando...</div>
-
-<table *ngIf="!loading && responsables.length">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Usuario</th>
-      <th>Cargo</th>
-      <th>Departamento</th>
-      <th>Activo</th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let responsable of responsables">
-      <td>{{ responsable.id }}</td>
-      <td>{{ isUsuarioObject(responsable.usuario) ? responsable.usuario.username : 'N/A' }}</td>
-      <td>{{ responsable.cargo }}</td>
-      <td>{{ responsable.departamento }}</td>
-      <td>{{ responsable.activo ? 'Sí' : 'No' }}</td>
-      <td>
-        <button (click)="navigateToDetail(responsable.id)">Ver Detalle</button>
-        <button (click)="deleteResponsable(responsable.id)">Eliminar</button>
-      </td>
-    </tr>
-  </tbody>
-</table>

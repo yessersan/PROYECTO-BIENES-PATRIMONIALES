@@ -1,0 +1,169 @@
+/* layout general */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f7fc;
+}
+
+/* sidebar */
+.sidebar {
+  width: 260px;
+  background: linear-gradient(135deg, #3a3a90, #6f75f3);
+  color: white;
+  padding: 2rem 1rem;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ffd93d;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu li {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: background 0.2s ease;
+}
+
+.menu li:hover,
+.menu li.active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* contenido */
+.content {
+  flex: 1;
+  padding: 2.5rem;
+}
+
+/* título */
+.content h2 {
+  color: #3a3a90;
+  font-weight: 700;
+  margin-bottom: 1.8rem;
+}
+
+/* formulario */
+.etiqueta-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  max-width: 600px;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.6rem;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #3a3a90;
+  outline: none;
+}
+
+/* acciones del formulario */
+.form-actions {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.form-actions button {
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.form-actions button[type="submit"] {
+  background-color: #3a3a90;
+  color: white;
+}
+
+.form-actions button[type="submit"]:hover {
+  background-color: #2f2f78;
+}
+
+.form-actions button[type="button"] {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.form-actions button[type='button']:hover {
+  background-color: #cfcfcf;
+}
+
+.form-actions button:last-child {
+  background-color: #dc3545;
+  color: white;
+}
+
+.form-actions button:last-child:hover {
+  background-color: #b52b38;
+}
+
+/* mensaje de error */
+.error-message {
+  background: #ffe0e0;
+  color: #b00020;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+/* sección de QR */
+.qr-section {
+  margin-top: 3rem;
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+  max-width: 400px;
+}
+
+.qr-section h3 {
+  margin-bottom: 1rem;
+  color: #3a3a90;
+  font-weight: 600;
+}

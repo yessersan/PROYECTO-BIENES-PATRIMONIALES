@@ -1,34 +1,53 @@
-<div>
-  <h2>Etiquetas Digitales</h2>
-  <button (click)="crearEtiqueta()">Nueva Etiqueta</button>
-  <div *ngIf="loading">Cargando...</div>
-  <div *ngIf="error">{{error}}</div>
-  <table *ngIf="etiquetas.length">
-    <thead>
-      <tr>
-        <th>Código QR</th>
-        <th>Bien</th>
-        <th>Estado</th>
-        <th>Fecha Activación</th>
-        <th>QR</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let etiqueta of etiquetas">
-        <td>{{etiqueta.codigo_qr}}</td>
-        <td>{{etiqueta.bien}}</td>
-        <td>{{etiqueta.estado}}</td>
-        <td>{{etiqueta.fecha_activacion | date:'short'}}</td>
-        <td>
-          <img *ngIf="etiqueta.imagen_qr" [src]="etiqueta.imagen_qr" alt="QR" width="60">
-        </td>
-        <td>
-          <button (click)="verDetalle(etiqueta.id)">Editar</button>
-          <button (click)="eliminarEtiqueta(etiqueta.id)">Eliminar</button>
-          <button (click)="generarQR(etiqueta.id)">Generar QR</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <i class="pi pi-box"></i> Sistema
+    </div>
+    <ul class="menu">
+      <li *ngFor="let item of menuItems" routerLinkActive="active" [routerLink]="item.routerLink">
+        <i [class]="item.icon"></i> {{ item.label }}
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="content">
+    <div class="header-actions">
+      <h2>Etiquetas Digitales</h2>
+      <button (click)="crearEtiqueta()">+ Nueva Etiqueta</button>
+    </div>
+
+    <div *ngIf="loading">Cargando...</div>
+    <div *ngIf="error" class="error-message">{{ error }}</div>
+
+    <table *ngIf="etiquetas.length" class="etiquetas-table">
+      <thead>
+        <tr>
+          <th>Código QR</th>
+          <th>Bien</th>
+          <th>Estado</th>
+          <th>Fecha Activación</th>
+          <th>QR</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let etiqueta of etiquetas">
+          <td>{{ etiqueta.codigo_qr }}</td>
+          <td>{{ etiqueta.bien }}</td>
+          <td>{{ etiqueta.estado }}</td>
+          <td>{{ etiqueta.fecha_activacion | date: 'short' }}</td>
+          <td>
+            <img *ngIf="etiqueta.imagen_qr" [src]="etiqueta.imagen_qr" alt="QR" width="60">
+          </td>
+          <td>
+            <button (click)="verDetalle(etiqueta.id)">Editar</button>
+            <button (click)="eliminarEtiqueta(etiqueta.id)">Eliminar</button>
+            <button (click)="generarQR(etiqueta.id)">Generar QR</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
 </div>

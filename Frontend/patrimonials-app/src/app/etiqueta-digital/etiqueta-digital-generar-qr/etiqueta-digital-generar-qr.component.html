@@ -1,9 +1,27 @@
-<div>
-  <h2>Generar Código QR</h2>
-  <div *ngIf="error" style="color:red">{{error}}</div>
-  <div *ngIf="qrCodeUrl">
-    <img [src]="qrCodeUrl" alt="Código QR" width="300">
-    <p><a [href]="qrCodeUrl" download>Descargar QR</a></p>
-  </div>
-  <div *ngIf="!qrCodeUrl && !error">Generando QR...</div>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <i class="pi pi-box"></i> Sistema
+    </div>
+    <ul class="menu">
+      <li *ngFor="let item of menuItems" routerLinkActive="active" [routerLink]="item.routerLink">
+        <i [class]="item.icon"></i> {{ item.label }}
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="content">
+    <h2>Generar Código QR</h2>
+
+    <div *ngIf="error" class="error-message">{{ error }}</div>
+
+    <div *ngIf="qrCodeUrl" class="qr-section">
+      <img [src]="qrCodeUrl" alt="Código QR" width="300">
+      <p><a [href]="qrCodeUrl" download>Descargar QR</a></p>
+    </div>
+
+    <div *ngIf="!qrCodeUrl && !error">Generando QR...</div>
+  </main>
 </div>

@@ -1,69 +1,91 @@
-<div class="container">
-  <h2>Registrar Nuevo Bien</h2>
-
-  <form (ngSubmit)="crearBien()">
-    <div class="form-group">
-      <label>Código:</label>
-      <input type="text" [(ngModel)]="bien.codigo" name="codigo" required />
+<div class="layout">
+  <!-- sidebar fijo -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <i class="pi pi-building text-2xl text-primary"></i>
+      <span class="sidebar-title">Sistema de Bienes</span>
     </div>
 
-    <div class="form-group">
-      <label>Descripción:</label>
-      <input type="text" [(ngModel)]="bien.descripcion" name="descripcion" required />
-    </div>
+    <ul class="sidebar-menu">
+      <li *ngFor="let item of menuItems">
+        <a [routerLink]="item.routerLink" routerLinkActive="active">
+          <i class="{{ item.icon }}"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
 
-    <div class="form-group">
-      <label>Valor de Adquisición:</label>
-      <input type="number" [(ngModel)]="bien.valor_adquisicion" name="valor_adquisicion" required />
-    </div>
+  <!-- contenido principal -->
+  <main class="main-content">
+    <div class="form-container">
+      <h2 class="form-title">Registrar Nuevo Bien</h2>
 
-    <div class="form-group">
-      <label>Fecha de Adquisición:</label>
-      <input type="date" [(ngModel)]="bien.fecha_adquisicion" name="fecha_adquisicion" required />
-    </div>
+      <form (ngSubmit)="crearBien()">
+        <div class="form-group">
+          <label>Código:</label>
+          <input type="text" [(ngModel)]="bien.codigo" name="codigo" required />
+        </div>
 
-    <div class="form-group">
-      <label>Estado:</label>
-      <select [(ngModel)]="bien.estado" name="estado" required>
-        <option value="BUENO">Bueno</option>
-        <option value="REGULAR">Regular</option>
-        <option value="MALO">Malo</option>
-        <option value="BAJA">Baja</option>
-        <option value="REPARACION">Reparación</option>
-      </select>
-    </div>
+        <div class="form-group">
+          <label>Descripción:</label>
+          <input type="text" [(ngModel)]="bien.descripcion" name="descripcion" required />
+        </div>
 
-    <div class="form-group">
-      <label>Categoría:</label>
-      <select [(ngModel)]="bien.categoria" name="categoria" required>
-        <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nombre }}</option>
-      </select>
-    </div>
+        <div class="form-group">
+          <label>Valor de Adquisición:</label>
+          <input type="number" [(ngModel)]="bien.valor_adquisicion" name="valor_adquisicion" required />
+        </div>
 
-    <div class="form-group">
-      <label>Ubicación:</label>
-      <select [(ngModel)]="bien.ubicacion" name="ubicacion" required>
-        <option *ngFor="let ubi of ubicaciones" [value]="ubi.id">
-          {{ ubi.edificio }} - {{ ubi.oficina }} (Piso {{ ubi.piso }})
-        </option>
-      </select>
-    </div>
+        <div class="form-group">
+          <label>Fecha de Adquisición:</label>
+          <input type="date" [(ngModel)]="bien.fecha_adquisicion" name="fecha_adquisicion" required />
+        </div>
 
-    <div class="form-group">
-      <label>Responsable:</label>
-      <select [(ngModel)]="bien.responsable" name="responsable" required>
-        <option *ngFor="let resp of responsables" [value]="resp.id">
-          {{ resp.usuario.username }}
-        </option>
-      </select>
-    </div>
+        <div class="form-group">
+          <label>Estado:</label>
+          <select [(ngModel)]="bien.estado" name="estado" required>
+            <option value="BUENO">Bueno</option>
+            <option value="REGULAR">Regular</option>
+            <option value="MALO">Malo</option>
+            <option value="BAJA">Baja</option>
+            <option value="REPARACION">Reparación</option>
+          </select>
+        </div>
 
-    <div class="actions">
-      <button type="submit">Guardar Bien</button>
-      <button type="button" (click)="volver()">Cancelar</button>
-    </div>
+        <div class="form-group">
+          <label>Categoría:</label>
+          <select [(ngModel)]="bien.categoria" name="categoria" required>
+            <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nombre }}</option>
+          </select>
+        </div>
 
-    <p *ngIf="success" class="success-message">{{ success }}</p>
-    <p *ngIf="error" class="error-message">{{ error }}</p>
-  </form>
+        <div class="form-group">
+          <label>Ubicación:</label>
+          <select [(ngModel)]="bien.ubicacion" name="ubicacion" required>
+            <option *ngFor="let ubi of ubicaciones" [value]="ubi.id">
+              {{ ubi.edificio }} - {{ ubi.oficina }} (Piso {{ ubi.piso }})
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Responsable:</label>
+          <select [(ngModel)]="bien.responsable" name="responsable" required>
+            <option *ngFor="let resp of responsables" [value]="resp.id">
+              {{ resp.usuario.username }}
+            </option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn-save">Guardar Bien</button>
+          <button type="button" class="btn-cancel" (click)="volver()">Cancelar</button>
+        </div>
+
+        <p *ngIf="success" class="success-message">{{ success }}</p>
+        <p *ngIf="error" class="error-message">{{ error }}</p>
+      </form>
+    </div>
+  </main>
 </div>

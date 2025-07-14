@@ -1,38 +1,69 @@
-<div>
-  <h2>{{ esNuevo ? 'Nuevo Documento' : 'Editar Documento' }}</h2>
-  <form (ngSubmit)="guardar()">
-    <label>Tipo:
-      <select [(ngModel)]="documento.tipo" name="tipo" required>
-        <option value="FACTURA">Factura</option>
-        <option value="GARANTIA">Garantía</option>
-        <option value="CONTRATO">Contrato</option>
-        <option value="FOTO">Fotografía</option>
-        <option value="OTRO">Otro</option>
-      </select>
-    </label>
-    <br>
-    <label>Bien (ID):
-      <input [(ngModel)]="documento.bien" name="bien" required>
-    </label>
-    <br>
-    <label>Usuario (ID):
-      <input [(ngModel)]="documento.usuario" name="usuario" required>
-    </label>
-    <br>
-    <label>Descripción:
-      <textarea [(ngModel)]="documento.descripcion" name="descripcion"></textarea>
-    </label>
-    <br>
-    <label>Fecha del documento:
-      <input type="date" [(ngModel)]="documento.fecha_documento" name="fecha_documento">
-    </label>
-    <br>
-    <label>Archivo:
-      <input type="file" (change)="onFileChange($event)" [required]="esNuevo">
-    </label>
-    <br>
-    <div *ngIf="error" style="color:red">{{error}}</div>
-    <button type="submit">Guardar</button>
-    <button type="button" (click)="cancelar()">Cancelar</button>
-  </form>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <i class="pi pi-box"></i> Sistema
+    </div>
+    <ul class="menu">
+      <li *ngFor="let item of menuItems" routerLinkActive="active" [routerLink]="item.routerLink">
+        <i [class]="item.icon"></i> {{ item.label }}
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="content">
+    <h2>{{ esNuevo ? 'Nuevo Documento' : 'Editar Documento' }}</h2>
+
+    <form (ngSubmit)="guardar()" class="documento-form">
+      <div class="form-group">
+        <label>Tipo:
+          <select [(ngModel)]="documento.tipo" name="tipo" required>
+            <option value="FACTURA">Factura</option>
+            <option value="GARANTIA">Garantía</option>
+            <option value="CONTRATO">Contrato</option>
+            <option value="FOTO">Fotografía</option>
+            <option value="OTRO">Otro</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>Bien (ID):
+          <input [(ngModel)]="documento.bien" name="bien" required>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>Usuario (ID):
+          <input [(ngModel)]="documento.usuario" name="usuario" required>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>Descripción:
+          <textarea [(ngModel)]="documento.descripcion" name="descripcion"></textarea>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>Fecha del documento:
+          <input type="date" [(ngModel)]="documento.fecha_documento" name="fecha_documento">
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>Archivo:
+          <input type="file" (change)="onFileChange($event)" [required]="esNuevo">
+        </label>
+      </div>
+
+      <div *ngIf="error" class="error-message">{{ error }}</div>
+
+      <div class="form-actions">
+        <button type="submit">Guardar</button>
+        <button type="button" (click)="cancelar()">Cancelar</button>
+      </div>
+    </form>
+  </main>
 </div>
