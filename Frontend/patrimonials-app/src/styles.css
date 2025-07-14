@@ -1,7 +1,16 @@
 /* You can add global styles to this file, and also import other style files */
 @import url('https://fonts.googleapis.com/css2?family=Jersey+25&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 @import "primeicons/primeicons.css";
-html{
+
+/* Fix para iconos de Leaflet - Versión corregida */
+
+
+.leaflet-div-icon {
+  background: transparent;
+  border: none;
+}
+
+html {
   padding: 0px;
   width: 100vw;
   overflow-x: hidden;

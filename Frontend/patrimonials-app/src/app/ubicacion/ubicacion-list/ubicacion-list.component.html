@@ -1,5 +1,7 @@
-<p>ubicacion-list works!</p>
 <h2>Ubicaciones</h2>
+
+<button (click)="nuevaUbicacion()">Nueva ubicación</button>
+
 <table>
   <thead>
     <tr>
@@ -21,8 +23,6 @@
       <td>{{ ubicacion.capacidad }}</td>
       <td>{{ ubicacion.ocupados }}</td>
       <td>
-        <button (click)="nuevaUbicacion()">Nueva ubicación</button>
-
         <button (click)="verDetalle(ubicacion.id)">Ver detalle</button>
       </td>
     </tr>

@@ -4,6 +4,7 @@ import { Bien } from '../../models/bien.model';
 import { ApiService } from '../../core/api.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import * as L from 'leaflet';
 
 @Component({
   selector: 'app-ubicacion-detail',
@@ -18,6 +19,9 @@ export class UbicacionDetailComponent implements OnInit {
   esNuevo = false;
   loading = false;
   error = '';
+  map!: L.Map;
+  marker: L.Marker | null = null;
+  coordenadasPendientes: { lat: number, lon: number } | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -26,27 +30,29 @@ export class UbicacionDetailComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.ubicacionForm = this.fb.group({
-      codigo: ['', [Validators.required, Validators.minLength(1)]],
-      edificio: ['', [Validators.required, Validators.minLength(1)]],
-      piso: ['', [Validators.required, Validators.minLength(1)]],
-      oficina: ['', [Validators.required, Validators.minLength(1)]],
-      direccion: ['', [Validators.required, Validators.minLength(1)]],
-      capacidad: [0, [Validators.required, Validators.min(1), Validators.pattern('^[0-9]+$')]],
-      ocupados: [0, [Validators.required, Validators.min(0), Validators.pattern('^[0-9]+$')]],
-      responsable: [null] // Campo opcional, inicializado como null
+      codigo: ['', Validators.required],
+      edificio: ['', Validators.required],
+      piso: ['', Validators.required],
+      oficina: ['', Validators.required],
+      direccion: ['', Validators.required],
+      capacidad: [0, [Validators.required, Validators.min(1)]],
+      ocupados: [0, [Validators.required, Validators.min(0)]],
+      responsable: [null],
+      latitud: [null, Validators.required],
+      longitud: [null, Validators.required]
     }, { validators: this.capacidadOcupadosValidator });
   }
 
-  // Validador personalizado para verificar que ocupados <= capacidad
-  capacidadOcupadosValidator(form: FormGroup): { [key: string]: any } | null {
+  capacidadOcupadosValidator = (form: FormGroup) => {
     const capacidad = Number(form.get('capacidad')?.value);
     const ocupados = Number(form.get('ocupados')?.value);
     return ocupados <= capacidad ? null : { ocupadosExcedeCapacidad: true };
-  }
+  };
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
     this.esNuevo = this.id === 'nuevo';
+
     if (!this.esNuevo && this.id) {
       this.loading = true;
       this.api.getUbicacion(Number(this.id)).subscribe({
@@ -57,11 +63,15 @@ export class UbicacionDetailComponent implements OnInit {
             piso: data.piso,
             oficina: data.oficina,
             direccion: data.direccion,
-            capacidad: data.capacidad ?? 0,
-            ocupados: data.ocupados ?? 0,
-            responsable: data.responsable ?? null
+            capacidad: data.capacidad,
+            ocupados: data.ocupados,
+            responsable: data.responsable,
+            latitud: data.latitud,
+            longitud: data.longitud
           });
           this.loading = false;
+
+          setTimeout(() => this.inicializarMapa());
         },
         error: () => {
           this.error = 'No se pudo cargar la ubicación';
@@ -77,32 +87,94 @@ export class UbicacionDetailComponent implements OnInit {
           this.error = 'No se pudo cargar los bienes';
         }
       });
+    } else {
+      // Si es nuevo, inicializamos el mapa apenas cargue
+      setTimeout(() => this.inicializarMapa());
+    }
+  }
+
+  inicializarMapa() {
+    if (this.map) return; // evitar reinicializar
+
+    if (!document.getElementById('map')) return;
+
+    this.map = L.map('map').setView([-9.93, -76.24], 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(this.map);
+
+    this.map.on('click', (e: L.LeafletMouseEvent) => {
+      const lat = e.latlng.lat;
+      const lon = e.latlng.lng;
+
+      this.ubicacionForm.patchValue({
+        latitud: lat,
+        longitud: lon
+      });
+
+      if (this.marker) {
+        this.marker.setLatLng(e.latlng);
+      } else {
+        this.marker = L.marker(e.latlng).addTo(this.map);
+      }
+    });
+
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
+      iconUrl: 'assets/leaflet/marker-icon.png',
+      shadowUrl: 'assets/leaflet/marker-shadow.png'
+    });
+
+    // Si ya hay coordenadas cargadas, colocar marcador
+    if (this.ubicacionForm.value.latitud && this.ubicacionForm.value.longitud) {
+      this.setMarkerOnMap();
+    }
+  }
+
+  setMarkerOnMap() {
+    if (this.ubicacionForm.value.latitud && this.ubicacionForm.value.longitud && this.map) {
+      const latlng = L.latLng(
+        Number(this.ubicacionForm.value.latitud),
+        Number(this.ubicacionForm.value.longitud)
+      );
+
+      if (this.marker) {
+        this.marker.setLatLng(latlng);
+      } else {
+        this.marker = L.marker(latlng).addTo(this.map);
+      }
+      this.map.setView(latlng, 16);
     }
   }
 
   guardar() {
     if (this.ubicacionForm.invalid) {
       this.ubicacionForm.markAllAsTouched();
-      this.error = 'Por favor, complete todos los campos requeridos correctamente.';
+      this.error = 'Complete correctamente todos los campos.';
       return;
     }
 
-    // Construir el objeto Ubicacion
+    if (this.ubicacionForm.value.latitud === null || this.ubicacionForm.value.longitud === null) {
+      this.error = 'Debe seleccionar una ubicación en el mapa.';
+      return;
+    }
+
+    const latitudRedondeada = Number(this.ubicacionForm.value.latitud).toFixed(6);
+    const longitudRedondeada = Number(this.ubicacionForm.value.longitud).toFixed(6);
+
     const ubicacion: Ubicacion = {
-      id: this.esNuevo ? 0 : Number(this.id), // id=0 para POST, ya que el servidor lo genera
-      codigo: this.ubicacionForm.value.codigo,
-      edificio: this.ubicacionForm.value.edificio,
-      piso: this.ubicacionForm.value.piso,
-      oficina: this.ubicacionForm.value.oficina,
-      direccion: this.ubicacionForm.value.direccion,
-      capacidad: Number(this.ubicacionForm.value.capacidad),
-      ocupados: Number(this.ubicacionForm.value.ocupados),
-      responsable: this.ubicacionForm.value.responsable || null // Enviar null si no se proporciona
+      id: this.esNuevo ? 0 : Number(this.id),
+      ...this.ubicacionForm.value,
+      latitud: latitudRedondeada,
+      longitud: longitudRedondeada
     };
 
+    console.log('Datos a enviar:', ubicacion);
     this.loading = true;
+
     if (this.esNuevo) {
-      // No incluir id en la solicitud POST
       const { id, ...ubicacionSinId } = ubicacion;
       this.api.createUbicacion(ubicacionSinId).subscribe({
         next: () => {
@@ -111,8 +183,8 @@ export class UbicacionDetailComponent implements OnInit {
         },
         error: (err) => {
           this.loading = false;
-          this.error = err.error?.message || 'No se pudo crear la ubicación. Verifique los datos.';
-          console.error('Error del servidor:', err.error); // Para depuración
+          console.error('Respuesta completa del backend:', err);
+          this.error = JSON.stringify(err.error, null, 2);
         }
       });
     } else if (this.id) {
@@ -123,8 +195,8 @@ export class UbicacionDetailComponent implements OnInit {
         },
         error: (err) => {
           this.loading = false;
-          this.error = err.error?.message || 'No se pudo actualizar la ubicación. Verifique los datos.';
-          console.error('Error del servidor:', err.error); // Para depuración
+          console.error('Respuesta completa del backend:', err);
+          this.error = JSON.stringify(err.error, null, 2);
         }
       });
     }
@@ -140,7 +212,7 @@ export class UbicacionDetailComponent implements OnInit {
         },
         error: () => {
           this.loading = false;
-          this.error = 'No se pudo eliminar la ubicación';
+          this.error = 'No se pudo eliminar';
         }
       });
     }

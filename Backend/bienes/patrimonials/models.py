@@ -120,9 +120,11 @@ class Ubicacion(models.Model):
     piso = models.CharField(max_length=20)
     oficina = models.CharField(max_length=50)
     direccion = models.TextField()
-    responsable = models.ForeignKey('Responsable', on_delete=models.SET_NULL, null=True, blank=True)
-    capacidad = models.PositiveIntegerField(default=1)
-    ocupados = models.PositiveIntegerField(default=0)
+    capacidad = models.PositiveIntegerField()
+    ocupados = models.PositiveIntegerField()
+    latitud = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitud = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    responsable = models.ForeignKey('Responsable', null=True, blank=True, on_delete=models.SET_NULL)
 
     def mover_bien(self, bien, nueva_ubicacion, usuario):
         if nueva_ubicacion.ocupados >= nueva_ubicacion.capacidad:

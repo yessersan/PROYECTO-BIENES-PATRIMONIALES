@@ -53,9 +53,17 @@ class UbicacionSerializer(serializers.ModelSerializer):
     responsable = serializers.PrimaryKeyRelatedField(queryset=Responsable.objects.all(), allow_null=True)
     espacio_disponible = serializers.ReadOnlyField()
 
+    latitud = serializers.DecimalField(max_digits=9, decimal_places=6, allow_null=True, required=False)
+    longitud = serializers.DecimalField(max_digits=9, decimal_places=6, allow_null=True, required=False)
+
+
     class Meta:
         model = Ubicacion
-        fields = ['id', 'codigo', 'edificio', 'piso', 'oficina', 'direccion', 'responsable', 'capacidad', 'ocupados', 'espacio_disponible']
+        fields = [
+            'id', 'codigo', 'edificio', 'piso', 'oficina', 'direccion',
+            'responsable', 'capacidad', 'ocupados', 'espacio_disponible',
+            'latitud', 'longitud'
+        ]
 
 class ResponsableSerializer(serializers.ModelSerializer):
     usuario = UsuarioSerializer(read_only=True)
