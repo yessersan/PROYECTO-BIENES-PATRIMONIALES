@@ -1,0 +1,176 @@
+<div class="dashboard-container">
+  <!-- Sidebar Estático -->
+  <div class="sidebar-container">
+    <div class="sidebar-header">
+      <div class="d-flex align-items-center mb-3">
+        <i class="pi pi-home text-primary me-2" style="font-size: 1.5rem;"></i>
+        <h4 class="mb-0 text-primary">Sistema</h4>
+      </div>
+      
+      <!-- Información del Usuario -->
+      <div class="user-info-card" *ngIf="usuario">
+        <div class="d-flex align-items-center">
+          <p-avatar 
+            [label]="usuario.nombre?.charAt(0) || 'U'" 
+            styleClass="me-3"
+            size="large"
+            [style]="{'background-color': '#007bff', 'color': '#fff'}">
+          </p-avatar>
+          <div class="user-details">
+            <h6 class="mb-1">{{ usuario.nombre || 'Usuario' }}</h6>
+            <p-tag 
+              [value]="usuario.rol || 'Sin rol'" 
+              [severity]="getRoleSeverity(usuario.rol)"
+              styleClass="text-xs">
+            </p-tag>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navegación del Sidebar -->
+    <div class="sidebar-navigation">
+      <nav class="nav flex-column">
+        <ng-container *ngFor="let item of menuItems">
+          <a 
+            *ngIf="item.visible !== false"
+            class="nav-link sidebar-nav-item"
+            [routerLink]="item.routerLink"
+            routerLinkActive="active"
+            (click)="navigateToRoute(item.routerLink)">
+            <i [class]="item.icon + ' me-3'"></i>
+            <span>{{ item.label }}</span>
+            <p-badge 
+              *ngIf="item.badge" 
+              [value]="item.badge" 
+              severity="danger"
+              styleClass="ms-auto">
+            </p-badge>
+          </a>
+        </ng-container>
+      </nav>
+    </div>
+
+    <!-- Footer del Sidebar -->
+    <div class="sidebar-footer">
+      <button 
+        type="button" 
+        class="btn btn-outline-danger w-100"
+        (click)="cerrarSesion()">
+        <i class="pi pi-sign-out me-2"></i>
+        Cerrar Sesión
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenido Principal -->
+  <div class="main-content">
+    <!-- Header Superior -->
+    <div class="top-header">
+      <div class="container-fluid">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <h3 class="mb-0">Dashboard</h3>
+            <p class="text-muted mb-0">Panel de Control del Sistema</p>
+          </div>
+          <div class="col-md-6 text-end">
+            <div class="d-none d-md-inline-block">
+              <p-chip 
+                [label]="'Conectado como: ' + (usuario?.nombre || 'Usuario')" 
+                styleClass="me-2">
+              </p-chip>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Área de Contenido -->
+    <div class="content-area">
+      <div class="container-fluid">
+        <!-- Mensaje de Acceso Denegado -->
+        <div *ngIf="accesoDenegado" class="row">
+          <div class="col-12">
+            <p-message 
+              severity="error" 
+              text="No se encontró información de usuario válida. Por favor, inicie sesión nuevamente."
+              [closable]="false">
+            </p-message>
+          </div>
+        </div>
+
+        <!-- Tarjetas de Resumen (Dashboard Principal) -->
+        <div *ngIf="!accesoDenegado" class="row g-4 mb-4">
+          <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+              <div class="d-flex align-items-center">
+                <div class="dashboard-icon bg-primary">
+                  <i class="pi pi-box text-white"></i>
+                </div>
+                <div class="ms-3">
+                  <h5 class="mb-0">1,234</h5>
+                  <p class="text-muted mb-0">Total Bienes</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+              <div class="d-flex align-items-center">
+                <div class="dashboard-icon bg-success">
+                  <i class="pi pi-users text-white"></i>
+                </div>
+                <div class="ms-3">
+                  <h5 class="mb-0">56</h5>
+                  <p class="text-muted mb-0">Responsables</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+              <div class="d-flex align-items-center">
+                <div class="dashboard-icon bg-warning">
+                  <i class="pi pi-exchange text-white"></i>
+                </div>
+                <div class="ms-3">
+                  <h5 class="mb-0">89</h5>
+                  <p class="text-muted mb-0">Movimientos</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+              <div class="d-flex align-items-center">
+                <div class="dashboard-icon bg-info">
+                  <i class="pi pi-bell text-white"></i>
+                </div>
+                <div class="ms-3">
+                  <h5 class="mb-0">12</h5>
+                  <p class="text-muted mb-0">Notificaciones</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contenido Dinámico -->
+        <div class="row">
+          <div class="col-12">
+            <div class="content-wrapper">
+              <!-- Aquí se cargará el contenido dinámico según la ruta -->
+              <router-outlet></router-outlet>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast para mensajes -->
+<p-toast></p-toast>

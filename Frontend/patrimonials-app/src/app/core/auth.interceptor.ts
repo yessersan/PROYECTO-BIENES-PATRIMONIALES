@@ -1,30 +1,43 @@
 import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
+  private apiKey = 'ABC123ABC123ABC123ABC123'; // Usa el valor de tu settings.py
+
+  constructor(private router: Router) {}
+
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Skip adding token for login requests
-    if (req.url.includes(`${environment.apiUrl}login/`)) {
-      return next.handle(req);
-    }
-
-    // Get token from localStorage
     const token = localStorage.getItem('token');
+    let headersConfig: any = {
+      'X-API-KEY': this.apiKey
+    };
 
-    // Clone request and add Authorization header if token exists
     if (token) {
-      const authReq = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      return next.handle(authReq);
+      headersConfig['Authorization'] = `Token ${token}`;
     }
 
-    // Proceed without modification if no token
-    return next.handle(req);
+    // Opcional: excluir login y registro si no quieres enviar la API KEY ahí
+    if (req.url.includes('login') || req.url.includes('registro')) {
+      headersConfig = { 'X-API-KEY': this.apiKey};
+    }
+
+    const authReq = req.clone({
+      setHeaders: headersConfig
+    });
+
+    return next.handle(authReq).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('usuario');
+          this.router.navigate(['/login']);
+        }
+        return throwError(() => error);
+      })
+    );
   }
 }

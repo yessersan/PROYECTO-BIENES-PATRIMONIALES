@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { LoginComponent } from './login/login.component';
+import { RegistroComponent } from './registro/registro.component';
 
 import { BienListComponent } from './bien/bien-list/bien-list.component';
 import { BienDetailComponent } from './bien/bien-detail/bien-detail.component';
@@ -29,7 +30,6 @@ import { DocumentoListComponent } from './documento/documento-list/documento-lis
 import { DocumentoDetailComponent } from './documento/documento-detail/documento-detail.component';
 
 import { NotificacionListComponent } from './notificacion/notificacion-list/notificacion-list.component';
-import { NotificacionDetailComponent } from './notificacion/notificacion-detail/notificacion-detail.component';
 
 import { MantenimientoListComponent } from './mantenimiento/mantenimiento-list/mantenimiento-list.component';
 import { MantenimientoDetailComponent } from './mantenimiento/mantenimiento-detail/mantenimiento-detail.component';
@@ -39,49 +39,202 @@ import { MantenimientoFinalizarComponent } from './mantenimiento/mantenimiento-f
 import { EtiquetaDigitalListComponent } from './etiqueta-digital/etiqueta-digital-list/etiqueta-digital-list.component';
 import { EtiquetaDigitalDetailComponent } from './etiqueta-digital/etiqueta-digital-detail/etiqueta-digital-detail.component';
 import { EtiquetaDigitalGenerarQrComponent } from './etiqueta-digital/etiqueta-digital-generar-qr/etiqueta-digital-generar-qr.component';
-
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { AuthGuard } from './core/auth.guard';
+import { RoleGuard } from './core/role.guard';
+import { BienCreateComponent } from './bien/bien-create/bien-create.component';
 const routes: Routes = [
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
+  { path: 'registro', component: RegistroComponent }, 
+  
+  // Rutas protegidas
+  { 
+    path: 'dashboard', 
+    component: DashboardComponent, 
+    canActivate: [AuthGuard] 
+  },
 
-  { path: 'bienes', component: BienListComponent },
-  { path: 'bienes/:id', component: BienDetailComponent },
-  { path: 'bienes/mover/:id', component: BienMoverComponent },
-  { path: 'bienes/dar-baja/:id', component: BienDarBajaComponent },
+  // Rutas de bienes
+  { 
+    path: 'bienes', 
+    component: BienListComponent, 
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] } 
+  },
+    { 
+    path: 'bienes/crear', 
+    component: BienCreateComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
+  { 
+    path: 'bienes/:id', 
+    component: BienDetailComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
+  { 
+    path: 'bienes/mover/:id', 
+    component: BienMoverComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
+  { 
+    path: 'bienes/dar-baja/:id', 
+    component: BienDarBajaComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] } // Solo admin puede dar de baja
+  },
+  // Rutas de responsables
+  { 
+    path: 'responsables', 
+    component: ResponsableListComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
+  { 
+    path: 'responsables/:id', 
+    component: ResponsableDetailComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
 
-  { path: 'responsables', component: ResponsableListComponent },
-  { path: 'responsables/:id', component: ResponsableDetailComponent },
+  // Rutas de categorías
+  { 
+    path: 'categorias', 
+    component: CategoriaListComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
+  { 
+    path: 'categorias/:id', 
+    component: CategoriaDetailComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
 
-  { path: 'categorias', component: CategoriaListComponent },
-  { path: 'categorias/:id', component: CategoriaDetailComponent },
+  // Rutas de ubicaciones
+  { 
+    path: 'ubicaciones', 
+    component: UbicacionListComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
+  { 
+    path: 'ubicaciones/:id', 
+    component: UbicacionDetailComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
 
-  { path: 'ubicaciones', component: UbicacionListComponent },
-  { path: 'ubicaciones/:id', component: UbicacionDetailComponent },
+  // Rutas de movimientos
+  { 
+    path: 'movimientos', 
+    component: MovimientoListComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR', 'AUDITOR'] }
+  },
+  { 
+    path: 'movimientos/:id', 
+    component: MovimientoDetailComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR', 'AUDITOR'] }
+  },
 
-  { path: 'movimientos', component: MovimientoListComponent },
-  { path: 'movimientos/:id', component: MovimientoDetailComponent },
+  // Rutas de reportes
+  { 
+    path: 'reportes', 
+    component: ReporteListComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR', 'AUDITOR', 'CONSULTA'] }
+  },
+  { 
+    path: 'reportes/:id', 
+    component: ReporteDetailComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR', 'AUDITOR', 'CONSULTA'] }
+  },
 
-  { path: 'reportes', component: ReporteListComponent },
-  { path: 'reportes/:id', component: ReporteDetailComponent },
+  // Ruta de historial de auditoría
+  { 
+    path: 'historial-auditoria', 
+    component: HistorialAuditoriaListComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'AUDITOR'] }
+  },
 
-  { path: 'historial-auditoria', component: HistorialAuditoriaListComponent },
+  // Rutas de documentos
+  { 
+    path: 'documentos', 
+    component: DocumentoListComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
+  { 
+    path: 'documentos/:id', 
+    component: DocumentoDetailComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
 
-  { path: 'documentos', component: DocumentoListComponent },
-  { path: 'documentos/:id', component: DocumentoDetailComponent },
+  // Rutas de notificaciones
+  { 
+    path: 'notificaciones', 
+    component: NotificacionListComponent,
+    canActivate: [AuthGuard]
+  },
+ 
 
-  { path: 'notificaciones', component: NotificacionListComponent },
-  { path: 'notificaciones/:id', component: NotificacionDetailComponent },
+  // Rutas de mantenimiento
+  { 
+    path: 'mantenimientos', 
+    component: MantenimientoListComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
+  { 
+    path: 'mantenimientos/:id', 
+    component: MantenimientoDetailComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
+  { 
+    path: 'mantenimientos/iniciar/:id', 
+    component: MantenimientoIniciarComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
+  { 
+    path: 'mantenimientos/finalizar/:id', 
+    component: MantenimientoFinalizarComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
 
-  { path: 'mantenimientos', component: MantenimientoListComponent },
-  { path: 'mantenimientos/:id', component: MantenimientoDetailComponent },
-  { path: 'mantenimientos/iniciar/:id', component: MantenimientoIniciarComponent },
-  { path: 'mantenimientos/finalizar/:id', component: MantenimientoFinalizarComponent },
+  // Rutas de etiquetas digitales
+  { 
+    path: 'etiquetas-digitales', 
+    component: EtiquetaDigitalListComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
+  { 
+    path: 'etiquetas-digitales/:id', 
+    component: EtiquetaDigitalDetailComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
+  { 
+    path: 'etiquetas-digitales/generar-qr/:id', 
+    component: EtiquetaDigitalGenerarQrComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'GESTOR'] }
+  },
 
-  { path: 'etiquetas-digitales', component: EtiquetaDigitalListComponent },
-  { path: 'etiquetas-digitales/:id', component: EtiquetaDigitalDetailComponent },
-  { path: 'etiquetas-digitales/generar-qr/:id', component: EtiquetaDigitalGenerarQrComponent },
-
-  { path: '', redirectTo: 'login', pathMatch: 'full' },   // Ruta por defecto
-  { path: '**', redirectTo: 'login' }                    // Ruta comodín para no encontrados
+  // Rutas por defecto y comodín
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '**', redirectTo: 'login' }
 ];
 
 @NgModule({

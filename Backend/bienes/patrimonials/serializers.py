@@ -8,13 +8,41 @@ from patrimonials.models import (
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['id', 'username', 'email', 'rol', 'departamento', 'telefono', 'fecha_creacion', 'ultimo_acceso']
+        fields = ['id', 'username', 'email', 'rol', 'departamento', 'telefono', 'fecha_creacion', 'ultimo_acceso', 'first_name', 'last_name']
         read_only_fields = ['fecha_creacion', 'ultimo_acceso']
 
     def validate_rol(self, value):
         if value not in dict(Usuario.ROLES).keys():
             raise serializers.ValidationError("Rol no válido")
         return value
+    
+class RegistroSerializer(serializers.ModelSerializer):
+    confirmPassword = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Usuario
+        fields = [
+            'username', 'email', 'password', 'confirmPassword',
+            'first_name', 'last_name', 'rol', 'departamento', 'telefono'
+        ]
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'departamento': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'telefono': {'required': False, 'allow_null': True, 'allow_blank': True}
+        }
+
+    def validate(self, data):
+        if data['password'] != data['confirmPassword']:
+            raise serializers.ValidationError("Las contraseñas no coinciden.")
+        return data
+
+    def create(self, validated_data):
+        validated_data.pop('confirmPassword')
+        password = validated_data.pop('password')
+        user = Usuario(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
 
 class CategoriaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -58,18 +86,15 @@ class BienPatrimonialSerializer(serializers.ModelSerializer):
         return value
 
 class MovimientoSerializer(serializers.ModelSerializer):
-    bien = serializers.PrimaryKeyRelatedField(queryset=BienPatrimonial.objects.all())
-    responsable = serializers.PrimaryKeyRelatedField(queryset=Responsable.objects.all())
-    origen = serializers.PrimaryKeyRelatedField(queryset=Ubicacion.objects.all(), allow_null=True)
-    destino = serializers.PrimaryKeyRelatedField(queryset=Ubicacion.objects.all(), allow_null=True)
-    usuario_registro = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
+    bien = serializers.SlugRelatedField(slug_field='codigo', queryset=BienPatrimonial.objects.all())
+    responsable = serializers.SlugRelatedField(slug_field='usuario__username', queryset=Responsable.objects.all())
+    origen = serializers.SlugRelatedField(slug_field='codigo', queryset=Ubicacion.objects.all(), allow_null=True)
+    destino = serializers.SlugRelatedField(slug_field='codigo', queryset=Ubicacion.objects.all(), allow_null=True)
+    usuario_registro = serializers.SlugRelatedField(slug_field='username', queryset=Usuario.objects.all())
 
     class Meta:
         model = Movimiento
-        fields = [
-            'id', 'tipo', 'fecha', 'descripcion', 'observaciones', 'bien', 'responsable',
-            'origen', 'destino', 'usuario_registro'
-        ]
+        fields = ['id', 'tipo', 'fecha', 'descripcion', 'observaciones', 'bien', 'responsable', 'origen', 'destino', 'usuario_registro']
         read_only_fields = ['fecha']
 
     def validate_tipo(self, value):
@@ -78,8 +103,7 @@ class MovimientoSerializer(serializers.ModelSerializer):
         return value
 
 class ReporteSerializer(serializers.ModelSerializer):
-    usuario = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
-
+    usuario = UsuarioSerializer(read_only=True)
     class Meta:
         model = Reporte
         fields = ['id', 'tipo', 'fecha_generacion', 'contenido', 'formato', 'parametros', 'usuario', 'archivo']

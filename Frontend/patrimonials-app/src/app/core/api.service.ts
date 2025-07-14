@@ -19,13 +19,26 @@ import { EtiquetaDigital } from '../models/etiqueta-digital.model';
   providedIn: 'root'
 })
 export class ApiService {
+  apiService: any;
+
+ get<T>(url: string): Observable<T> {
+  return this.http.get<T>(`${this.apiUrl}${url}`);
+}
+  post<T>(url: string, body: any): Observable<T> {
+    return this.http.post<T>(`${this.apiUrl}${url}`, body);
+  }
   private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
-
+patch(url: string, body: any): Observable<any> {
+  return this.http.patch(`${this.apiUrl}${url}`, body);
+}
   // Authentication
-  login(credentials: { username: string; password: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}login/`, credentials);
+   login(credentials: { username: string; password: string }): Observable<any> {
+    return this.http.post(`${environment.apiUrl}login/`, credentials);
+  }
+  registrar(usuario: Partial<Usuario>): Observable<Usuario> {
+  return this.http.post<Usuario>(`${this.apiUrl}auth/registro/`, usuario);
   }
 
   // Usuarios
@@ -95,6 +108,9 @@ export class ApiService {
   deleteResponsable(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}responsables/${id}/`);
   }
+  getUsuariosDisponibles(): Observable<Usuario[]> {
+  return this.http.get<Usuario[]>(`${this.apiUrl}usuarios/disponibles/`);
+}
 
   // Bienes
   getBienes(): Observable<Bien[]> {
@@ -112,9 +128,9 @@ export class ApiService {
   deleteBien(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}bienes/${id}/`);
   }
-  moverBien(id: number, data: { ubicacion_id: number }): Observable<any> {
+  moverBien(id: number, data: { nueva_ubicacion_id: number }): Observable<any> {
     return this.http.post(`${this.apiUrl}bienes/${id}/mover/`, data);
-  }
+  } 
   darBajaBien(id: number, data: { motivo: string; fecha_baja?: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}bienes/${id}/dar-baja/`, data);
   }
@@ -157,6 +173,15 @@ export class ApiService {
   getHistorialAuditoria(): Observable<HistorialAuditoria[]> {
     return this.http.get<HistorialAuditoria[]>(`${this.apiUrl}historial-auditoria/`);
   }
+  createHistorialAuditoria(historial: Partial<HistorialAuditoria>): Observable<HistorialAuditoria> {
+  return this.http.post<HistorialAuditoria>(`${this.apiUrl}historial-auditoria/`, historial);
+}
+updateHistorialAuditoria(id: number, historial: Partial<HistorialAuditoria>): Observable<HistorialAuditoria> {
+  return this.http.put<HistorialAuditoria>(`${this.apiUrl}historial-auditoria/${id}/`, historial);
+}
+deleteHistorialAuditoria(id: number): Observable<void> {
+  return this.http.delete<void>(`${this.apiUrl}historial-auditoria/${id}/`);
+}
 
   // Documentos
   getDocumentos(): Observable<Documento[]> {

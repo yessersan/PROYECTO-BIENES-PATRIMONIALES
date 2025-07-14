@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser, UserManager
 
 # Create your models here.
 from django.contrib.auth.models import AbstractUser 
@@ -9,6 +10,27 @@ from datetime import date, timedelta
 import qrcode 
 from io import BytesIO
 from django.core.files import File 
+
+class UsuarioManager(UserManager):
+    def create_user(self, username, email=None, password=None, **extra_fields):
+        if not username:
+            raise ValueError('El username debe ser obligatorio')
+        email = self.normalize_email(email)
+        user = self.model(username=username, email=email, **extra_fields)
+        user.set_password(password) 
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser debe tener is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser debe tener is_superuser=True.')
+
+        return self.create_user(username, email, password, **extra_fields)
 
 class Usuario(AbstractUser):
     ROLES = (
@@ -24,6 +46,7 @@ class Usuario(AbstractUser):
     telefono = models.CharField(max_length=20, blank=True, null=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     ultimo_acceso = models.DateTimeField(null=True, blank=True)
+    objects = UsuarioManager()
 
     def autenticar(self, password):
         """Autentica al usuario verificando la contraseña"""
@@ -40,9 +63,9 @@ class Usuario(AbstractUser):
     def tiene_permiso(self, permiso_requerido):
         """Verifica si el usuario tiene el permiso requerido"""
         permisos = {
-            'ADMIN': ['crear', 'editar', 'eliminar', 'asignar', 'reportes'],
-            'GESTOR': ['crear', 'editar', 'asignar', 'reportes'],
-            'AUDITOR': ['editar', 'reportes'],
+            'ADMIN': ['crear', 'editar', 'eliminar', 'asignar', 'reportes','consultar'],
+            'GESTOR': ['crear', 'editar', 'asignar', 'reportes','consultar'],
+            'AUDITOR': ['editar', 'reportes','consultar'],
             'CONSULTA': ['consultar']
         }
         return permiso_requerido in permisos.get(self.rol, [])
@@ -101,14 +124,13 @@ class Ubicacion(models.Model):
     capacidad = models.PositiveIntegerField(default=1)
     ocupados = models.PositiveIntegerField(default=0)
 
-    def mover_bien(self, bien, nueva_ubicacion):
-        """Mueve un bien a una nueva ubicación actualizando contadores"""
+    def mover_bien(self, bien, nueva_ubicacion, usuario):
         if nueva_ubicacion.ocupados >= nueva_ubicacion.capacidad:
             return False, "La ubicación destino está llena"
         
         # Liberar espacio en ubicación actual
         if bien.ubicacion:
-            bien.ubicacion.ocupados -= 1
+            bien.ubicacion.ocupados =max(bien.ubicacion.ocupados - 1, 0)
             bien.ubicacion.save()
         
         # Asignar nueva ubicación
@@ -119,6 +141,10 @@ class Ubicacion(models.Model):
         nueva_ubicacion.ocupados += 1
         nueva_ubicacion.save()
         
+        # Validar responsable
+        if not bien.responsable:
+            return False, "El bien no tiene responsable asignado"
+        
         # Registrar movimiento
         Movimiento.objects.create(
             tipo='TRASLADO',
@@ -126,14 +152,14 @@ class Ubicacion(models.Model):
             bien=bien,
             responsable=bien.responsable,
             origen=self,
-            destino=nueva_ubicacion
+            destino=nueva_ubicacion,
+            usuario_registro=usuario
         )
         
         return True, f"Bien movido a {nueva_ubicacion}"
-
+    
     def espacio_disponible(self):
-        return self.capacidad - self.ocupados
-
+            return self.capacidad - self.ocupados
     def __str__(self):
         return f"{self.edificio} - Piso {self.piso} - {self.oficina} ({self.codigo})"
 
@@ -158,29 +184,12 @@ class Responsable(models.Model):
             descripcion=f"Asignación a {self}",
             bien=bien,
             responsable=self,
-            destino=bien.ubicacion
+            destino=bien.ubicacion,
+            usuario_registro=self.usuario
         )
         
         return True, f"Bien {bien.codigo} asignado a {self}"
 
-    def liberar_bien(self, bien):
-        """Libera un bien del responsable"""
-        if bien.responsable != self:
-            return False, "El bien no está asignado a este responsable"
-        
-        bien.responsable = None
-        bien.save()
-        
-        # Registrar movimiento
-        Movimiento.objects.create(
-            tipo='LIBERACION',
-            descripcion=f"Liberación de {self}",
-            bien=bien,
-            responsable=self,
-            origen=bien.ubicacion
-        )
-        
-        return True, f"Bien {bien.codigo} liberado"
 
     def bienes_asignados(self):
         """Devuelve los bienes asignados a este responsable"""
@@ -249,12 +258,16 @@ class BienPatrimonial(models.Model):
         self.save()
         
         # Registrar en historial
-        HistorialAuditoria.objects.create(
-            usuario=Usuario.objects.get(username='sistema'),
-            accion="CÁLCULO DEPRECIACIÓN",
-            detalle=f"Depreciación calculada: {self.depreciacion}",
+        try:
+            usuario_sistema = Usuario.objects.get(username='sistema')
+            HistorialAuditoria.objects.create(
+                usuario=usuario_sistema,
+                accion="CÁLCULO DEPRECIACIÓN",
+                detalle=f"Depreciación calculada: {self.depreciacion}",
             bien=self
         )
+        except Usuario.DoesNotExist:
+            pass    
         
         return self.depreciacion
 
@@ -290,37 +303,45 @@ class BienPatrimonial(models.Model):
         )
         
         return True, "Estado actualizado correctamente"
-
+    
     def dar_baja(self, usuario, motivo, fecha_baja=None):
-        """Da de baja el bien patrimonial"""
         if not fecha_baja:
             fecha_baja = date.today()
-        
-        # Actualizar estado
-        success, message = self.actualizar_estado('BAJA', usuario, motivo)
-        if not success:
-            return False, message
-        
-        # Registrar movimiento
+        self.estado = 'BAJA'
+        self.motivo_baja = motivo
+        self.fecha_baja = fecha_baja
+        self.save()
         Movimiento.objects.create(
             tipo='BAJA',
             descripcion=f"Baja del bien. Motivo: {motivo}",
             bien=self,
             responsable=self.responsable,
-            origen=self.ubicacion
+            origen=self.ubicacion,
+            usuario_registro=usuario
         )
-        
+        # Actualizar estado
+        success, message = self.actualizar_estado('BAJA', usuario, motivo)
+        if not success:
+            return False, message
+
         # Liberar responsable si lo tiene
-        if self.responsable:
-            self.responsable.liberar_bien(self)
-        
+        try:
+            if self.responsable:
+                self.responsable.liberar_bien(self)
+        except Exception as e:
+            print(f"Error al liberar responsable: {e}")
+
         # Liberar ubicación
-        self.ubicacion.ocupados -= 1
-        self.ubicacion.save()
-        
+        try:
+            if self.ubicacion:
+                self.ubicacion.ocupados -= 1
+                self.ubicacion.save()
+        except Exception as e:
+            print(f"Error al liberar ubicación: {e}")
+
         return True, "Bien dado de baja correctamente"
 
-    def generar_codigo_qr(self):
+def generar_codigo_qr(self):
         """Genera un código QR con información del bien"""
         qr = qrcode.QRCode(
             version=1,
@@ -338,7 +359,7 @@ class BienPatrimonial(models.Model):
         
         return File(buffer, name=f'qr_{self.codigo}.png')
 
-    def __str__(self):
+def __str__(self):
         return f"{self.codigo} - {self.descripcion[:50]}..."
 
 class Movimiento(models.Model):
@@ -724,30 +745,28 @@ def crear_etiqueta_digital(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Movimiento)
 def notificar_movimiento(sender, instance, created, **kwargs):
-    """Envía notificaciones cuando se registra un movimiento"""
     if created and instance.responsable:
-        Notificacion.objects.create(
+        notificacion = Notificacion.objects.create(
             mensaje=f"Nuevo movimiento registrado: {instance.get_tipo_display()} para el bien {instance.bien.codigo}",
-            responsables=[instance.responsable],
             url=f"/bienes/{instance.bien.id}/movimientos"
         )
+        notificacion.responsables.set([instance.responsable])
 
 @receiver(post_save, sender=Mantenimiento)
 def programar_notificacion_mantenimiento(sender, instance, created, **kwargs):
-    """Programa notificaciones para mantenimientos pendientes"""
     if created:
         # Notificar al responsable
         if instance.bien.responsable:
-            Notificacion.objects.create(
+            notificacion = Notificacion.objects.create(
                 mensaje=f"Mantenimiento {instance.get_tipo_display()} programado para el bien {instance.bien.codigo}",
-                responsables=[instance.bien.responsable],
                 importante=True,
                 url=f"/bienes/{instance.bien.id}/mantenimientos"
             )
+            notificacion.responsables.set([instance.bien.responsable])
         
         # Notificar al usuario que lo registró
-        Notificacion.objects.create(
+        notificacion2 = Notificacion.objects.create(
             mensaje=f"Has registrado un mantenimiento para el bien {instance.bien.codigo}",
-            usuarios=[instance.usuario_registro],
             url=f"/bienes/{instance.bien.id}/mantenimientos"
         )
+        notificacion2.usuarios.set([instance.usuario_registro])

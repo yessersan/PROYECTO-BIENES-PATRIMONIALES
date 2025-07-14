@@ -1,27 +1,85 @@
 import { Component } from '@angular/core';
-import { ApiService } from '../core/api.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../core/auth.service';
+import { Router } from '@angular/router';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-login',
   standalone: false,
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
+  providers: [MessageService], 
 })
 export class LoginComponent {
-  credentials = { username: '', password: '' };
-  error: string | null = null;
+  loginForm: FormGroup;
+  loading = false;
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router,
+    private messageService: MessageService
+  ) {
+    this.loginForm = this.fb.group({
+      username: ['', [Validators.required, Validators.minLength(4)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+    });
+  }
 
   login() {
-    this.apiService.login(this.credentials).subscribe({
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Por favor, completa todos los campos correctamente',
+      });
+      return;
+    }
+
+    this.loading = true;
+    const credentials = this.loginForm.value;
+    this.authService.login(credentials).subscribe({
       next: (response) => {
         localStorage.setItem('token', response.token);
-        console.log('Login successful', response);
+        this.authService.getUsuarioBackend().subscribe({
+          next: (usuario) => {
+            localStorage.setItem('usuario', JSON.stringify(usuario));
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Éxito',
+              detail: 'Inicio de sesión exitoso',
+            });
+            setTimeout(() => this.router.navigate(['/dashboard']), 1000);
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Error al obtener datos del usuario',
+            });
+            this.loading = false;
+          },
+        });
       },
-      error: (err) => {
-        this.error = 'Login failed: ' + (err.error?.message || 'Unknown error');
-      }
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Usuario o contraseña incorrectos',
+        });
+        this.loading = false;
+      },
     });
+  }
+
+  goToRegistro() {
+    this.router.navigate(['/registro']);
+  }
+
+  isInvalid(controlName: string): boolean {
+    const control = this.loginForm.get(controlName);
+    return !!(control && control.invalid && (control.touched || control.dirty));
   }
 }

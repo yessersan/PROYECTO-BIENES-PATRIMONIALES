@@ -1,0 +1,5136 @@
+diff --git a/Backend/bienes/bienes/settings.py b/Backend/bienes/bienes/settings.py
+index 5f52d52..2552e0e 100644
+--- a/Backend/bienes/bienes/settings.py
++++ b/Backend/bienes/bienes/settings.py
+@@ -69,7 +69,7 @@ MIDDLEWARE = [
+     'django.contrib.auth.middleware.AuthenticationMiddleware',
+     'django.contrib.messages.middleware.MessageMiddleware',
+     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+-    'patrimonials.middleware.PatrimonialsMiddleware',
++    #'patrimonials.middleware.PatrimonialsMiddleware',
+ 
+ ]
+ 
+diff --git a/Backend/bienes/patrimonials/serializers.py b/Backend/bienes/patrimonials/serializers.py
+index 9bad4ee..10bf6f7 100644
+--- a/Backend/bienes/patrimonials/serializers.py
++++ b/Backend/bienes/patrimonials/serializers.py
+@@ -8,7 +8,7 @@ from patrimonials.models import (
+ class UsuarioSerializer(serializers.ModelSerializer):
+     class Meta:
+         model = Usuario
+-        fields = ['id', 'username', 'email', 'rol', 'departamento', 'telefono', 'fecha_creacion', 'ultimo_acceso']
++        fields = ['id', 'username', 'email', 'rol', 'departamento', 'telefono', 'fecha_creacion', 'ultimo_acceso', 'first_name', 'last_name']
+         read_only_fields = ['fecha_creacion', 'ultimo_acceso']
+ 
+     def validate_rol(self, value):
+@@ -86,18 +86,15 @@ class BienPatrimonialSerializer(serializers.ModelSerializer):
+         return value
+ 
+ class MovimientoSerializer(serializers.ModelSerializer):
+-    bien = serializers.PrimaryKeyRelatedField(queryset=BienPatrimonial.objects.all())
+-    responsable = serializers.PrimaryKeyRelatedField(queryset=Responsable.objects.all())
+-    origen = serializers.PrimaryKeyRelatedField(queryset=Ubicacion.objects.all(), allow_null=True)
+-    destino = serializers.PrimaryKeyRelatedField(queryset=Ubicacion.objects.all(), allow_null=True)
+-    usuario_registro = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
++    bien = serializers.SlugRelatedField(slug_field='codigo', queryset=BienPatrimonial.objects.all())
++    responsable = serializers.SlugRelatedField(slug_field='usuario__username', queryset=Responsable.objects.all())
++    origen = serializers.SlugRelatedField(slug_field='codigo', queryset=Ubicacion.objects.all(), allow_null=True)
++    destino = serializers.SlugRelatedField(slug_field='codigo', queryset=Ubicacion.objects.all(), allow_null=True)
++    usuario_registro = serializers.SlugRelatedField(slug_field='username', queryset=Usuario.objects.all())
+ 
+     class Meta:
+         model = Movimiento
+-        fields = [
+-            'id', 'tipo', 'fecha', 'descripcion', 'observaciones', 'bien', 'responsable',
+-            'origen', 'destino', 'usuario_registro'
+-        ]
++        fields = ['id', 'tipo', 'fecha', 'descripcion', 'observaciones', 'bien', 'responsable', 'origen', 'destino', 'usuario_registro']
+         read_only_fields = ['fecha']
+ 
+     def validate_tipo(self, value):
+diff --git a/Backend/bienes/patrimonials/urls.py b/Backend/bienes/patrimonials/urls.py
+index 8ca0b48..1b08fdd 100644
+--- a/Backend/bienes/patrimonials/urls.py
++++ b/Backend/bienes/patrimonials/urls.py
+@@ -1,6 +1,8 @@
+-from django.urls import path
++from django.db import router
++from rest_framework.routers import DefaultRouter
++from django.urls import include, path
+ from .views import (
+-    LoginView, UsuarioActualView, UsuarioListCreateView, UsuarioRetrieveUpdateDestroyView,
++    HistorialAuditoriaViewSet, LoginView, UsuarioActualView, UsuarioListCreateView, UsuarioRetrieveUpdateDestroyView,
+     CategoriaListCreateView, CategoriaRetrieveUpdateDestroyView,
+     UbicacionListCreateView, UbicacionRetrieveUpdateDestroyView,
+     ResponsableListCreateView, ResponsableRetrieveUpdateDestroyView,
+@@ -14,13 +16,17 @@ from .views import (
+     MantenimientoListCreateView, MantenimientoRetrieveUpdateDestroyView,
+     MantenimientoIniciarView, MantenimientoFinalizarView,
+     EtiquetaDigitalListCreateView, EtiquetaDigitalRetrieveUpdateDestroyView,
+-    EtiquetaDigitalGenerarQRView,RegistroUsuarioAPIView
++    EtiquetaDigitalGenerarQRView, RegistroUsuarioAPIView
+ )
++from . import views
++router = DefaultRouter()
++router.register(r'historial-auditoria', HistorialAuditoriaViewSet, basename='historial-auditoria')
+ 
+ urlpatterns = [
+     path('login/', LoginView.as_view(), name='login'),
+     path('usuarios/', UsuarioListCreateView.as_view(), name='usuario-list-create'),
+     path('usuarios/<int:pk>/', UsuarioRetrieveUpdateDestroyView.as_view(), name='usuario-detail'),
++    path('usuarios/disponibles/', views.get_usuarios_disponibles, name='usuarios-disponibles'),
+     path('categorias/', CategoriaListCreateView.as_view(), name='categoria-list-create'),
+     path('categorias/<int:pk>/', CategoriaRetrieveUpdateDestroyView.as_view(), name='categoria-detail'),
+     path('ubicaciones/', UbicacionListCreateView.as_view(), name='ubicacion-list-create'),
+@@ -35,7 +41,7 @@ urlpatterns = [
+     path('movimientos/<int:pk>/', MovimientoRetrieveUpdateDestroyView.as_view(), name='movimiento-detail'),
+     path('reportes/', ReporteListCreateView.as_view(), name='reporte-list-create'),
+     path('reportes/<int:pk>/', ReporteRetrieveUpdateDestroyView.as_view(), name='reporte-detail'),
+-    path('historial-auditoria/', HistorialAuditoriaListView.as_view(), name='historial-auditoria-list'),
++    #path('historial-auditoria/', HistorialAuditoriaListView.as_view(), name='historial-auditoria-list'),
+     path('documentos/', DocumentoAdjuntoListCreateView.as_view(), name='documento-list-create'),
+     path('documentos/<int:pk>/', DocumentoAdjuntoRetrieveUpdateDestroyView.as_view(), name='documento-detail'),
+     path('notificaciones/', NotificacionListCreateView.as_view(), name='notificacion-list-create'),
+@@ -48,5 +54,7 @@ urlpatterns = [
+     path('etiquetas-digitales/<int:pk>/', EtiquetaDigitalRetrieveUpdateDestroyView.as_view(), name='etiqueta-digital-detail'),
+     path('auth/registro/', RegistroUsuarioAPIView.as_view(), name='registro'),
+     path('etiquetas-digitales/<int:pk>/generar-qr/', EtiquetaDigitalGenerarQRView.as_view(), name='etiqueta-digital-generar-qr'),
+-     path('auth/usuario/', UsuarioActualView.as_view(), name='usuario-actual'),
++    path('auth/usuario/', UsuarioActualView.as_view(), name='usuario-actual'),
++    path('', include(router.urls)),
++
+ ]
+\ No newline at end of file
+diff --git a/Backend/bienes/patrimonials/views.py b/Backend/bienes/patrimonials/views.py
+index 9951af7..26d8164 100644
+--- a/Backend/bienes/patrimonials/views.py
++++ b/Backend/bienes/patrimonials/views.py
+@@ -4,8 +4,13 @@ from rest_framework.permissions import AllowAny
+ from rest_framework.response import Response
+ from rest_framework.authtoken.models import Token
+ from rest_framework.views import APIView
++from rest_framework import viewsets
+ from rest_framework.permissions import IsAuthenticated
++from rest_framework.decorators import api_view
++from rest_framework.response import Response
+ from django.contrib.auth import authenticate
++from rest_framework.decorators import api_view, permission_classes
++
+ from patrimonials.models import (
+     Usuario, Categoria, Ubicacion, Responsable, BienPatrimonial,
+     Movimiento, Reporte, HistorialAuditoria, DocumentoAdjunto,
+@@ -69,6 +74,13 @@ class UsuarioListCreateView(generics.ListCreateAPIView):
+             bien=None
+         )
+ 
++@api_view(['GET'])
++@permission_classes([IsAuthenticated])
++def get_usuarios_disponibles(request):
++    usuarios_con_responsable = Responsable.objects.values_list('usuario_id', flat=True)
++    usuarios_disponibles = Usuario.objects.exclude(id__in=usuarios_con_responsable)
++    serializer = UsuarioSerializer(usuarios_disponibles, many=True)
++    return Response(serializer.data)
+ class UsuarioRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+     queryset = Usuario.objects.all()
+     serializer_class = UsuarioSerializer
+@@ -238,6 +250,11 @@ class HistorialAuditoriaListView(generics.ListAPIView):
+     serializer_class = HistorialAuditoriaSerializer
+     permission_classes = [IsAuthenticatedWithPermission]
+ 
++class HistorialAuditoriaViewSet(viewsets.ModelViewSet):
++    queryset = HistorialAuditoria.objects.all()
++    serializer_class = HistorialAuditoriaSerializer
++    permission_classes = [IsAuthenticatedWithPermission]
++
+ class DocumentoAdjuntoListCreateView(generics.ListCreateAPIView):
+     queryset = DocumentoAdjunto.objects.all()
+     serializer_class = DocumentoAdjuntoSerializer
+diff --git a/Frontend/patrimonials-app/package-lock.json b/Frontend/patrimonials-app/package-lock.json
+index d004f7a..0b78625 100644
+--- a/Frontend/patrimonials-app/package-lock.json
++++ b/Frontend/patrimonials-app/package-lock.json
+@@ -798,9 +798,9 @@
+       }
+     },
+     "node_modules/@babel/compat-data": {
+-      "version": "7.27.7",
+-      "resolved": "https://registry.npmjs.org/@babel/compat-data/-/compat-data-7.27.7.tgz",
+-      "integrity": "sha512-xgu/ySj2mTiUFmdE9yCMfBxLp4DHd5DwmbbD05YAuICfodYT3VvRxbrh81LGQ/8UpSdtMdfKMn3KouYDX59DGQ==",
++      "version": "7.28.0",
++      "resolved": "https://registry.npmjs.org/@babel/compat-data/-/compat-data-7.28.0.tgz",
++      "integrity": "sha512-60X7qkglvrap8mn1lh2ebxXdZYtUcpd7gsmy9kLaBJ4i/WdY8PqTSdxyA8qraikqKQK5C1KRBKXqznrVapyNaw==",
+       "dev": true,
+       "license": "MIT",
+       "engines": {
+@@ -1015,6 +1015,16 @@
+         "@babel/core": "^7.4.0 || ^8.0.0-0 <8.0.0"
+       }
+     },
++    "node_modules/@babel/helper-globals": {
++      "version": "7.28.0",
++      "resolved": "https://registry.npmjs.org/@babel/helper-globals/-/helper-globals-7.28.0.tgz",
++      "integrity": "sha512-+W6cISkXFa1jXsDEdYA8HeevQT/FULhxzR99pxphltZcVaugps53THCeiWA8SguxxpSp3gKPiuYfSWopkLQ4hw==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=6.9.0"
++      }
++    },
+     "node_modules/@babel/helper-member-expression-to-functions": {
+       "version": "7.27.1",
+       "resolved": "https://registry.npmjs.org/@babel/helper-member-expression-to-functions/-/helper-member-expression-to-functions-7.27.1.tgz",
+@@ -1220,13 +1230,13 @@
+       }
+     },
+     "node_modules/@babel/parser": {
+-      "version": "7.27.7",
+-      "resolved": "https://registry.npmjs.org/@babel/parser/-/parser-7.27.7.tgz",
+-      "integrity": "sha512-qnzXzDXdr/po3bOTbTIQZ7+TxNKxpkN5IifVLXS+r7qwynkZfPyjZfE7hCXbo7IoO9TNcSyibgONsf2HauUd3Q==",
++      "version": "7.28.0",
++      "resolved": "https://registry.npmjs.org/@babel/parser/-/parser-7.28.0.tgz",
++      "integrity": "sha512-jVZGvOxOuNSsuQuLRTh13nU0AogFlw32w/MT+LV6D3sP5WdbW61E77RnkbaO2dUvmPAYrBDJXGn5gGS6tH4j8g==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+-        "@babel/types": "^7.27.7"
++        "@babel/types": "^7.28.0"
+       },
+       "bin": {
+         "parser": "bin/babel-parser.js"
+@@ -1450,9 +1460,9 @@
+       }
+     },
+     "node_modules/@babel/plugin-transform-block-scoping": {
+-      "version": "7.27.5",
+-      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-block-scoping/-/plugin-transform-block-scoping-7.27.5.tgz",
+-      "integrity": "sha512-JF6uE2s67f0y2RZcm2kpAUEbD50vH62TyWVebxwHAlbSdM49VqPz8t4a1uIjp4NIOIZ4xzLfjY5emt/RCyC7TQ==",
++      "version": "7.28.0",
++      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-block-scoping/-/plugin-transform-block-scoping-7.28.0.tgz",
++      "integrity": "sha512-gKKnwjpdx5sER/wl0WN0efUBFzF/56YZO0RJrSYP4CljXnP31ByY7fol89AzomdlLNzI36AvOTmYHsnZTCkq8Q==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+@@ -1500,18 +1510,18 @@
+       }
+     },
+     "node_modules/@babel/plugin-transform-classes": {
+-      "version": "7.27.7",
+-      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-classes/-/plugin-transform-classes-7.27.7.tgz",
+-      "integrity": "sha512-CuLkokN1PEZ0Fsjtq+001aog/C2drDK9nTfK/NRK0n6rBin6cBrvM+zfQjDE+UllhR6/J4a6w8Xq9i4yi3mQrw==",
++      "version": "7.28.0",
++      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-classes/-/plugin-transform-classes-7.28.0.tgz",
++      "integrity": "sha512-IjM1IoJNw72AZFlj33Cu8X0q2XK/6AaVC3jQu+cgQ5lThWD5ajnuUAml80dqRmOhmPkTH8uAwnpMu9Rvj0LTRA==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+         "@babel/helper-annotate-as-pure": "^7.27.3",
+         "@babel/helper-compilation-targets": "^7.27.2",
++        "@babel/helper-globals": "^7.28.0",
+         "@babel/helper-plugin-utils": "^7.27.1",
+         "@babel/helper-replace-supers": "^7.27.1",
+-        "@babel/traverse": "^7.27.7",
+-        "globals": "^11.1.0"
++        "@babel/traverse": "^7.28.0"
+       },
+       "engines": {
+         "node": ">=6.9.0"
+@@ -1551,14 +1561,14 @@
+       }
+     },
+     "node_modules/@babel/plugin-transform-destructuring": {
+-      "version": "7.27.7",
+-      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-destructuring/-/plugin-transform-destructuring-7.27.7.tgz",
+-      "integrity": "sha512-pg3ZLdIKWCP0CrJm0O4jYjVthyBeioVfvz9nwt6o5paUxsgJ/8GucSMAIaj6M7xA4WY+SrvtGu2LijzkdyecWQ==",
++      "version": "7.28.0",
++      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-destructuring/-/plugin-transform-destructuring-7.28.0.tgz",
++      "integrity": "sha512-v1nrSMBiKcodhsyJ4Gf+Z0U/yawmJDBOTpEB3mcQY52r9RIyPneGyAS/yM6seP/8I+mWI3elOMtT5dB8GJVs+A==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+         "@babel/helper-plugin-utils": "^7.27.1",
+-        "@babel/traverse": "^7.27.7"
++        "@babel/traverse": "^7.28.0"
+       },
+       "engines": {
+         "node": ">=6.9.0"
+@@ -1900,17 +1910,17 @@
+       }
+     },
+     "node_modules/@babel/plugin-transform-object-rest-spread": {
+-      "version": "7.27.7",
+-      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-object-rest-spread/-/plugin-transform-object-rest-spread-7.27.7.tgz",
+-      "integrity": "sha512-201B1kFTWhckclcXpWHc8uUpYziDX/Pl4rxl0ZX0DiCZ3jknwfSUALL3QCYeeXXB37yWxJbo+g+Vfq8pAaHi3w==",
++      "version": "7.28.0",
++      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-object-rest-spread/-/plugin-transform-object-rest-spread-7.28.0.tgz",
++      "integrity": "sha512-9VNGikXxzu5eCiQjdE4IZn8sb9q7Xsk5EXLDBKUYg1e/Tve8/05+KJEtcxGxAgCY5t/BpKQM+JEL/yT4tvgiUA==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+         "@babel/helper-compilation-targets": "^7.27.2",
+         "@babel/helper-plugin-utils": "^7.27.1",
+-        "@babel/plugin-transform-destructuring": "^7.27.7",
++        "@babel/plugin-transform-destructuring": "^7.28.0",
+         "@babel/plugin-transform-parameters": "^7.27.7",
+-        "@babel/traverse": "^7.27.7"
++        "@babel/traverse": "^7.28.0"
+       },
+       "engines": {
+         "node": ">=6.9.0"
+@@ -2050,9 +2060,9 @@
+       }
+     },
+     "node_modules/@babel/plugin-transform-regenerator": {
+-      "version": "7.27.5",
+-      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-regenerator/-/plugin-transform-regenerator-7.27.5.tgz",
+-      "integrity": "sha512-uhB8yHerfe3MWnuLAhEbeQ4afVoqv8BQsPqrTv7e/jZ9y00kJL6l9a/f4OWaKxotmjzewfEyXE1vgDJenkQ2/Q==",
++      "version": "7.28.0",
++      "resolved": "https://registry.npmjs.org/@babel/plugin-transform-regenerator/-/plugin-transform-regenerator-7.28.0.tgz",
++      "integrity": "sha512-LOAozRVbqxEVjSKfhGnuLoE4Kz4Oc5UJzuvFUhSsQzdCdaAQu06mG8zDv2GFSerM62nImUZ7K92vxnQcLSDlCQ==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+@@ -2415,35 +2425,35 @@
+       }
+     },
+     "node_modules/@babel/traverse": {
+-      "version": "7.27.7",
+-      "resolved": "https://registry.npmjs.org/@babel/traverse/-/traverse-7.27.7.tgz",
+-      "integrity": "sha512-X6ZlfR/O/s5EQ/SnUSLzr+6kGnkg8HXGMzpgsMsrJVcfDtH1vIp6ctCN4eZ1LS5c0+te5Cb6Y514fASjMRJ1nw==",
++      "version": "7.28.0",
++      "resolved": "https://registry.npmjs.org/@babel/traverse/-/traverse-7.28.0.tgz",
++      "integrity": "sha512-mGe7UK5wWyh0bKRfupsUchrQGqvDbZDbKJw+kcRGSmdHVYrv+ltd0pnpDTVpiTqnaBru9iEvA8pz8W46v0Amwg==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+         "@babel/code-frame": "^7.27.1",
+-        "@babel/generator": "^7.27.5",
+-        "@babel/parser": "^7.27.7",
++        "@babel/generator": "^7.28.0",
++        "@babel/helper-globals": "^7.28.0",
++        "@babel/parser": "^7.28.0",
+         "@babel/template": "^7.27.2",
+-        "@babel/types": "^7.27.7",
+-        "debug": "^4.3.1",
+-        "globals": "^11.1.0"
++        "@babel/types": "^7.28.0",
++        "debug": "^4.3.1"
+       },
+       "engines": {
+         "node": ">=6.9.0"
+       }
+     },
+     "node_modules/@babel/traverse/node_modules/@babel/generator": {
+-      "version": "7.27.5",
+-      "resolved": "https://registry.npmjs.org/@babel/generator/-/generator-7.27.5.tgz",
+-      "integrity": "sha512-ZGhA37l0e/g2s1Cnzdix0O3aLYm66eF8aufiVteOgnwxgnRP8GoyMj7VWsgWnQbVKXyge7hqrFh2K2TQM6t1Hw==",
++      "version": "7.28.0",
++      "resolved": "https://registry.npmjs.org/@babel/generator/-/generator-7.28.0.tgz",
++      "integrity": "sha512-lJjzvrbEeWrhB4P3QBsH7tey117PjLZnDbLiQEKjQ/fNJTjuq4HSqgFA+UNSwZT8D7dxxbnuSBMsa1lrWzKlQg==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+-        "@babel/parser": "^7.27.5",
+-        "@babel/types": "^7.27.3",
+-        "@jridgewell/gen-mapping": "^0.3.5",
+-        "@jridgewell/trace-mapping": "^0.3.25",
++        "@babel/parser": "^7.28.0",
++        "@babel/types": "^7.28.0",
++        "@jridgewell/gen-mapping": "^0.3.12",
++        "@jridgewell/trace-mapping": "^0.3.28",
+         "jsesc": "^3.0.2"
+       },
+       "engines": {
+@@ -2451,9 +2461,9 @@
+       }
+     },
+     "node_modules/@babel/types": {
+-      "version": "7.27.7",
+-      "resolved": "https://registry.npmjs.org/@babel/types/-/types-7.27.7.tgz",
+-      "integrity": "sha512-8OLQgDScAOHXnAz2cV+RfzzNMipuLVBz2biuAJFMV9bfkNf393je3VM8CLkjQodW5+iWsSJdSgSWT6rsZoXHPw==",
++      "version": "7.28.0",
++      "resolved": "https://registry.npmjs.org/@babel/types/-/types-7.28.0.tgz",
++      "integrity": "sha512-jYnje+JyZG5YThjHiF28oT4SIZLnYOcSBb6+SDaFIyzDVSkXQmQQYclJ2R+YxcdmK0AX6x1E5OQNtuh3jHDrUg==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+@@ -2910,13 +2920,13 @@
+       }
+     },
+     "node_modules/@inquirer/checkbox": {
+-      "version": "4.1.8",
+-      "resolved": "https://registry.npmjs.org/@inquirer/checkbox/-/checkbox-4.1.8.tgz",
+-      "integrity": "sha512-d/QAsnwuHX2OPolxvYcgSj7A9DO9H6gVOy2DvBTx+P2LH2iRTo/RSGV3iwCzW024nP9hw98KIuDmdyhZQj1UQg==",
++      "version": "4.1.9",
++      "resolved": "https://registry.npmjs.org/@inquirer/checkbox/-/checkbox-4.1.9.tgz",
++      "integrity": "sha512-DBJBkzI5Wx4jFaYm221LHvAhpKYkhVS0k9plqHwaHhofGNxvYB7J3Bz8w+bFJ05zaMb0sZNHo4KdmENQFlNTuQ==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+-        "@inquirer/core": "^10.1.13",
++        "@inquirer/core": "^10.1.14",
+         "@inquirer/figures": "^1.0.12",
+         "@inquirer/type": "^3.0.7",
+         "ansi-escapes": "^4.3.2",
+@@ -2957,9 +2967,9 @@
+       }
+     },
+     "node_modules/@inquirer/core": {
+-      "version": "10.1.13",
+-      "resolved": "https://registry.npmjs.org/@inquirer/core/-/core-10.1.13.tgz",
+-      "integrity": "sha512-1viSxebkYN2nJULlzCxES6G9/stgHSepZ9LqqfdIGPHj5OHhiBUXVS0a6R0bEC2A+VL4D9w6QB66ebCr6HGllA==",
++      "version": "10.1.14",
++      "resolved": "https://registry.npmjs.org/@inquirer/core/-/core-10.1.14.tgz",
++      "integrity": "sha512-Ma+ZpOJPewtIYl6HZHZckeX1STvDnHTCB2GVINNUlSEn2Am6LddWwfPkIGY0IUFVjUUrr/93XlBwTK6mfLjf0A==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+@@ -2985,13 +2995,13 @@
+       }
+     },
+     "node_modules/@inquirer/editor": {
+-      "version": "4.2.13",
+-      "resolved": "https://registry.npmjs.org/@inquirer/editor/-/editor-4.2.13.tgz",
+-      "integrity": "sha512-WbicD9SUQt/K8O5Vyk9iC2ojq5RHoCLK6itpp2fHsWe44VxxcA9z3GTWlvjSTGmMQpZr+lbVmrxdHcumJoLbMA==",
++      "version": "4.2.14",
++      "resolved": "https://registry.npmjs.org/@inquirer/editor/-/editor-4.2.14.tgz",
++      "integrity": "sha512-yd2qtLl4QIIax9DTMZ1ZN2pFrrj+yL3kgIWxm34SS6uwCr0sIhsNyudUjAo5q3TqI03xx4SEBkUJqZuAInp9uA==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+-        "@inquirer/core": "^10.1.13",
++        "@inquirer/core": "^10.1.14",
+         "@inquirer/type": "^3.0.7",
+         "external-editor": "^3.1.0"
+       },
+@@ -3008,13 +3018,13 @@
+       }
+     },
+     "node_modules/@inquirer/expand": {
+-      "version": "4.0.15",
+-      "resolved": "https://registry.npmjs.org/@inquirer/expand/-/expand-4.0.15.tgz",
+-      "integrity": "sha512-4Y+pbr/U9Qcvf+N/goHzPEXiHH8680lM3Dr3Y9h9FFw4gHS+zVpbj8LfbKWIb/jayIB4aSO4pWiBTrBYWkvi5A==",
++      "version": "4.0.16",
++      "resolved": "https://registry.npmjs.org/@inquirer/expand/-/expand-4.0.16.tgz",
++      "integrity": "sha512-oiDqafWzMtofeJyyGkb1CTPaxUkjIcSxePHHQCfif8t3HV9pHcw1Kgdw3/uGpDvaFfeTluwQtWiqzPVjAqS3zA==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+-        "@inquirer/core": "^10.1.13",
++        "@inquirer/core": "^10.1.14",
+         "@inquirer/type": "^3.0.7",
+         "yoctocolors-cjs": "^2.1.2"
+       },
+@@ -3041,13 +3051,13 @@
+       }
+     },
+     "node_modules/@inquirer/input": {
+-      "version": "4.1.12",
+-      "resolved": "https://registry.npmjs.org/@inquirer/input/-/input-4.1.12.tgz",
+-      "integrity": "sha512-xJ6PFZpDjC+tC1P8ImGprgcsrzQRsUh9aH3IZixm1lAZFK49UGHxM3ltFfuInN2kPYNfyoPRh+tU4ftsjPLKqQ==",
++      "version": "4.2.0",
++      "resolved": "https://registry.npmjs.org/@inquirer/input/-/input-4.2.0.tgz",
++      "integrity": "sha512-opqpHPB1NjAmDISi3uvZOTrjEEU5CWVu/HBkDby8t93+6UxYX0Z7Ps0Ltjm5sZiEbWenjubwUkivAEYQmy9xHw==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+-        "@inquirer/core": "^10.1.13",
++        "@inquirer/core": "^10.1.14",
+         "@inquirer/type": "^3.0.7"
+       },
+       "engines": {
+@@ -3063,13 +3073,13 @@
+       }
+     },
+     "node_modules/@inquirer/number": {
+-      "version": "3.0.15",
+-      "resolved": "https://registry.npmjs.org/@inquirer/number/-/number-3.0.15.tgz",
+-      "integrity": "sha512-xWg+iYfqdhRiM55MvqiTCleHzszpoigUpN5+t1OMcRkJrUrw7va3AzXaxvS+Ak7Gny0j2mFSTv2JJj8sMtbV2g==",
++      "version": "3.0.16",
++      "resolved": "https://registry.npmjs.org/@inquirer/number/-/number-3.0.16.tgz",
++      "integrity": "sha512-kMrXAaKGavBEoBYUCgualbwA9jWUx2TjMA46ek+pEKy38+LFpL9QHlTd8PO2kWPUgI/KB+qi02o4y2rwXbzr3Q==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+-        "@inquirer/core": "^10.1.13",
++        "@inquirer/core": "^10.1.14",
+         "@inquirer/type": "^3.0.7"
+       },
+       "engines": {
+@@ -3085,13 +3095,13 @@
+       }
+     },
+     "node_modules/@inquirer/password": {
+-      "version": "4.0.15",
+-      "resolved": "https://registry.npmjs.org/@inquirer/password/-/password-4.0.15.tgz",
+-      "integrity": "sha512-75CT2p43DGEnfGTaqFpbDC2p2EEMrq0S+IRrf9iJvYreMy5mAWj087+mdKyLHapUEPLjN10mNvABpGbk8Wdraw==",
++      "version": "4.0.16",
++      "resolved": "https://registry.npmjs.org/@inquirer/password/-/password-4.0.16.tgz",
++      "integrity": "sha512-g8BVNBj5Zeb5/Y3cSN+hDUL7CsIFDIuVxb9EPty3lkxBaYpjL5BNRKSYOF9yOLe+JOcKFd+TSVeADQ4iSY7rbg==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+-        "@inquirer/core": "^10.1.13",
++        "@inquirer/core": "^10.1.14",
+         "@inquirer/type": "^3.0.7",
+         "ansi-escapes": "^4.3.2"
+       },
+@@ -3138,13 +3148,13 @@
+       }
+     },
+     "node_modules/@inquirer/rawlist": {
+-      "version": "4.1.3",
+-      "resolved": "https://registry.npmjs.org/@inquirer/rawlist/-/rawlist-4.1.3.tgz",
+-      "integrity": "sha512-7XrV//6kwYumNDSsvJIPeAqa8+p7GJh7H5kRuxirct2cgOcSWwwNGoXDRgpNFbY/MG2vQ4ccIWCi8+IXXyFMZA==",
++      "version": "4.1.4",
++      "resolved": "https://registry.npmjs.org/@inquirer/rawlist/-/rawlist-4.1.4.tgz",
++      "integrity": "sha512-5GGvxVpXXMmfZNtvWw4IsHpR7RzqAR624xtkPd1NxxlV5M+pShMqzL4oRddRkg8rVEOK9fKdJp1jjVML2Lr7TQ==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+-        "@inquirer/core": "^10.1.13",
++        "@inquirer/core": "^10.1.14",
+         "@inquirer/type": "^3.0.7",
+         "yoctocolors-cjs": "^2.1.2"
+       },
+@@ -3161,13 +3171,13 @@
+       }
+     },
+     "node_modules/@inquirer/search": {
+-      "version": "3.0.15",
+-      "resolved": "https://registry.npmjs.org/@inquirer/search/-/search-3.0.15.tgz",
+-      "integrity": "sha512-YBMwPxYBrADqyvP4nNItpwkBnGGglAvCLVW8u4pRmmvOsHUtCAUIMbUrLX5B3tFL1/WsLGdQ2HNzkqswMs5Uaw==",
++      "version": "3.0.16",
++      "resolved": "https://registry.npmjs.org/@inquirer/search/-/search-3.0.16.tgz",
++      "integrity": "sha512-POCmXo+j97kTGU6aeRjsPyuCpQQfKcMXdeTMw708ZMtWrj5aykZvlUxH4Qgz3+Y1L/cAVZsSpA+UgZCu2GMOMg==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+-        "@inquirer/core": "^10.1.13",
++        "@inquirer/core": "^10.1.14",
+         "@inquirer/figures": "^1.0.12",
+         "@inquirer/type": "^3.0.7",
+         "yoctocolors-cjs": "^2.1.2"
+@@ -3185,13 +3195,13 @@
+       }
+     },
+     "node_modules/@inquirer/select": {
+-      "version": "4.2.3",
+-      "resolved": "https://registry.npmjs.org/@inquirer/select/-/select-4.2.3.tgz",
+-      "integrity": "sha512-OAGhXU0Cvh0PhLz9xTF/kx6g6x+sP+PcyTiLvCrewI99P3BBeexD+VbuwkNDvqGkk3y2h5ZiWLeRP7BFlhkUDg==",
++      "version": "4.2.4",
++      "resolved": "https://registry.npmjs.org/@inquirer/select/-/select-4.2.4.tgz",
++      "integrity": "sha512-unTppUcTjmnbl/q+h8XeQDhAqIOmwWYWNyiiP2e3orXrg6tOaa5DHXja9PChCSbChOsktyKgOieRZFnajzxoBg==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+-        "@inquirer/core": "^10.1.13",
++        "@inquirer/core": "^10.1.14",
+         "@inquirer/figures": "^1.0.12",
+         "@inquirer/type": "^3.0.7",
+         "ansi-escapes": "^4.3.2",
+@@ -3325,9 +3335,9 @@
+       }
+     },
+     "node_modules/@jridgewell/gen-mapping": {
+-      "version": "0.3.10",
+-      "resolved": "https://registry.npmjs.org/@jridgewell/gen-mapping/-/gen-mapping-0.3.10.tgz",
+-      "integrity": "sha512-HM2F4B9N4cA0RH2KQiIZOHAZqtP4xGS4IZ+SFe1SIbO4dyjf9MTY2Bo3vHYnm0hglWfXqBrzUBSa+cJfl3Xvrg==",
++      "version": "0.3.12",
++      "resolved": "https://registry.npmjs.org/@jridgewell/gen-mapping/-/gen-mapping-0.3.12.tgz",
++      "integrity": "sha512-OuLGC46TjB5BbN1dH8JULVVZY4WTdkF7tV9Ys6wLL1rubZnCMstOhNHueU5bLCrnRuDhKPDM4g6sw4Bel5Gzqg==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+@@ -3346,9 +3356,9 @@
+       }
+     },
+     "node_modules/@jridgewell/source-map": {
+-      "version": "0.3.8",
+-      "resolved": "https://registry.npmjs.org/@jridgewell/source-map/-/source-map-0.3.8.tgz",
+-      "integrity": "sha512-3EDAPd0B8X1gsQQgGHU8vyxSp2MB414z3roN67fY7nI0GV3GDthHfaWcbCfrC95tpAzA5xUvAuoO9Dxx/ywwRQ==",
++      "version": "0.3.10",
++      "resolved": "https://registry.npmjs.org/@jridgewell/source-map/-/source-map-0.3.10.tgz",
++      "integrity": "sha512-0pPkgz9dY+bijgistcTTJ5mR+ocqRXLuhXHYdzoMmmoJ2C9S46RCm2GMUbatPEUK9Yjy26IrAy8D/M00lLkv+Q==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+@@ -3357,16 +3367,16 @@
+       }
+     },
+     "node_modules/@jridgewell/sourcemap-codec": {
+-      "version": "1.5.2",
+-      "resolved": "https://registry.npmjs.org/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.2.tgz",
+-      "integrity": "sha512-gKYheCylLIedI+CSZoDtGkFV9YEBxRRVcfCH7OfAqh4TyUyRjEE6WVE/aXDXX0p8BIe/QgLcaAoI0220KRRFgg==",
++      "version": "1.5.4",
++      "resolved": "https://registry.npmjs.org/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.4.tgz",
++      "integrity": "sha512-VT2+G1VQs/9oz078bLrYbecdZKs912zQlkelYpuf+SXF+QvZDYJlbx/LSx+meSAwdDFnF8FVXW92AVjjkVmgFw==",
+       "dev": true,
+       "license": "MIT"
+     },
+     "node_modules/@jridgewell/trace-mapping": {
+-      "version": "0.3.27",
+-      "resolved": "https://registry.npmjs.org/@jridgewell/trace-mapping/-/trace-mapping-0.3.27.tgz",
+-      "integrity": "sha512-VO95AxtSFMelbg3ouljAYnfvTEwSWVt/2YLf+U5Ejd8iT5mXE2Sa/1LGyvySMne2CGsepGLI7KpF3EzE3Aq9Mg==",
++      "version": "0.3.29",
++      "resolved": "https://registry.npmjs.org/@jridgewell/trace-mapping/-/trace-mapping-0.3.29.tgz",
++      "integrity": "sha512-uw6guiW/gcAGPDhLmd77/6lW8QLeiV5RUTsAX46Db6oLhGaVj4lhnPwb184s1bkc8kdVg/+h988dro8GRDpmYQ==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+@@ -3646,9 +3656,9 @@
+       ]
+     },
+     "node_modules/@napi-rs/nice": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice/-/nice-1.0.1.tgz",
+-      "integrity": "sha512-zM0mVWSXE0a0h9aKACLwKmD6nHcRiKrPpCfvaKqG1CqDEyjEawId0ocXxVzPMCAm6kkWr2P025msfxXEnt8UGQ==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice/-/nice-1.0.4.tgz",
++      "integrity": "sha512-Sqih1YARrmMoHlXGgI9JrrgkzxcaaEso0AH+Y7j8NHonUs+xe4iDsgC3IBIDNdzEewbNpccNN6hip+b5vmyRLw==",
+       "dev": true,
+       "license": "MIT",
+       "optional": true,
+@@ -3660,28 +3670,28 @@
+         "url": "https://github.com/sponsors/Brooooooklyn"
+       },
+       "optionalDependencies": {
+-        "@napi-rs/nice-android-arm-eabi": "1.0.1",
+-        "@napi-rs/nice-android-arm64": "1.0.1",
+-        "@napi-rs/nice-darwin-arm64": "1.0.1",
+-        "@napi-rs/nice-darwin-x64": "1.0.1",
+-        "@napi-rs/nice-freebsd-x64": "1.0.1",
+-        "@napi-rs/nice-linux-arm-gnueabihf": "1.0.1",
+-        "@napi-rs/nice-linux-arm64-gnu": "1.0.1",
+-        "@napi-rs/nice-linux-arm64-musl": "1.0.1",
+-        "@napi-rs/nice-linux-ppc64-gnu": "1.0.1",
+-        "@napi-rs/nice-linux-riscv64-gnu": "1.0.1",
+-        "@napi-rs/nice-linux-s390x-gnu": "1.0.1",
+-        "@napi-rs/nice-linux-x64-gnu": "1.0.1",
+-        "@napi-rs/nice-linux-x64-musl": "1.0.1",
+-        "@napi-rs/nice-win32-arm64-msvc": "1.0.1",
+-        "@napi-rs/nice-win32-ia32-msvc": "1.0.1",
+-        "@napi-rs/nice-win32-x64-msvc": "1.0.1"
++        "@napi-rs/nice-android-arm-eabi": "1.0.4",
++        "@napi-rs/nice-android-arm64": "1.0.4",
++        "@napi-rs/nice-darwin-arm64": "1.0.4",
++        "@napi-rs/nice-darwin-x64": "1.0.4",
++        "@napi-rs/nice-freebsd-x64": "1.0.4",
++        "@napi-rs/nice-linux-arm-gnueabihf": "1.0.4",
++        "@napi-rs/nice-linux-arm64-gnu": "1.0.4",
++        "@napi-rs/nice-linux-arm64-musl": "1.0.4",
++        "@napi-rs/nice-linux-ppc64-gnu": "1.0.4",
++        "@napi-rs/nice-linux-riscv64-gnu": "1.0.4",
++        "@napi-rs/nice-linux-s390x-gnu": "1.0.4",
++        "@napi-rs/nice-linux-x64-gnu": "1.0.4",
++        "@napi-rs/nice-linux-x64-musl": "1.0.4",
++        "@napi-rs/nice-win32-arm64-msvc": "1.0.4",
++        "@napi-rs/nice-win32-ia32-msvc": "1.0.4",
++        "@napi-rs/nice-win32-x64-msvc": "1.0.4"
+       }
+     },
+     "node_modules/@napi-rs/nice-android-arm-eabi": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-android-arm-eabi/-/nice-android-arm-eabi-1.0.1.tgz",
+-      "integrity": "sha512-5qpvOu5IGwDo7MEKVqqyAxF90I6aLj4n07OzpARdgDRfz8UbBztTByBp0RC59r3J1Ij8uzYi6jI7r5Lws7nn6w==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-android-arm-eabi/-/nice-android-arm-eabi-1.0.4.tgz",
++      "integrity": "sha512-OZFMYUkih4g6HCKTjqJHhMUlgvPiDuSLZPbPBWHLjKmFTv74COzRlq/gwHtmEVaR39mJQ6ZyttDl2HNMUbLVoA==",
+       "cpu": [
+         "arm"
+       ],
+@@ -3696,9 +3706,9 @@
+       }
+     },
+     "node_modules/@napi-rs/nice-android-arm64": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-android-arm64/-/nice-android-arm64-1.0.1.tgz",
+-      "integrity": "sha512-GqvXL0P8fZ+mQqG1g0o4AO9hJjQaeYG84FRfZaYjyJtZZZcMjXW5TwkL8Y8UApheJgyE13TQ4YNUssQaTgTyvA==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-android-arm64/-/nice-android-arm64-1.0.4.tgz",
++      "integrity": "sha512-k8u7cjeA64vQWXZcRrPbmwjH8K09CBnNaPnI9L1D5N6iMPL3XYQzLcN6WwQonfcqCDv5OCY3IqX89goPTV4KMw==",
+       "cpu": [
+         "arm64"
+       ],
+@@ -3713,9 +3723,9 @@
+       }
+     },
+     "node_modules/@napi-rs/nice-darwin-arm64": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-darwin-arm64/-/nice-darwin-arm64-1.0.1.tgz",
+-      "integrity": "sha512-91k3HEqUl2fsrz/sKkuEkscj6EAj3/eZNCLqzD2AA0TtVbkQi8nqxZCZDMkfklULmxLkMxuUdKe7RvG/T6s2AA==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-darwin-arm64/-/nice-darwin-arm64-1.0.4.tgz",
++      "integrity": "sha512-GsLdQvUcuVzoyzmtjsThnpaVEizAqH5yPHgnsBmq3JdVoVZHELFo7PuJEdfOH1DOHi2mPwB9sCJEstAYf3XCJA==",
+       "cpu": [
+         "arm64"
+       ],
+@@ -3730,9 +3740,9 @@
+       }
+     },
+     "node_modules/@napi-rs/nice-darwin-x64": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-darwin-x64/-/nice-darwin-x64-1.0.1.tgz",
+-      "integrity": "sha512-jXnMleYSIR/+TAN/p5u+NkCA7yidgswx5ftqzXdD5wgy/hNR92oerTXHc0jrlBisbd7DpzoaGY4cFD7Sm5GlgQ==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-darwin-x64/-/nice-darwin-x64-1.0.4.tgz",
++      "integrity": "sha512-1y3gyT3e5zUY5SxRl3QDtJiWVsbkmhtUHIYwdWWIQ3Ia+byd/IHIEpqAxOGW1nhhnIKfTCuxBadHQb+yZASVoA==",
+       "cpu": [
+         "x64"
+       ],
+@@ -3747,9 +3757,9 @@
+       }
+     },
+     "node_modules/@napi-rs/nice-freebsd-x64": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-freebsd-x64/-/nice-freebsd-x64-1.0.1.tgz",
+-      "integrity": "sha512-j+iJ/ezONXRQsVIB/FJfwjeQXX7A2tf3gEXs4WUGFrJjpe/z2KB7sOv6zpkm08PofF36C9S7wTNuzHZ/Iiccfw==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-freebsd-x64/-/nice-freebsd-x64-1.0.4.tgz",
++      "integrity": "sha512-06oXzESPRdXUuzS8n2hGwhM2HACnDfl3bfUaSqLGImM8TA33pzDXgGL0e3If8CcFWT98aHows5Lk7xnqYNGFeA==",
+       "cpu": [
+         "x64"
+       ],
+@@ -3764,9 +3774,9 @@
+       }
+     },
+     "node_modules/@napi-rs/nice-linux-arm-gnueabihf": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-arm-gnueabihf/-/nice-linux-arm-gnueabihf-1.0.1.tgz",
+-      "integrity": "sha512-G8RgJ8FYXYkkSGQwywAUh84m946UTn6l03/vmEXBYNJxQJcD+I3B3k5jmjFG/OPiU8DfvxutOP8bi+F89MCV7Q==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-arm-gnueabihf/-/nice-linux-arm-gnueabihf-1.0.4.tgz",
++      "integrity": "sha512-CgklZ6g8WL4+EgVVkxkEvvsi2DSLf9QIloxWO0fvQyQBp6VguUSX3eHLeRpqwW8cRm2Hv/Q1+PduNk7VK37VZw==",
+       "cpu": [
+         "arm"
+       ],
+@@ -3781,9 +3791,9 @@
+       }
+     },
+     "node_modules/@napi-rs/nice-linux-arm64-gnu": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-arm64-gnu/-/nice-linux-arm64-gnu-1.0.1.tgz",
+-      "integrity": "sha512-IMDak59/W5JSab1oZvmNbrms3mHqcreaCeClUjwlwDr0m3BoR09ZiN8cKFBzuSlXgRdZ4PNqCYNeGQv7YMTjuA==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-arm64-gnu/-/nice-linux-arm64-gnu-1.0.4.tgz",
++      "integrity": "sha512-wdAJ7lgjhAlsANUCv0zi6msRwq+D4KDgU+GCCHssSxWmAERZa2KZXO0H2xdmoJ/0i03i6YfK/sWaZgUAyuW2oQ==",
+       "cpu": [
+         "arm64"
+       ],
+@@ -3798,9 +3808,9 @@
+       }
+     },
+     "node_modules/@napi-rs/nice-linux-arm64-musl": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-arm64-musl/-/nice-linux-arm64-musl-1.0.1.tgz",
+-      "integrity": "sha512-wG8fa2VKuWM4CfjOjjRX9YLIbysSVV1S3Kgm2Fnc67ap/soHBeYZa6AGMeR5BJAylYRjnoVOzV19Cmkco3QEPw==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-arm64-musl/-/nice-linux-arm64-musl-1.0.4.tgz",
++      "integrity": "sha512-4b1KYG+sriufhFrpUS9uNOEYYJqSfcbnwGx6uGX7JjrH8tELG90cOpCawz5THNIwlS3DhLgnCOcn0+4p6z26QA==",
+       "cpu": [
+         "arm64"
+       ],
+@@ -3815,9 +3825,9 @@
+       }
+     },
+     "node_modules/@napi-rs/nice-linux-ppc64-gnu": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-ppc64-gnu/-/nice-linux-ppc64-gnu-1.0.1.tgz",
+-      "integrity": "sha512-lxQ9WrBf0IlNTCA9oS2jg/iAjQyTI6JHzABV664LLrLA/SIdD+I1i3Mjf7TsnoUbgopBcCuDztVLfJ0q9ubf6Q==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-ppc64-gnu/-/nice-linux-ppc64-gnu-1.0.4.tgz",
++      "integrity": "sha512-iaf3vMRgr23oe1PUaKpxaH3DS0IMN0+N9iEiWVwYPm/U15vZFYdqVegGfN2PzrZLUl5lc8ZxbmEKDfuqslhAMA==",
+       "cpu": [
+         "ppc64"
+       ],
+@@ -3832,9 +3842,9 @@
+       }
+     },
+     "node_modules/@napi-rs/nice-linux-riscv64-gnu": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-riscv64-gnu/-/nice-linux-riscv64-gnu-1.0.1.tgz",
+-      "integrity": "sha512-3xs69dO8WSWBb13KBVex+yvxmUeEsdWexxibqskzoKaWx9AIqkMbWmE2npkazJoopPKX2ULKd8Fm9veEn0g4Ig==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-riscv64-gnu/-/nice-linux-riscv64-gnu-1.0.4.tgz",
++      "integrity": "sha512-UXoREY6Yw6rHrGuTwQgBxpfjK34t6mTjibE9/cXbefL9AuUCJ9gEgwNKZiONuR5QGswChqo9cnthjdKkYyAdDg==",
+       "cpu": [
+         "riscv64"
+       ],
+@@ -3849,9 +3859,9 @@
+       }
+     },
+     "node_modules/@napi-rs/nice-linux-s390x-gnu": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-s390x-gnu/-/nice-linux-s390x-gnu-1.0.1.tgz",
+-      "integrity": "sha512-lMFI3i9rlW7hgToyAzTaEybQYGbQHDrpRkg+1gJWEpH0PLAQoZ8jiY0IzakLfNWnVda1eTYYlxxFYzW8Rqczkg==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-s390x-gnu/-/nice-linux-s390x-gnu-1.0.4.tgz",
++      "integrity": "sha512-eFbgYCRPmsqbYPAlLYU5hYTNbogmIDUvknilehHsFhCH1+0/kN87lP+XaLT0Yeq4V/rpwChSd9vlz4muzFArtw==",
+       "cpu": [
+         "s390x"
+       ],
+@@ -3866,9 +3876,9 @@
+       }
+     },
+     "node_modules/@napi-rs/nice-linux-x64-gnu": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-x64-gnu/-/nice-linux-x64-gnu-1.0.1.tgz",
+-      "integrity": "sha512-XQAJs7DRN2GpLN6Fb+ZdGFeYZDdGl2Fn3TmFlqEL5JorgWKrQGRUrpGKbgZ25UeZPILuTKJ+OowG2avN8mThBA==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-x64-gnu/-/nice-linux-x64-gnu-1.0.4.tgz",
++      "integrity": "sha512-4T3E6uTCwWT6IPnwuPcWVz3oHxvEp/qbrCxZhsgzwTUBEwu78EGNXGdHfKJQt3soth89MLqZJw+Zzvnhrsg1mQ==",
+       "cpu": [
+         "x64"
+       ],
+@@ -3883,9 +3893,9 @@
+       }
+     },
+     "node_modules/@napi-rs/nice-linux-x64-musl": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-x64-musl/-/nice-linux-x64-musl-1.0.1.tgz",
+-      "integrity": "sha512-/rodHpRSgiI9o1faq9SZOp/o2QkKQg7T+DK0R5AkbnI/YxvAIEHf2cngjYzLMQSQgUhxym+LFr+UGZx4vK4QdQ==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-linux-x64-musl/-/nice-linux-x64-musl-1.0.4.tgz",
++      "integrity": "sha512-NtbBkAeyBPLvCBkWtwkKXkNSn677eaT0cX3tygq+2qVv71TmHgX4gkX6o9BXjlPzdgPGwrUudavCYPT9tzkEqQ==",
+       "cpu": [
+         "x64"
+       ],
+@@ -3900,9 +3910,9 @@
+       }
+     },
+     "node_modules/@napi-rs/nice-win32-arm64-msvc": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-win32-arm64-msvc/-/nice-win32-arm64-msvc-1.0.1.tgz",
+-      "integrity": "sha512-rEcz9vZymaCB3OqEXoHnp9YViLct8ugF+6uO5McifTedjq4QMQs3DHz35xBEGhH3gJWEsXMUbzazkz5KNM5YUg==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-win32-arm64-msvc/-/nice-win32-arm64-msvc-1.0.4.tgz",
++      "integrity": "sha512-vubOe3i+YtSJGEk/++73y+TIxbuVHi+W8ZzrRm2eETCjCRwNlgbfToQZ85dSA+4iBB/NJRGNp+O4hfdbbttZWA==",
+       "cpu": [
+         "arm64"
+       ],
+@@ -3917,9 +3927,9 @@
+       }
+     },
+     "node_modules/@napi-rs/nice-win32-ia32-msvc": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-win32-ia32-msvc/-/nice-win32-ia32-msvc-1.0.1.tgz",
+-      "integrity": "sha512-t7eBAyPUrWL8su3gDxw9xxxqNwZzAqKo0Szv3IjVQd1GpXXVkb6vBBQUuxfIYaXMzZLwlxRQ7uzM2vdUE9ULGw==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-win32-ia32-msvc/-/nice-win32-ia32-msvc-1.0.4.tgz",
++      "integrity": "sha512-BMOVrUDZeg1RNRKVlh4eyLv5djAAVLiSddfpuuQ47EFjBcklg0NUeKMFKNrKQR4UnSn4HAiACLD7YK7koskwmg==",
+       "cpu": [
+         "ia32"
+       ],
+@@ -3934,9 +3944,9 @@
+       }
+     },
+     "node_modules/@napi-rs/nice-win32-x64-msvc": {
+-      "version": "1.0.1",
+-      "resolved": "https://registry.npmjs.org/@napi-rs/nice-win32-x64-msvc/-/nice-win32-x64-msvc-1.0.1.tgz",
+-      "integrity": "sha512-JlF+uDcatt3St2ntBG8H02F1mM45i5SF9W+bIKiReVE6wiy3o16oBP/yxt+RZ+N6LbCImJXJ6bXNO2kn9AXicg==",
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/nice-win32-x64-msvc/-/nice-win32-x64-msvc-1.0.4.tgz",
++      "integrity": "sha512-kCNk6HcRZquhw/whwh4rHsdPyOSCQCgnVDVik+Y9cuSVTDy3frpiCJTScJqPPS872h4JgZKkr/+CwcwttNEo9Q==",
+       "cpu": [
+         "x64"
+       ],
+@@ -4837,9 +4847,9 @@
+       ]
+     },
+     "node_modules/@rollup/rollup-linux-riscv64-musl": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-riscv64-musl/-/rollup-linux-riscv64-musl-4.44.1.tgz",
+-      "integrity": "sha512-ppn5llVGgrZw7yxbIm8TTvtj1EoPgYUAbfw0uDjIOzzoqlZlZrLJ/KuiE7uf5EpTpCTrNt1EdtzF0naMm0wGYg==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-riscv64-musl/-/rollup-linux-riscv64-musl-4.44.2.tgz",
++      "integrity": "sha512-e6vEbgaaqz2yEHqtkPXa28fFuBGmUJ0N2dOJK8YUfijejInt9gfCSA7YDdJ4nYlv67JfP3+PSWFX4IVw/xRIPg==",
+       "cpu": [
+         "riscv64"
+       ],
+@@ -5248,9 +5258,9 @@
+       "license": "MIT"
+     },
+     "node_modules/@types/node": {
+-      "version": "24.0.7",
+-      "resolved": "https://registry.npmjs.org/@types/node/-/node-24.0.7.tgz",
+-      "integrity": "sha512-YIEUUr4yf8q8oQoXPpSlnvKNVKDQlPMWrmOcgzoduo7kvA2UF0/BwJ/eMKFTiTtkNL17I0M6Xe2tvwFU7be6iw==",
++      "version": "24.0.10",
++      "resolved": "https://registry.npmjs.org/@types/node/-/node-24.0.10.tgz",
++      "integrity": "sha512-ENHwaH+JIRTDIEEbDK6QSQntAYGtbvdDXnMXnZaZ6k13Du1dPMmprkEHIL7ok2Wl2aZevetwTAb5S+7yIF+enA==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+@@ -5258,9 +5268,9 @@
+       }
+     },
+     "node_modules/@types/node-forge": {
+-      "version": "1.3.11",
+-      "resolved": "https://registry.npmjs.org/@types/node-forge/-/node-forge-1.3.11.tgz",
+-      "integrity": "sha512-FQx220y22OKNTqaByeBGqHWYz4cl94tpcxeFdvBo3wjG6XPBuZ0BNgNZRV5J5TFmmcsJ4IzsLkmGRiQbnYsBEQ==",
++      "version": "1.3.12",
++      "resolved": "https://registry.npmjs.org/@types/node-forge/-/node-forge-1.3.12.tgz",
++      "integrity": "sha512-a0ToKlRVnUw3aXKQq2F+krxZKq7B8LEQijzPn5RdFAMatARD2JX9o8FBpMXOOrjob0uc13aN+V/AXniOXW4d9A==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+@@ -6336,9 +6346,9 @@
+       }
+     },
+     "node_modules/caniuse-lite": {
+-      "version": "1.0.30001726",
+-      "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001726.tgz",
+-      "integrity": "sha512-VQAUIUzBiZ/UnlM28fSp2CRF3ivUn1BWEvxMcVTNwpw91Py1pGbPIyIKtd+tzct9C3ouceCVdGAXxZOpZAsgdw==",
++      "version": "1.0.30001727",
++      "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001727.tgz",
++      "integrity": "sha512-pB68nIHmbN6L/4C6MH1DokyR3bYqFwjaSs/sWDHGj4CTcFtQUQMuJftVwWkXq7mNWOybD3KhUv3oWHoGxgP14Q==",
+       "dev": true,
+       "funding": [
+         {
+@@ -7257,9 +7267,9 @@
+       "license": "MIT"
+     },
+     "node_modules/electron-to-chromium": {
+-      "version": "1.5.177",
+-      "resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.177.tgz",
+-      "integrity": "sha512-7EH2G59nLsEMj97fpDuvVcYi6lwTcM1xuWw3PssD8xzboAW7zj7iB3COEEEATUfjLHrs5uKBLQT03V/8URx06g==",
++      "version": "1.5.179",
++      "resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.179.tgz",
++      "integrity": "sha512-UWKi/EbBopgfFsc5k61wFpV7WrnnSlSzW/e2XcBmS6qKYTivZlLtoll5/rdqRTxGglGHkmkW0j0pFNJG10EUIQ==",
+       "dev": true,
+       "license": "ISC"
+     },
+@@ -8249,16 +8259,6 @@
+       "dev": true,
+       "license": "BSD-2-Clause"
+     },
+-    "node_modules/globals": {
+-      "version": "11.12.0",
+-      "resolved": "https://registry.npmjs.org/globals/-/globals-11.12.0.tgz",
+-      "integrity": "sha512-WOBp/EEGUiIsJSp7wcv/y6MO+lV9UoncWqxuFfm8eBwzWNgyfBd6Gz+IeKQ9jCmyhoH99g15M3T+QaVHFjizVA==",
+-      "dev": true,
+-      "license": "MIT",
+-      "engines": {
+-        "node": ">=4"
+-      }
+-    },
+     "node_modules/globby": {
+       "version": "14.1.0",
+       "resolved": "https://registry.npmjs.org/globby/-/globby-14.1.0.tgz",
+@@ -13565,15 +13565,15 @@
+       "license": "0BSD"
+     },
+     "node_modules/tuf-js": {
+-      "version": "3.0.1",
+-      "resolved": "https://registry.npmjs.org/tuf-js/-/tuf-js-3.0.1.tgz",
+-      "integrity": "sha512-+68OP1ZzSF84rTckf3FA95vJ1Zlx/uaXyiiKyPd1pA4rZNkpEvDAKmsu1xUSmbF/chCRYgZ6UZkDwC7PmzmAyA==",
++      "version": "3.1.0",
++      "resolved": "https://registry.npmjs.org/tuf-js/-/tuf-js-3.1.0.tgz",
++      "integrity": "sha512-3T3T04WzowbwV2FDiGXBbr81t64g1MUGGJRgT4x5o97N+8ArdhVCAF9IxFrxuSJmM3E5Asn7nKHkao0ibcZXAg==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+         "@tufjs/models": "3.0.1",
+-        "debug": "^4.3.6",
+-        "make-fetch-happen": "^14.0.1"
++        "debug": "^4.4.1",
++        "make-fetch-happen": "^14.0.3"
+       },
+       "engines": {
+         "node": "^18.17.0 || >=20.5.0"
+@@ -13930,9 +13930,9 @@
+       }
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-android-arm-eabi": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-android-arm-eabi/-/rollup-android-arm-eabi-4.44.1.tgz",
+-      "integrity": "sha512-JAcBr1+fgqx20m7Fwe1DxPUl/hPkee6jA6Pl7n1v2EFiktAHenTaXl5aIFjUIEsfn9w3HE4gK1lEgNGMzBDs1w==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-android-arm-eabi/-/rollup-android-arm-eabi-4.44.2.tgz",
++      "integrity": "sha512-g0dF8P1e2QYPOj1gu7s/3LVP6kze9A7m6x0BZ9iTdXK8N5c2V7cpBKHV3/9A4Zd8xxavdhK0t4PnqjkqVmUc9Q==",
+       "cpu": [
+         "arm"
+       ],
+@@ -13945,9 +13945,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-android-arm64": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-android-arm64/-/rollup-android-arm64-4.44.1.tgz",
+-      "integrity": "sha512-RurZetXqTu4p+G0ChbnkwBuAtwAbIwJkycw1n6GvlGlBuS4u5qlr5opix8cBAYFJgaY05TWtM+LaoFggUmbZEQ==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-android-arm64/-/rollup-android-arm64-4.44.2.tgz",
++      "integrity": "sha512-Yt5MKrOosSbSaAK5Y4J+vSiID57sOvpBNBR6K7xAaQvk3MkcNVV0f9fE20T+41WYN8hDn6SGFlFrKudtx4EoxA==",
+       "cpu": [
+         "arm64"
+       ],
+@@ -13960,9 +13960,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-darwin-arm64": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-darwin-arm64/-/rollup-darwin-arm64-4.44.1.tgz",
+-      "integrity": "sha512-fM/xPesi7g2M7chk37LOnmnSTHLG/v2ggWqKj3CCA1rMA4mm5KVBT1fNoswbo1JhPuNNZrVwpTvlCVggv8A2zg==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-darwin-arm64/-/rollup-darwin-arm64-4.44.2.tgz",
++      "integrity": "sha512-EsnFot9ZieM35YNA26nhbLTJBHD0jTwWpPwmRVDzjylQT6gkar+zenfb8mHxWpRrbn+WytRRjE0WKsfaxBkVUA==",
+       "cpu": [
+         "arm64"
+       ],
+@@ -13975,9 +13975,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-darwin-x64": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-darwin-x64/-/rollup-darwin-x64-4.44.1.tgz",
+-      "integrity": "sha512-gDnWk57urJrkrHQ2WVx9TSVTH7lSlU7E3AFqiko+bgjlh78aJ88/3nycMax52VIVjIm3ObXnDL2H00e/xzoipw==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-darwin-x64/-/rollup-darwin-x64-4.44.2.tgz",
++      "integrity": "sha512-dv/t1t1RkCvJdWWxQ2lWOO+b7cMsVw5YFaS04oHpZRWehI1h0fV1gF4wgGCTyQHHjJDfbNpwOi6PXEafRBBezw==",
+       "cpu": [
+         "x64"
+       ],
+@@ -13990,9 +13990,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-freebsd-arm64": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-freebsd-arm64/-/rollup-freebsd-arm64-4.44.1.tgz",
+-      "integrity": "sha512-wnFQmJ/zPThM5zEGcnDcCJeYJgtSLjh1d//WuHzhf6zT3Md1BvvhJnWoy+HECKu2bMxaIcfWiu3bJgx6z4g2XA==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-freebsd-arm64/-/rollup-freebsd-arm64-4.44.2.tgz",
++      "integrity": "sha512-W4tt4BLorKND4qeHElxDoim0+BsprFTwb+vriVQnFFtT/P6v/xO5I99xvYnVzKWrK6j7Hb0yp3x7V5LUbaeOMg==",
+       "cpu": [
+         "arm64"
+       ],
+@@ -14005,9 +14005,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-freebsd-x64": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-freebsd-x64/-/rollup-freebsd-x64-4.44.1.tgz",
+-      "integrity": "sha512-uBmIxoJ4493YATvU2c0upGz87f99e3wop7TJgOA/bXMFd2SvKCI7xkxY/5k50bv7J6dw1SXT4MQBQSLn8Bb/Uw==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-freebsd-x64/-/rollup-freebsd-x64-4.44.2.tgz",
++      "integrity": "sha512-tdT1PHopokkuBVyHjvYehnIe20fxibxFCEhQP/96MDSOcyjM/shlTkZZLOufV3qO6/FQOSiJTBebhVc12JyPTA==",
+       "cpu": [
+         "x64"
+       ],
+@@ -14020,9 +14020,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-linux-arm-gnueabihf": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-arm-gnueabihf/-/rollup-linux-arm-gnueabihf-4.44.1.tgz",
+-      "integrity": "sha512-n0edDmSHlXFhrlmTK7XBuwKlG5MbS7yleS1cQ9nn4kIeW+dJH+ExqNgQ0RrFRew8Y+0V/x6C5IjsHrJmiHtkxQ==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-arm-gnueabihf/-/rollup-linux-arm-gnueabihf-4.44.2.tgz",
++      "integrity": "sha512-+xmiDGGaSfIIOXMzkhJ++Oa0Gwvl9oXUeIiwarsdRXSe27HUIvjbSIpPxvnNsRebsNdUo7uAiQVgBD1hVriwSQ==",
+       "cpu": [
+         "arm"
+       ],
+@@ -14035,9 +14035,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-linux-arm-musleabihf": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-arm-musleabihf/-/rollup-linux-arm-musleabihf-4.44.1.tgz",
+-      "integrity": "sha512-8WVUPy3FtAsKSpyk21kV52HCxB+me6YkbkFHATzC2Yd3yuqHwy2lbFL4alJOLXKljoRw08Zk8/xEj89cLQ/4Nw==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-arm-musleabihf/-/rollup-linux-arm-musleabihf-4.44.2.tgz",
++      "integrity": "sha512-bDHvhzOfORk3wt8yxIra8N4k/N0MnKInCW5OGZaeDYa/hMrdPaJzo7CSkjKZqX4JFUWjUGm88lI6QJLCM7lDrA==",
+       "cpu": [
+         "arm"
+       ],
+@@ -14050,9 +14050,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-linux-arm64-gnu": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-arm64-gnu/-/rollup-linux-arm64-gnu-4.44.1.tgz",
+-      "integrity": "sha512-yuktAOaeOgorWDeFJggjuCkMGeITfqvPgkIXhDqsfKX8J3jGyxdDZgBV/2kj/2DyPaLiX6bPdjJDTu9RB8lUPQ==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-arm64-gnu/-/rollup-linux-arm64-gnu-4.44.2.tgz",
++      "integrity": "sha512-NMsDEsDiYghTbeZWEGnNi4F0hSbGnsuOG+VnNvxkKg0IGDvFh7UVpM/14mnMwxRxUf9AdAVJgHPvKXf6FpMB7A==",
+       "cpu": [
+         "arm64"
+       ],
+@@ -14065,9 +14065,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-linux-arm64-musl": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-arm64-musl/-/rollup-linux-arm64-musl-4.44.1.tgz",
+-      "integrity": "sha512-W+GBM4ifET1Plw8pdVaecwUgxmiH23CfAUj32u8knq0JPFyK4weRy6H7ooxYFD19YxBulL0Ktsflg5XS7+7u9g==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-arm64-musl/-/rollup-linux-arm64-musl-4.44.2.tgz",
++      "integrity": "sha512-lb5bxXnxXglVq+7imxykIp5xMq+idehfl+wOgiiix0191av84OqbjUED+PRC5OA8eFJYj5xAGcpAZ0pF2MnW+A==",
+       "cpu": [
+         "arm64"
+       ],
+@@ -14080,9 +14080,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-linux-loongarch64-gnu": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-loongarch64-gnu/-/rollup-linux-loongarch64-gnu-4.44.1.tgz",
+-      "integrity": "sha512-1zqnUEMWp9WrGVuVak6jWTl4fEtrVKfZY7CvcBmUUpxAJ7WcSowPSAWIKa/0o5mBL/Ij50SIf9tuirGx63Ovew==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-loongarch64-gnu/-/rollup-linux-loongarch64-gnu-4.44.2.tgz",
++      "integrity": "sha512-Yl5Rdpf9pIc4GW1PmkUGHdMtbx0fBLE1//SxDmuf3X0dUC57+zMepow2LK0V21661cjXdTn8hO2tXDdAWAqE5g==",
+       "cpu": [
+         "loong64"
+       ],
+@@ -14095,9 +14095,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-linux-powerpc64le-gnu": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-powerpc64le-gnu/-/rollup-linux-powerpc64le-gnu-4.44.1.tgz",
+-      "integrity": "sha512-Rl3JKaRu0LHIx7ExBAAnf0JcOQetQffaw34T8vLlg9b1IhzcBgaIdnvEbbsZq9uZp3uAH+JkHd20Nwn0h9zPjA==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-powerpc64le-gnu/-/rollup-linux-powerpc64le-gnu-4.44.2.tgz",
++      "integrity": "sha512-03vUDH+w55s680YYryyr78jsO1RWU9ocRMaeV2vMniJJW/6HhoTBwyyiiTPVHNWLnhsnwcQ0oH3S9JSBEKuyqw==",
+       "cpu": [
+         "ppc64"
+       ],
+@@ -14110,9 +14110,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-linux-riscv64-gnu": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-riscv64-gnu/-/rollup-linux-riscv64-gnu-4.44.1.tgz",
+-      "integrity": "sha512-j5akelU3snyL6K3N/iX7otLBIl347fGwmd95U5gS/7z6T4ftK288jKq3A5lcFKcx7wwzb5rgNvAg3ZbV4BqUSw==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-riscv64-gnu/-/rollup-linux-riscv64-gnu-4.44.2.tgz",
++      "integrity": "sha512-iYtAqBg5eEMG4dEfVlkqo05xMOk6y/JXIToRca2bAWuqjrJYJlx/I7+Z+4hSrsWU8GdJDFPL4ktV3dy4yBSrzg==",
+       "cpu": [
+         "riscv64"
+       ],
+@@ -14125,9 +14125,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-linux-s390x-gnu": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-s390x-gnu/-/rollup-linux-s390x-gnu-4.44.1.tgz",
+-      "integrity": "sha512-Hu6hEdix0oxtUma99jSP7xbvjkUM/ycke/AQQ4EC5g7jNRLLIwjcNwaUy95ZKBJJwg1ZowsclNnjYqzN4zwkAw==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-s390x-gnu/-/rollup-linux-s390x-gnu-4.44.2.tgz",
++      "integrity": "sha512-evFOtkmVdY3udE+0QKrV5wBx7bKI0iHz5yEVx5WqDJkxp9YQefy4Mpx3RajIVcM6o7jxTvVd/qpC1IXUhGc1Mw==",
+       "cpu": [
+         "s390x"
+       ],
+@@ -14140,9 +14140,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-linux-x64-gnu": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.44.1.tgz",
+-      "integrity": "sha512-EtnsrmZGomz9WxK1bR5079zee3+7a+AdFlghyd6VbAjgRJDbTANJ9dcPIPAi76uG05micpEL+gPGmAKYTschQw==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.44.2.tgz",
++      "integrity": "sha512-/bXb0bEsWMyEkIsUL2Yt5nFB5naLAwyOWMEviQfQY1x3l5WsLKgvZf66TM7UTfED6erckUVUJQ/jJ1FSpm3pRQ==",
+       "cpu": [
+         "x64"
+       ],
+@@ -14155,9 +14155,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-linux-x64-musl": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-x64-musl/-/rollup-linux-x64-musl-4.44.1.tgz",
+-      "integrity": "sha512-iAS4p+J1az6Usn0f8xhgL4PaU878KEtutP4hqw52I4IO6AGoyOkHCxcc4bqufv1tQLdDWFx8lR9YlwxKuv3/3g==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-x64-musl/-/rollup-linux-x64-musl-4.44.2.tgz",
++      "integrity": "sha512-3D3OB1vSSBXmkGEZR27uiMRNiwN08/RVAcBKwhUYPaiZ8bcvdeEwWPvbnXvvXHY+A/7xluzcN+kaiOFNiOZwWg==",
+       "cpu": [
+         "x64"
+       ],
+@@ -14170,9 +14170,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-win32-arm64-msvc": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-win32-arm64-msvc/-/rollup-win32-arm64-msvc-4.44.1.tgz",
+-      "integrity": "sha512-NtSJVKcXwcqozOl+FwI41OH3OApDyLk3kqTJgx8+gp6On9ZEt5mYhIsKNPGuaZr3p9T6NWPKGU/03Vw4CNU9qg==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-win32-arm64-msvc/-/rollup-win32-arm64-msvc-4.44.2.tgz",
++      "integrity": "sha512-VfU0fsMK+rwdK8mwODqYeM2hDrF2WiHaSmCBrS7gColkQft95/8tphyzv2EupVxn3iE0FI78wzffoULH1G+dkw==",
+       "cpu": [
+         "arm64"
+       ],
+@@ -14185,9 +14185,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-win32-ia32-msvc": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-win32-ia32-msvc/-/rollup-win32-ia32-msvc-4.44.1.tgz",
+-      "integrity": "sha512-JYA3qvCOLXSsnTR3oiyGws1Dm0YTuxAAeaYGVlGpUsHqloPcFjPg+X0Fj2qODGLNwQOAcCiQmHub/V007kiH5A==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-win32-ia32-msvc/-/rollup-win32-ia32-msvc-4.44.2.tgz",
++      "integrity": "sha512-+qMUrkbUurpE6DVRjiJCNGZBGo9xM4Y0FXU5cjgudWqIBWbcLkjE3XprJUsOFgC6xjBClwVa9k6O3A7K3vxb5Q==",
+       "cpu": [
+         "ia32"
+       ],
+@@ -14200,9 +14200,9 @@
+       "peer": true
+     },
+     "node_modules/vite/node_modules/@rollup/rollup-win32-x64-msvc": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.44.1.tgz",
+-      "integrity": "sha512-J8o22LuF0kTe7m+8PvW9wk3/bRq5+mRo5Dqo6+vXb7otCm3TPhYOJqOaQtGU9YMWQSL3krMnoOxMr0+9E6F3Ug==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.44.2.tgz",
++      "integrity": "sha512-3+QZROYfJ25PDcxFF66UEk8jGWigHJeecZILvkPkyQN7oc5BvFo4YEXFkOs154j3FTMp9mn9Ky8RCOwastduEA==",
+       "cpu": [
+         "x64"
+       ],
+@@ -14253,9 +14253,9 @@
+       }
+     },
+     "node_modules/vite/node_modules/rollup": {
+-      "version": "4.44.1",
+-      "resolved": "https://registry.npmjs.org/rollup/-/rollup-4.44.1.tgz",
+-      "integrity": "sha512-x8H8aPvD+xbl0Do8oez5f5o8eMS3trfCghc4HhLAnCkj7Vl0d1JWGs0UF/D886zLW2rOj2QymV/JcSSsw+XDNg==",
++      "version": "4.44.2",
++      "resolved": "https://registry.npmjs.org/rollup/-/rollup-4.44.2.tgz",
++      "integrity": "sha512-PVoapzTwSEcelaWGth3uR66u7ZRo6qhPHc0f2uRO9fX6XDVNrIiGYS0Pj9+R8yIIYSD/mCx2b16Ws9itljKSPg==",
+       "dev": true,
+       "license": "MIT",
+       "peer": true,
+@@ -14270,26 +14270,26 @@
+         "npm": ">=8.0.0"
+       },
+       "optionalDependencies": {
+-        "@rollup/rollup-android-arm-eabi": "4.44.1",
+-        "@rollup/rollup-android-arm64": "4.44.1",
+-        "@rollup/rollup-darwin-arm64": "4.44.1",
+-        "@rollup/rollup-darwin-x64": "4.44.1",
+-        "@rollup/rollup-freebsd-arm64": "4.44.1",
+-        "@rollup/rollup-freebsd-x64": "4.44.1",
+-        "@rollup/rollup-linux-arm-gnueabihf": "4.44.1",
+-        "@rollup/rollup-linux-arm-musleabihf": "4.44.1",
+-        "@rollup/rollup-linux-arm64-gnu": "4.44.1",
+-        "@rollup/rollup-linux-arm64-musl": "4.44.1",
+-        "@rollup/rollup-linux-loongarch64-gnu": "4.44.1",
+-        "@rollup/rollup-linux-powerpc64le-gnu": "4.44.1",
+-        "@rollup/rollup-linux-riscv64-gnu": "4.44.1",
+-        "@rollup/rollup-linux-riscv64-musl": "4.44.1",
+-        "@rollup/rollup-linux-s390x-gnu": "4.44.1",
+-        "@rollup/rollup-linux-x64-gnu": "4.44.1",
+-        "@rollup/rollup-linux-x64-musl": "4.44.1",
+-        "@rollup/rollup-win32-arm64-msvc": "4.44.1",
+-        "@rollup/rollup-win32-ia32-msvc": "4.44.1",
+-        "@rollup/rollup-win32-x64-msvc": "4.44.1",
++        "@rollup/rollup-android-arm-eabi": "4.44.2",
++        "@rollup/rollup-android-arm64": "4.44.2",
++        "@rollup/rollup-darwin-arm64": "4.44.2",
++        "@rollup/rollup-darwin-x64": "4.44.2",
++        "@rollup/rollup-freebsd-arm64": "4.44.2",
++        "@rollup/rollup-freebsd-x64": "4.44.2",
++        "@rollup/rollup-linux-arm-gnueabihf": "4.44.2",
++        "@rollup/rollup-linux-arm-musleabihf": "4.44.2",
++        "@rollup/rollup-linux-arm64-gnu": "4.44.2",
++        "@rollup/rollup-linux-arm64-musl": "4.44.2",
++        "@rollup/rollup-linux-loongarch64-gnu": "4.44.2",
++        "@rollup/rollup-linux-powerpc64le-gnu": "4.44.2",
++        "@rollup/rollup-linux-riscv64-gnu": "4.44.2",
++        "@rollup/rollup-linux-riscv64-musl": "4.44.2",
++        "@rollup/rollup-linux-s390x-gnu": "4.44.2",
++        "@rollup/rollup-linux-x64-gnu": "4.44.2",
++        "@rollup/rollup-linux-x64-musl": "4.44.2",
++        "@rollup/rollup-win32-arm64-msvc": "4.44.2",
++        "@rollup/rollup-win32-ia32-msvc": "4.44.2",
++        "@rollup/rollup-win32-x64-msvc": "4.44.2",
+         "fsevents": "~2.3.2"
+       }
+     },
+diff --git a/Frontend/patrimonials-app/src/app/app.module.ts b/Frontend/patrimonials-app/src/app/app.module.ts
+index 56bc41d..bc3b5df 100644
+--- a/Frontend/patrimonials-app/src/app/app.module.ts
++++ b/Frontend/patrimonials-app/src/app/app.module.ts
+@@ -1,7 +1,7 @@
+ import { NgModule } from '@angular/core';
+ import { BrowserModule } from '@angular/platform-browser';
+ import { HttpClientModule } from '@angular/common/http';
+-import { FormsModule } from '@angular/forms';
++import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+ import { AppRoutingModule } from './app-routing.module';
+ import { AppComponent } from './app.component';
+ import { LoginComponent } from './login/login.component';
+@@ -30,10 +30,10 @@ import { MantenimientoFinalizarComponent } from './mantenimiento/mantenimiento-f
+ import { EtiquetaDigitalListComponent } from './etiqueta-digital/etiqueta-digital-list/etiqueta-digital-list.component';
+ import { EtiquetaDigitalDetailComponent } from './etiqueta-digital/etiqueta-digital-detail/etiqueta-digital-detail.component';
+ import { EtiquetaDigitalGenerarQrComponent } from './etiqueta-digital/etiqueta-digital-generar-qr/etiqueta-digital-generar-qr.component';
+-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+-import { AuthInterceptor } from './core/auth.interceptor';
+ import { DashboardComponent } from './dashboard/dashboard.component';
+ import { RegistroComponent } from './registro/registro.component';
++import { HTTP_INTERCEPTORS } from '@angular/common/http';
++import { AuthInterceptor } from './core/auth.interceptor';
+ import { MatFormFieldModule } from '@angular/material/form-field';
+ import { MatSelectModule } from '@angular/material/select';
+ import { MatOptionModule } from '@angular/material/core';
+@@ -44,9 +44,6 @@ import { MatIconModule } from '@angular/material/icon';
+ import { MatButtonModule } from '@angular/material/button';
+ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+ import { TableModule } from 'primeng/table';
+-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+-import { providePrimeNG } from 'primeng/config';
+-import Aura from '@primeng/themes/aura';
+ import { MenubarModule } from 'primeng/menubar';
+ import { AvatarModule } from 'primeng/avatar';
+ import { BadgeModule } from 'primeng/badge';
+@@ -58,10 +55,13 @@ import { PasswordModule } from 'primeng/password';
+ import { ButtonModule } from 'primeng/button';
+ import { ToastModule } from 'primeng/toast';
+ import { MessagesModule } from 'primeng/messages';
+-import { MessageService } from 'primeng/api';
+ import { DropdownModule } from 'primeng/dropdown';
+-import { ReactiveFormsModule } from '@angular/forms';
+ import { SelectModule } from 'primeng/select';
++import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
++import { providePrimeNG } from 'primeng/config';
++import { MessageService } from 'primeng/api';
++import Aura from '@primeng/themes/aura';
++import { TagModule } from 'primeng/tag';
+ 
+ 
+ @NgModule({
+@@ -94,13 +94,14 @@ import { SelectModule } from 'primeng/select';
+     EtiquetaDigitalDetailComponent,
+     EtiquetaDigitalGenerarQrComponent,
+     DashboardComponent,
+-    RegistroComponent,
++    RegistroComponent
+   ],
+   imports: [
+     BrowserModule,
+     HttpClientModule,
+     FormsModule,
+     ReactiveFormsModule,
++    AppRoutingModule,
+     MatFormFieldModule,
+     MatSelectModule,
+     MatOptionModule,
+@@ -110,21 +111,21 @@ import { SelectModule } from 'primeng/select';
+     MatIconModule,
+     MatButtonModule,
+     MatProgressSpinnerModule,
+-    AppRoutingModule,
+-    ButtonModule,
+     TableModule,
+-    InputTextModule,
+     MenubarModule,
+     AvatarModule,
+-    PanelMenuModule,
+     BadgeModule,
+-    CardModule,
++    PanelMenuModule,
+     MessageModule,
++    CardModule,
++    InputTextModule,
+     PasswordModule,
++    ButtonModule,
+     ToastModule,
+     MessagesModule,
+-    ReactiveFormsModule,
+     DropdownModule,
++    SelectModule,
++    TagModule,
+     SelectModule
+   ],
+   providers: [
+@@ -135,7 +136,7 @@ import { SelectModule } from 'primeng/select';
+         preset: Aura
+       }
+     }),
+-     MessageService 
++    MessageService
+   ],
+   bootstrap: [AppComponent]
+ })
+diff --git a/Frontend/patrimonials-app/src/app/bien/bien-dar-baja/bien-dar-baja.component.html b/Frontend/patrimonials-app/src/app/bien/bien-dar-baja/bien-dar-baja.component.html
+index a40ee45..03d0112 100644
+--- a/Frontend/patrimonials-app/src/app/bien/bien-dar-baja/bien-dar-baja.component.html
++++ b/Frontend/patrimonials-app/src/app/bien/bien-dar-baja/bien-dar-baja.component.html
+@@ -1,13 +1,11 @@
+-<div>
++<div class="bien-dar-baja-container">
+   <h2>Dar de Baja Bien</h2>
+-  <form (ngSubmit)="darDeBaja()">
+-    <label>Motivo de baja:
+-      <textarea [(ngModel)]="motivo" name="motivo" required></textarea>
+-    </label>
+-    <br>
+-    <button type="submit">Dar de Baja</button>
+-    <button type="button" (click)="router.navigate(['/bienes'])">Cancelar</button>
+-  </form>
+-  <div *ngIf="mensaje" style="color:green">{{mensaje}}</div>
+-  <div *ngIf="error" style="color:red">{{error}}</div>
++  <div *ngIf="mensaje" class="success-message">{{ mensaje }}</div>
++  <div *ngIf="error" class="error-message">{{ error }}</div>
++  <div>
++    <label>Motivo de Baja:</label>
++    <textarea [(ngModel)]="motivo" required placeholder="Ingrese el motivo de la baja"></textarea>
++  </div>
++  <button (click)="darDeBaja()" [disabled]="!motivo">Dar de Baja</button>
++  <button (click)="router.navigate(['/bienes'])">Cancelar</button>
+ </div>
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/bien/bien-dar-baja/bien-dar-baja.component.ts b/Frontend/patrimonials-app/src/app/bien/bien-dar-baja/bien-dar-baja.component.ts
+index ed8dcda..5738554 100644
+--- a/Frontend/patrimonials-app/src/app/bien/bien-dar-baja/bien-dar-baja.component.ts
++++ b/Frontend/patrimonials-app/src/app/bien/bien-dar-baja/bien-dar-baja.component.ts
+@@ -31,4 +31,4 @@ export class BienDarBajaComponent {
+       }
+     });
+   }
+-}
++}
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/bien/bien-detail/bien-detail.component.html b/Frontend/patrimonials-app/src/app/bien/bien-detail/bien-detail.component.html
+index 09fe4c2..c0a558c 100644
+--- a/Frontend/patrimonials-app/src/app/bien/bien-detail/bien-detail.component.html
++++ b/Frontend/patrimonials-app/src/app/bien/bien-detail/bien-detail.component.html
+@@ -1,82 +1,91 @@
+-<div *ngIf="bien || editMode">
+-  <h2 *ngIf="bien && !editMode">Detalle de Bien: {{bien.codigo}}</h2>
+-  <h2 *ngIf="!bien && editMode">Nuevo Bien</h2>
++<div class="bien-detail-container">
++  <h2>{{ bien ? 'Detalles del Bien' : 'Crear Nuevo Bien' }}</h2>
++  <div *ngIf="loading" class="loading">Cargando...</div>
++  <div *ngIf="error" class="error-message">{{ error }}</div>
+ 
+-  <!-- ✅ Botón para crear nuevo bien -->
+-  <button *ngIf="!editMode" (click)="router.navigate(['/bienes/nuevo'])">+ Crear Nuevo Bien</button>
+-
+-  <div *ngIf="error" style="color:red">{{error}}</div>
+-
+-  <div *ngIf="bien && !editMode">
+-    <p><strong>Descripción:</strong> {{bien.descripcion}}</p>
+-    <p><strong>Estado:</strong> {{bien.estado}}</p>
+-    <p><strong>Ubicación:</strong> {{ubicacion?.edificio}} - {{ubicacion?.oficina}}</p>
+-    <p><strong>Responsable:</strong> {{responsable?.usuario?.username}}</p>
++  <div *ngIf="!loading && !editMode && bien" class="bien-details">
++    <p><strong>Código:</strong> {{ bien.codigo }}</p>
++    <p><strong>Descripción:</strong> {{ bien.descripcion }}</p>
++    <p><strong>Estado:</strong> {{ bien.estado }}</p>
++    <p><strong>Valor Adquisición:</strong> {{ bien.valor_adquisicion | currency }}</p>
++    <p><strong>Fecha Adquisición:</strong> {{ bien.fecha_adquisicion | date }}</p>
++    <p><strong>Categoría:</strong> {{ categoria?.nombre || 'Cargando...' }}</p>
++    <p><strong>Ubicación:</strong> {{ ubicacion?.edificio }} - {{ ubicacion?.oficina }}</p>
++    <p><strong>Responsable:</strong> {{ responsable?.usuario?.username || 'Sin responsable' }}</p>
++    <p><strong>Marca:</strong> {{ bien.marca || 'N/A' }}</p>
++    <p><strong>Modelo:</strong> {{ bien.modelo || 'N/A' }}</p>
++    <p><strong>Serie:</strong> {{ bien.serie || 'N/A' }}</p>
+     <button (click)="toggleEdit()">Editar</button>
+     <button (click)="moveBien()">Mover</button>
++    <button (click)="darBaja()">Dar de Baja</button>
+     <button (click)="confirmDelete()">Eliminar</button>
+     <button (click)="goBack()">Volver</button>
+-    <button (click)="router.navigate(['/bienes/dar-baja', bien.id])">Dar de Baja</button>
+   </div>
+ 
+-  <form *ngIf="editMode" (ngSubmit)="saveChanges()">
+-    <label>Código:
+-      <input [(ngModel)]="editedBien.codigo" name="codigo" required [readonly]="!!bien">
+-    </label>
+-    <br>
+-    <label>Descripción:
+-      <input [(ngModel)]="editedBien.descripcion" name="descripcion" required>
+-    </label>
+-    <br>
+-    <label>Estado:
++  <form *ngIf="editMode" (ngSubmit)="saveChanges()" class="bien-form">
++    <div>
++      <label>Código:</label>
++      <input [(ngModel)]="editedBien.codigo" name="codigo" required>
++    </div>
++    <div>
++      <label>Descripción:</label>
++      <textarea [(ngModel)]="editedBien.descripcion" name="descripcion" required></textarea>
++    </div>
++    <div>
++      <label>Estado:</label>
+       <select [(ngModel)]="editedBien.estado" name="estado" required>
+         <option value="BUENO">Bueno</option>
+         <option value="REGULAR">Regular</option>
+         <option value="MALO">Malo</option>
+-        <option value="REPARACION">En reparación</option>
+-        <option value="BAJA">Dado de baja</option>
++        <option value="REPARACION">En Reparación</option>
+       </select>
+-    </label>
+-    <br>
+-    <label>Ubicación (ID):
+-      <input type="number" [(ngModel)]="editedBien.ubicacion" name="ubicacion" required>
+-    </label>
+-    <br>
+-    <label>Responsable (ID):
+-      <input type="number" [(ngModel)]="editedBien.responsable" name="responsable">
+-    </label>
+-    <br>
+-    <label>Valor de adquisición:
+-      <input type="number" [(ngModel)]="editedBien.valor_adquisicion" name="valor_adquisicion" required>
+-    </label>
+-    <br>
+-    <label>Fecha de adquisición:
++    </div>
++    <div>
++      <label>Valor Adquisición:</label>
++      <input type="number" [(ngModel)]="editedBien.valor_adquisicion" name="valor_adquisicion" required min="0">
++    </div>
++    <div>
++      <label>Fecha Adquisición:</label>
+       <input type="date" [(ngModel)]="editedBien.fecha_adquisicion" name="fecha_adquisicion" required>
+-    </label>
+-    <br>
+-    <label>Categoría (ID):
+-      <input type="number" [(ngModel)]="editedBien.categoria" name="categoria" required>
+-    </label>
+-    <br>
+-    <label>Marca:
++    </div>
++    <div>
++      <label>Categoría:</label>
++      <select [(ngModel)]="editedBien.categoria" name="categoria" required>
++        <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nombre }}</option>
++      </select>
++    </div>
++    <div>
++      <label>Ubicación:</label>
++      <select [(ngModel)]="editedBien.ubicacion" name="ubicacion" required>
++        <option *ngFor="let ubi of ubicaciones" [value]="ubi.id">{{ ubi.edificio }} - {{ ubi.oficina }} (Disponible: {{ ubi.capacidad - ubi.ocupados }})</option>
++      </select>
++    </div>
++    <div>
++      <label>Responsable:</label>
++      <select [(ngModel)]="editedBien.responsable" name="responsable">
++        <option value="">Sin responsable</option>
++        <option *ngFor="let resp of responsables" [value]="resp.id">{{ resp.usuario.username }}</option>
++      </select>
++    </div>
++    <div>
++      <label>Marca:</label>
+       <input [(ngModel)]="editedBien.marca" name="marca">
+-    </label>
+-    <br>
+-    <label>Modelo:
++    </div>
++    <div>
++      <label>Modelo:</label>
+       <input [(ngModel)]="editedBien.modelo" name="modelo">
+-    </label>
+-    <br>
+-    <label>Serie:
++    </div>
++    <div>
++      <label>Serie:</label>
+       <input [(ngModel)]="editedBien.serie" name="serie">
+-    </label>
+-    <br>
+-    <button type="submit">{{ bien ? 'Guardar' : 'Crear' }}</button>
+-    <button type="button" (click)="goBack()">Cancelar</button>
++    </div>
++    <button type="submit">Guardar</button>
++    <button type="button" (click)="toggleEdit()">Cancelar</button>
+   </form>
+ 
+-  <div *ngIf="showDeleteConfirm">
+-    <p>¿Seguro que deseas eliminar este bien?</p>
++  <div *ngIf="showDeleteConfirm" class="confirm-dialog">
++    <p>¿Está seguro de que desea eliminar este bien?</p>
+     <button (click)="deleteBien()">Sí, eliminar</button>
+     <button (click)="cancelDelete()">Cancelar</button>
+   </div>
+-</div>
++</div>
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/bien/bien-detail/bien-detail.component.ts b/Frontend/patrimonials-app/src/app/bien/bien-detail/bien-detail.component.ts
+index 2410fd8..0b2d682 100644
+--- a/Frontend/patrimonials-app/src/app/bien/bien-detail/bien-detail.component.ts
++++ b/Frontend/patrimonials-app/src/app/bien/bien-detail/bien-detail.component.ts
+@@ -4,6 +4,7 @@ import { ApiService } from '../../core/api.service';
+ import { Bien } from '../../models/bien.model';
+ import { Ubicacion } from '../../models/ubicacion.model';
+ import { Responsable } from '../../models/responsable.model';
++import { Categoria } from '../../models/categoria.model';
+ 
+ @Component({
+   selector: 'app-bien-detail',
+@@ -15,11 +16,15 @@ export class BienDetailComponent implements OnInit {
+   bien: Bien | null = null;
+   ubicacion?: Ubicacion;
+   responsable?: Responsable;
++  categoria?: Categoria;
+   editMode = false;
+   editedBien: Partial<Bien> = {};
+   error: string | null = null;
+   showDeleteConfirm = false;
+   loading = true;
++  categorias: Categoria[] = [];
++  ubicaciones: Ubicacion[] = [];
++  responsables: Responsable[] = [];
+ 
+   constructor(
+     private route: ActivatedRoute,
+@@ -28,20 +33,42 @@ export class BienDetailComponent implements OnInit {
+   ) {}
+ 
+   ngOnInit() {
++    this.loadCategorias();
++    this.loadUbicaciones();
++    this.loadResponsables();
+     const idParam = this.route.snapshot.paramMap.get('id');
+     if (idParam === 'nuevo') {
+-      // Modo creación
+       this.editMode = true;
+       this.bien = null;
+-      this.editedBien = {};
++      this.editedBien = { estado: 'BUENO', activo: true };
+       this.loading = false;
+     } else {
+-      // Modo detalle/edición
+       const id = +idParam!;
+       this.loadBien(id);
+     }
+   }
+ 
++  loadCategorias() {
++    this.apiService.getCategorias().subscribe({
++      next: (categorias) => this.categorias = categorias,
++      error: (err) => console.error('Error cargando categorías:', err)
++    });
++  }
++
++  loadUbicaciones() {
++    this.apiService.getUbicaciones().subscribe({
++      next: (ubicaciones) => this.ubicaciones = ubicaciones,
++      error: (err) => console.error('Error cargando ubicaciones:', err)
++    });
++  }
++
++  loadResponsables() {
++    this.apiService.getResponsables().subscribe({
++      next: (responsables) => this.responsables = responsables,
++      error: (err) => console.error('Error cargando responsables:', err)
++    });
++  }
++
+   loadBien(id: number) {
+     this.loading = true;
+     this.apiService.getBien(id).subscribe({
+@@ -58,10 +85,10 @@ export class BienDetailComponent implements OnInit {
+           categoria: bien.categoria,
+           marca: bien.marca,
+           modelo: bien.modelo,
+-          serie: bien.serie
++          serie: bien.serie,
++          activo: bien.activo
+         };
+         
+-        // Cargar ubicación si existe
+         if (bien.ubicacion) {
+           this.apiService.getUbicacion(bien.ubicacion).subscribe({
+             next: (ubicacion) => this.ubicacion = ubicacion,
+@@ -69,7 +96,6 @@ export class BienDetailComponent implements OnInit {
+           });
+         }
+         
+-        // Cargar responsable si existe
+         if (bien.responsable) {
+           this.apiService.getResponsable(bien.responsable).subscribe({
+             next: (responsable) => this.responsable = responsable,
+@@ -77,6 +103,13 @@ export class BienDetailComponent implements OnInit {
+           });
+         }
+         
++        if (bien.categoria) {
++          this.apiService.getCategoria(bien.categoria).subscribe({
++            next: (categoria) => this.categoria = categoria,
++            error: (err) => console.error('Error cargando categoría:', err)
++          });
++        }
++        
+         this.loading = false;
+       },
+       error: (err) => {
+@@ -100,13 +133,11 @@ export class BienDetailComponent implements OnInit {
+         categoria: this.bien.categoria,
+         marca: this.bien.marca,
+         modelo: this.bien.modelo,
+-        serie: this.bien.serie
++        serie: this.bien.serie,
++        activo: this.bien.activo
+       };
+     }
+   }
+-crearNuevoBien() {
+-  this.router.navigate(['/bienes/nuevo']);
+-}
+ 
+   saveChanges() {
+     if (!this.bien) {
+@@ -161,4 +192,10 @@ crearNuevoBien() {
+       this.router.navigate(['/bienes', this.bien.id, 'mover']);
+     }
+   }
++
++  darBaja() {
++    if (this.bien) {
++      this.router.navigate(['/bienes', this.bien.id, 'dar-baja']);
++    }
++  }
+ }
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/bien/bien-list/bien-list.component.html b/Frontend/patrimonials-app/src/app/bien/bien-list/bien-list.component.html
+index f66073c..76210d0 100644
+--- a/Frontend/patrimonials-app/src/app/bien/bien-list/bien-list.component.html
++++ b/Frontend/patrimonials-app/src/app/bien/bien-list/bien-list.component.html
+@@ -1,27 +1,29 @@
+-<div>
+-  <h2>Bienes Patrimoniales</h2>
+-  <div *ngIf="error" style="color:red">{{error}}</div>
+-  <table *ngIf="bienes.length">
++<div class="bien-list-container">
++  <h2>Listado de Bienes</h2>
++  <div *ngIf="error" class="error-message">{{ error }}</div>
++  <button (click)="createNewBien()">Crear Nuevo Bien</button>
++  <table *ngIf="bienes.length; else noData">
+     <thead>
+       <tr>
+         <th>Código</th>
+         <th>Descripción</th>
+         <th>Estado</th>
+-        <th>Ubicación</th>
+         <th>Acciones</th>
+       </tr>
+     </thead>
+     <tbody>
+       <tr *ngFor="let bien of bienes">
+-        <td>{{bien.codigo}}</td>
+-        <td>{{bien.descripcion}}</td>
+-        <td>{{bien.estado}}</td>
+-        <td>{{bien.ubicacion}}</td>
++        <td>{{ bien.codigo }}</td>
++        <td>{{ bien.descripcion }}</td>
++        <td>{{ bien.estado }}</td>
+         <td>
+-          <button (click)="viewDetails(bien.id)">Ver/Editar</button>
++          <button (click)="viewDetails(bien.id)">Detalles</button>
+           <button (click)="moveBien(bien.id)">Mover</button>
+         </td>
+       </tr>
+     </tbody>
+   </table>
++  <ng-template #noData>
++    <p>No hay bienes registrados.</p>
++  </ng-template>
+ </div>
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/bien/bien-list/bien-list.component.ts b/Frontend/patrimonials-app/src/app/bien/bien-list/bien-list.component.ts
+index da018b5..c0ccf59 100644
+--- a/Frontend/patrimonials-app/src/app/bien/bien-list/bien-list.component.ts
++++ b/Frontend/patrimonials-app/src/app/bien/bien-list/bien-list.component.ts
+@@ -29,4 +29,8 @@ export class BienListComponent implements OnInit {
+   moveBien(id: number) {
+     this.router.navigate(['/bienes', id, 'mover']);
+   }
++
++  createNewBien() {
++    this.router.navigate(['/bienes/nuevo']);
++  }
+ }
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/bien/bien-mover/bien-mover.component.html b/Frontend/patrimonials-app/src/app/bien/bien-mover/bien-mover.component.html
+index 7d5c0dd..6623bdb 100644
+--- a/Frontend/patrimonials-app/src/app/bien/bien-mover/bien-mover.component.html
++++ b/Frontend/patrimonials-app/src/app/bien/bien-mover/bien-mover.component.html
+@@ -1,16 +1,15 @@
+-<div>
++<div class="bien-mover-container">
+   <h2>Mover Bien</h2>
+-  <form (ngSubmit)="mover()">
+-    <label>Selecciona nueva ubicación:
+-      <select [(ngModel)]="ubicacionId" name="ubicacionId" required>
+-        <option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion.id">
+-          {{ubicacion.edificio}} - {{ubicacion.oficina}} ({{ubicacion.codigo}})
+-        </option>
+-      </select>
+-    </label>
+-    <br>
+-    <button type="submit">Mover</button>
+-  </form>
+-  <div *ngIf="success" style="color:green">{{success}}</div>
+-  <div *ngIf="error" style="color:red">{{error}}</div>
++  <div *ngIf="success" class="success-message">{{ success }}</div>
++  <div *ngIf="error" class="error-message">{{ error }}</div>
++  <div>
++    <label>Nueva Ubicación:</label>
++    <select [(ngModel)]="ubicacionId" required>
++      <option value="">Seleccione una ubicación</option>
++      <option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion.id">
++        {{ ubicacion.edificio }} - {{ ubicacion.oficina }} (Disponible: {{ ubicacion.capacidad - ubicacion.ocupados }})
++      </option>
++    </select>
++  </div>
++  <button (click)="mover()" [disabled]="!ubicacionId">Mover</button>
+ </div>
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/bien/bien-mover/bien-mover.component.ts b/Frontend/patrimonials-app/src/app/bien/bien-mover/bien-mover.component.ts
+index d234c3c..c9e185c 100644
+--- a/Frontend/patrimonials-app/src/app/bien/bien-mover/bien-mover.component.ts
++++ b/Frontend/patrimonials-app/src/app/bien/bien-mover/bien-mover.component.ts
+@@ -26,12 +26,12 @@ export class BienMoverComponent implements OnInit {
+     });
+   }
+ 
+-mover() {
+-  if (this.ubicacionId) {
+-    this.apiService.moverBien(this.bienId, { nueva_ubicacion_id: this.ubicacionId }).subscribe({
+-      next: () => this.success = 'Bien movido correctamente',
+-      error: (err) => this.error = 'Error moving bien: ' + (err.error?.message || 'Unknown error')
+-    });
++  mover() {
++    if (this.ubicacionId) {
++      this.apiService.moverBien(this.bienId, { nueva_ubicacion_id: this.ubicacionId }).subscribe({
++        next: () => this.success = 'Bien movido correctamente',
++        error: (err) => this.error = 'Error al mover el bien: ' + (err.error?.message || 'Error desconocido')
++      });
++    }
+   }
+-}
+-}
++}
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/core/api.service.ts b/Frontend/patrimonials-app/src/app/core/api.service.ts
+index 288ac14..0c248c2 100644
+--- a/Frontend/patrimonials-app/src/app/core/api.service.ts
++++ b/Frontend/patrimonials-app/src/app/core/api.service.ts
+@@ -108,6 +108,9 @@ patch(url: string, body: any): Observable<any> {
+   deleteResponsable(id: number): Observable<void> {
+     return this.http.delete<void>(`${this.apiUrl}responsables/${id}/`);
+   }
++  getUsuariosDisponibles(): Observable<Usuario[]> {
++  return this.http.get<Usuario[]>(`${this.apiUrl}usuarios/disponibles/`);
++}
+ 
+   // Bienes
+   getBienes(): Observable<Bien[]> {
+@@ -170,6 +173,15 @@ patch(url: string, body: any): Observable<any> {
+   getHistorialAuditoria(): Observable<HistorialAuditoria[]> {
+     return this.http.get<HistorialAuditoria[]>(`${this.apiUrl}historial-auditoria/`);
+   }
++  createHistorialAuditoria(historial: Partial<HistorialAuditoria>): Observable<HistorialAuditoria> {
++  return this.http.post<HistorialAuditoria>(`${this.apiUrl}historial-auditoria/`, historial);
++}
++updateHistorialAuditoria(id: number, historial: Partial<HistorialAuditoria>): Observable<HistorialAuditoria> {
++  return this.http.put<HistorialAuditoria>(`${this.apiUrl}historial-auditoria/${id}/`, historial);
++}
++deleteHistorialAuditoria(id: number): Observable<void> {
++  return this.http.delete<void>(`${this.apiUrl}historial-auditoria/${id}/`);
++}
+ 
+   // Documentos
+   getDocumentos(): Observable<Documento[]> {
+diff --git a/Frontend/patrimonials-app/src/app/dashboard/dashboard.component.css b/Frontend/patrimonials-app/src/app/dashboard/dashboard.component.css
+index 702e4fa..a52544d 100644
+--- a/Frontend/patrimonials-app/src/app/dashboard/dashboard.component.css
++++ b/Frontend/patrimonials-app/src/app/dashboard/dashboard.component.css
+@@ -1,4 +1,508 @@
+-.custom-card {
+-  width: 400px;
+-  border-radius: 20px;
++/* Layout Variables */
++:root {
++  --sidebar-width: 280px;
++  --topbar-height: 70px;
++  --primary-color: #3B82F6;
++  --surface-color: #ffffff;
++  --text-color: #1f2937;
++  --border-color: #e5e7eb;
++  --hover-color: #f3f4f6;
++  --shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
++  --transition: all 0.3s ease;
++}
++
++/* Base Layout */
++.layout-topbar {
++  position: fixed;
++  top: 0;
++  left: 0;
++  right: 0;
++  height: var(--topbar-height);
++  background: var(--surface-color);
++  border-bottom: 1px solid var(--border-color);
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  padding: 0 2rem;
++  z-index: 1000;
++  box-shadow: var(--shadow);
++}
++
++.layout-topbar-logo {
++  display: flex;
++  align-items: center;
++  gap: 0.75rem;
++}
++
++.layout-topbar-title {
++  font-size: 1.5rem;
++  font-weight: 600;
++  color: var(--text-color);
++}
++
++.layout-topbar-menu {
++  display: flex;
++  align-items: center;
++  gap: 1rem;
++}
++
++.layout-topbar-user {
++  display: flex;
++  align-items: center;
++  gap: 0.75rem;
++}
++
++.user-info {
++  display: flex;
++  flex-direction: column;
++  align-items: flex-end;
++}
++
++.user-name {
++  font-weight: 600;
++  color: var(--text-color);
++  font-size: 0.9rem;
++}
++
++.user-role {
++  font-size: 0.8rem;
++  color: #6b7280;
++}
++
++.user-avatar {
++  background: var(--primary-color) !important;
++  color: white !important;
++}
++
++.layout-topbar-menu-button {
++  display: none;
++  background: none;
++  border: none;
++  cursor: pointer;
++  padding: 0.5rem;
++  border-radius: 0.375rem;
++  transition: var(--transition);
++}
++
++.layout-topbar-menu-button:hover {
++  background-color: var(--hover-color);
++}
++
++.layout-topbar-menu-button i {
++  font-size: 1.25rem;
++  color: var(--text-color);
++}
++
++/* Sidebar */
++.layout-sidebar {
++  position: fixed;
++  top: var(--topbar-height);
++  left: 0;
++  width: var(--sidebar-width);
++  height: calc(100vh - var(--topbar-height));
++  background: var(--surface-color);
++  border-right: 1px solid var(--border-color);
++  overflow-y: auto;
++  z-index: 999;
++  transition: var(--transition);
++}
++
++.layout-sidebar-content {
++  padding: 1.5rem;
++  height: 100%;
++  display: flex;
++  flex-direction: column;
++}
++
++.user-profile-card {
++  background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
++  border-radius: 0.75rem;
++  padding: 1.5rem;
++  margin-bottom: 1.5rem;
++  color: white;
++}
++
++.user-profile-header {
++  display: flex;
++  align-items: center;
++  gap: 1rem;
++}
++
++.profile-avatar {
++  background: rgba(255, 255, 255, 0.2) !important;
++  color: white !important;
++  border: 2px solid rgba(255, 255, 255, 0.3);
++}
++
++.user-profile-info h4 {
++  margin: 0 0 0.5rem 0;
++  font-size: 1.1rem;
++  font-weight: 600;
++}
++
++.role-tag {
++  background: rgba(255, 255, 255, 0.2) !important;
++  color: white !important;
++  border: 1px solid rgba(255, 255, 255, 0.3);
++}
++
++/* Navigation Menu */
++.navigation-menu {
++  flex: 1;
++  border: none;
++  background: none;
++}
++
++.navigation-menu .p-panelmenu-panel {
++  border: none;
++  margin-bottom: 0;
++}
++
++.navigation-menu .p-panelmenu-header {
++  background: none;
++  border: none;
++  padding: 0;
++}
++
++.navigation-menu .p-panelmenu-header-content {
++  background: none;
++  border: none;
++  color: var(--text-color);
++  font-weight: 600;
++  font-size: 0.9rem;
++  text-transform: uppercase;
++  letter-spacing: 0.05em;
++  padding: 0.5rem 0;
++}
++
++.navigation-menu .p-panelmenu-content {
++  background: none;
++  border: none;
++  padding: 0;
++}
++
++.navigation-menu .p-menuitem-link {
++  padding: 0.875rem 1rem;
++  margin-bottom: 0.25rem;
++  border-radius: 0.5rem;
++  transition: var(--transition);
++  display: flex;
++  align-items: center;
++  gap: 0.75rem;
++  color: var(--text-color);
++  text-decoration: none;
++}
++
++.navigation-menu .p-menuitem-link:hover {
++  background-color: var(--hover-color);
++}
++
++.navigation-menu .p-menuitem-link.router-link-active {
++  background-color: var(--primary-color);
++  color: white;
++}
++
++.navigation-menu .p-menuitem-icon {
++  font-size: 1.1rem;
++  width: 1.25rem;
++  text-align: center;
++}
++
++.navigation-menu .p-menuitem-text {
++  flex: 1;
++  font-weight: 500;
++}
++
++.navigation-menu .p-badge {
++  margin-left: auto;
++}
++
++/* Logout Section */
++.logout-section {
++  margin-top: auto;
++  padding-top: 1rem;
++  border-top: 1px solid var(--border-color);
++}
++
++.logout-button {
++  width: 100%;
++  justify-content: center;
++}
++
++/* Main Content */
++.layout-main {
++  margin-left: var(--sidebar-width);
++  margin-top: var(--topbar-height);
++  min-height: calc(100vh - var(--topbar-height));
++  transition: var(--transition);
++}
++
++.layout-content {
++  padding: 2rem;
++}
++
++.layout-mask {
++  position: fixed;
++  top: 0;
++  left: 0;
++  width: 100%;
++  height: 100%;
++  background: rgba(0, 0, 0, 0.5);
++  z-index: 998;
++  opacity: 0;
++  visibility: hidden;
++  transition: var(--transition);
++}
++
++.layout-mask-active {
++  opacity: 1;
++  visibility: visible;
++}
++
++/* Access Denied */
++.access-denied {
++  display: flex;
++  justify-content: center;
++  align-items: center;
++  min-height: 50vh;
++}
++
++.access-denied .p-card {
++  max-width: 400px;
++  text-align: center;
++}
++
++/* Dashboard Content */
++.dashboard-content {
++  max-width: 1200px;
++  margin: 0 auto;
++}
++
++.welcome-section {
++  text-align: center;
++  margin-bottom: 3rem;
++}
++
++.dashboard-title {
++  font-size: 2.5rem;
++  font-weight: 700;
++  color: var(--text-color);
++  margin-bottom: 1rem;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  gap: 0.5rem;
++}
++
++.dashboard-subtitle {
++  font-size: 1.1rem;
++  color: #6b7280;
++  margin: 0;
++}
++
++/* Quick Access Grid */
++.quick-access-grid {
++  display: grid;
++  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
++  gap: 1.5rem;
++  margin-bottom: 2rem;
++}
++
++.quick-access-card {
++  cursor: pointer;
++  transition: var(--transition);
++}
++
++.quick-access-card:hover {
++  transform: translateY(-2px);
++}
++
++.quick-access-card.card-hidden {
++  display: none;
++}
++
++.quick-card {
++  border: 1px solid var(--border-color);
++  transition: var(--transition);
++  height: 100%;
++}
++
++.quick-card:hover {
++  border-color: var(--primary-color);
++  box-shadow: 0 4px 20px 0 rgba(59, 130, 246, 0.15);
++}
++
++.card-content {
++  display: flex;
++  align-items: center;
++  gap: 1rem;
++  padding: 1rem;
++}
++
++.card-icon {
++  flex-shrink: 0;
++  width: 4rem;
++  height: 4rem;
++  border-radius: 0.75rem;
++  background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
++  color: white;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++}
++
++.card-info {
++  flex: 1;
++}
++
++.card-info h3 {
++  margin: 0 0 0.5rem 0;
++  font-size: 1.1rem;
++  font-weight: 600;
++  color: var(--text-color);
++}
++
++/* Stats Section */
++.stats-section {
++  margin-top: 3rem;
++}
++
++.stats-card {
++  border: 1px solid var(--border-color);
++  transition: var(--transition);
++}
++
++.stats-card:hover {
++  transform: translateY(-2px);
++  box-shadow: var(--shadow);
++}
++
++.stat-content {
++  display: flex;
++  align-items: center;
++  gap: 1rem;
++  padding: 1rem;
++}
++
++.stat-icon {
++  width: 3rem;
++  height: 3rem;
++  border-radius: 0.75rem;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  flex-shrink: 0;
++}
++
++.stat-icon i {
++  font-size: 1.5rem;
++}
++
++.stat-info {
++  flex: 1;
++}
++
++.stat-info h3 {
++  margin: 0 0 0.25rem 0;
++  font-size: 0.9rem;
++  color: #6b7280;
++  font-weight: 500;
++}
++
++.stat-number {
++  margin: 0;
++  font-size: 1.5rem;
++  font-weight: 700;
++  color: var(--text-color);
++}
++
++/* Responsive Design */
++@media (max-width: 768px) {
++  .layout-topbar {
++    padding: 0 1rem;
++  }
++  
++  .layout-topbar-menu-button {
++    display: block;
++  }
++  
++  .user-info {
++    display: none;
++  }
++  
++  .layout-sidebar {
++    transform: translateX(-100%);
++    width: 100%;
++    max-width: 320px;
++  }
++  
++  .layout-sidebar-active {
++    transform: translateX(0);
++  }
++  
++  .layout-main {
++    margin-left: 0;
++  }
++  
++  .layout-main-mobile-active {
++    margin-left: 0;
++  }
++  
++  .layout-content {
++    padding: 1rem;
++  }
++  
++  .dashboard-title {
++    font-size: 2rem;
++  }
++  
++  .quick-access-grid {
++    grid-template-columns: 1fr;
++    gap: 1rem;
++  }
++  
++  .welcome-section {
++    margin-bottom: 2rem;
++  }
++}
++
++@media (max-width: 480px) {
++  .layout-topbar {
++    padding: 0 0.5rem;
++  }
++  
++  .layout-topbar-title {
++    font-size: 1.2rem;
++  }
++  
++  .layout-content {
++    padding: 0.5rem;
++  }
++  
++  .dashboard-title {
++    font-size: 1.5rem;
++  }
++  
++  .card-content {
++    padding: 0.75rem;
++  }
++  
++  .card-icon {
++    width: 3rem;
++    height: 3rem;
++  }
++  
++  .card-icon i {
++    font-size: 1.5rem;
++  }
++}
++
++/* Dark mode support */
++@media (prefers-color-scheme: dark) {
++  :root {
++    --surface-color: #1f2937;
++    --text-color: #f9fafb;
++    --border-color: #374151;
++    --hover-color: #374151;
++  }
+ }
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/dashboard/dashboard.component.html b/Frontend/patrimonials-app/src/app/dashboard/dashboard.component.html
+index 746fc94..73e0b30 100644
+--- a/Frontend/patrimonials-app/src/app/dashboard/dashboard.component.html
++++ b/Frontend/patrimonials-app/src/app/dashboard/dashboard.component.html
+@@ -1,35 +1,204 @@
+-<p-menubar [model]="menuItems" class="mb-3 shadow-2">
+-  <ng-template pTemplate="start">
+-    <div class="flex align-items-center">
+-      <i class="pi pi-home mr-2" style="font-size: 2rem;"></i>
+-      <span class="text-xl font-bold">Sistema de Gestión</span>
+-    </div>
+-  </ng-template>
+-  <ng-template pTemplate="end">
+-    <div class="flex align-items-center gap-3">
+-      <div class="flex flex-column align-items-end mr-2">
+-        <span class="font-semibold">{{ usuario?.nombre || 'Usuario' }}</span>
+-        <small class="text-color-secondary">{{ usuario?.rol || 'Sin rol' }}</small>
++<!-- Header -->
++<div class="layout-topbar">
++  <div class="layout-topbar-logo">
++    <i class="pi pi-building text-primary text-2xl"></i>
++    <span class="layout-topbar-title">Sistema de Bienes</span>
++  </div>
++  
++  <div class="layout-topbar-menu">
++    <!-- User info -->
++    <div class="layout-topbar-user" *ngIf="usuario">
++      <div class="user-info">
++        <span class="user-name">{{ usuario.nombre || 'Usuario' }}</span>
++        <span class="user-role">{{ usuario.rol || 'Sin rol' }}</span>
+       </div>
+-      <p-avatar icon="pi pi-user" shape="circle" styleClass="mr-2" size="large"></p-avatar>
+-      <button pButton icon="pi pi-sign-out" label="Cerrar Sesión" class="p-button-danger p-button-sm" (click)="cerrarSesion()"></button>
++      <p-avatar 
++        [label]="(usuario.nombre ? usuario.nombre.charAt(0) : 'U').toUpperCase()" 
++        shape="circle" 
++        styleClass="user-avatar">
++      </p-avatar>
+     </div>
+-  </ng-template>
+-</p-menubar>
++    
++    <!-- Mobile menu button -->
++    <button 
++      type="button" 
++      class="layout-topbar-menu-button p-link" 
++      (click)="toggleMobileMenu()">
++      <i class="pi pi-bars"></i>
++    </button>
++  </div>
++</div>
+ 
+-<div *ngIf="accesoDenegado" class="flex justify-content-center align-items-center" style="height: 60vh;">
+-  <div class="p-message p-message-error">
+-    <div class="p-message-wrapper">
+-      <span class="p-message-text">No tienes permisos para acceder a esta sección</span>
++<!-- Sidebar -->
++<div class="layout-sidebar" [class.layout-sidebar-active]="mobileMenuOpen">
++  <div class="layout-sidebar-content">
++    <!-- User profile card -->
++    <div class="user-profile-card" *ngIf="usuario">
++      <div class="user-profile-header">
++        <p-avatar 
++          [label]="(usuario.nombre ? usuario.nombre.charAt(0) : 'U').toUpperCase()" 
++          size="large" 
++          shape="circle" 
++          styleClass="profile-avatar">
++        </p-avatar>
++        <div class="user-profile-info">
++          <h4>{{ usuario.nombre || 'Usuario' }}</h4>
++          <p-tag 
++            [value]="usuario.rol || 'Sin rol'" 
++            [severity]="getRoleSeverity(usuario.rol)"
++            styleClass="role-tag">
++          </p-tag>
++        </div>
++      </div>
++    </div>
++    
++    <!-- Navigation menu -->
++    <p-panelMenu 
++      [model]="panelMenuItems" 
++      styleClass="navigation-menu"
++      (click)="closeMobileMenu()">
++    </p-panelMenu>
++    
++    <!-- Logout button -->
++    <div class="logout-section">
++      <p-button 
++        label="Cerrar Sesión" 
++        icon="pi pi-sign-out" 
++        styleClass="p-button-danger p-button-outlined logout-button"
++        (click)="cerrarSesion()">
++      </p-button>
+     </div>
+   </div>
+ </div>
+ 
+-<div *ngIf="!accesoDenegado" class="flex" style="min-height: 80vh;">
+-  <div class="surface-card shadow-2 p-3" style="width: 280px; min-width: 220px;">
+-    <p-panelMenu [model]="panelMenuItems"></p-panelMenu>
++<!-- Main content -->
++<div class="layout-main" [class.layout-main-mobile-active]="mobileMenuOpen">
++  <!-- Mobile overlay -->
++  <div class="layout-mask" 
++       [class.layout-mask-active]="mobileMenuOpen" 
++       (click)="closeMobileMenu()">
+   </div>
+-  <div class="main-content p-4 flex-1">
+-    <router-outlet></router-outlet>
++  
++  <!-- Content area -->
++  <div class="layout-content">
++    <!-- Access denied message -->
++    <div *ngIf="accesoDenegado" class="access-denied">
++      <p-card>
++        <div class="text-center">
++          <i class="pi pi-exclamation-triangle text-6xl text-red-500 mb-4"></i>
++          <h2 class="text-red-600 mb-3">Acceso Denegado</h2>
++          <p class="text-600 mb-4">
++            No tienes permisos para acceder a este sistema o no se encontró información de usuario.
++          </p>
++          <p-button 
++            label="Ir al Login" 
++            icon="pi pi-sign-in" 
++            (click)="router.navigate(['/login'])">
++          </p-button>
++        </div>
++      </p-card>
++    </div>
++    
++    <!-- Dashboard content -->
++    <div *ngIf="!accesoDenegado" class="dashboard-content">
++      <!-- Welcome section -->
++      <div class="welcome-section mb-4">
++        <h1 class="dashboard-title">
++          <i class="pi pi-home mr-2"></i>
++          Dashboard
++        </h1>
++        <p class="dashboard-subtitle">
++          Bienvenido, {{ usuario?.nombre || 'Usuario' }}. Gestiona tus bienes y recursos desde aquí.
++        </p>
++      </div>
++      
++      <!-- Quick access cards -->
++      <div class="quick-access-grid">
++        <div class="quick-access-card" 
++             *ngFor="let item of menuItems" 
++             [class.card-hidden]="item.visible === false"
++             (click)="navigateToRoute(item.routerLink)">
++          <p-card styleClass="quick-card h-full">
++            <div class="card-content">
++              <div class="card-icon">
++                <i [class]="item.icon" class="text-4xl"></i>
++              </div>
++              <div class="card-info">
++                <h3>{{ item.label }}</h3>
++                <p-badge 
++                  *ngIf="item.badge" 
++                  [value]="item.badge" 
++                  severity="info">
++                </p-badge>
++              </div>
++            </div>
++          </p-card>
++        </div>
++      </div>
++      
++      <!-- Stats section -->
++      <div class="stats-section mt-6">
++        <div class="grid">
++          <div class="col-12 md:col-6 lg:col-3">
++            <p-card styleClass="stats-card">
++              <div class="stat-content">
++                <div class="stat-icon bg-blue-100">
++                  <i class="pi pi-box text-blue-600"></i>
++                </div>
++                <div class="stat-info">
++                  <h3>Total Bienes</h3>
++                  <p class="stat-number">1,234</p>
++                </div>
++              </div>
++            </p-card>
++          </div>
++          
++          <div class="col-12 md:col-6 lg:col-3">
++            <p-card styleClass="stats-card">
++              <div class="stat-content">
++                <div class="stat-icon bg-green-100">
++                  <i class="pi pi-check-circle text-green-600"></i>
++                </div>
++                <div class="stat-info">
++                  <h3>Activos</h3>
++                  <p class="stat-number">1,180</p>
++                </div>
++              </div>
++            </p-card>
++          </div>
++          
++          <div class="col-12 md:col-6 lg:col-3">
++            <p-card styleClass="stats-card">
++              <div class="stat-content">
++                <div class="stat-icon bg-orange-100">
++                  <i class="pi pi-exclamation-triangle text-orange-600"></i>
++                </div>
++                <div class="stat-info">
++                  <h3>Mantenimiento</h3>
++                  <p class="stat-number">42</p>
++                </div>
++              </div>
++            </p-card>
++          </div>
++          
++          <div class="col-12 md:col-6 lg:col-3">
++            <p-card styleClass="stats-card">
++              <div class="stat-content">
++                <div class="stat-icon bg-red-100">
++                  <i class="pi pi-times-circle text-red-600"></i>
++                </div>
++                <div class="stat-info">
++                  <h3>Inactivos</h3>
++                  <p class="stat-number">12</p>
++                </div>
++              </div>
++            </p-card>
++          </div>
++        </div>
++      </div>
++    </div>
+   </div>
+-</div>
+\ No newline at end of file
++</div>
++
++<!-- Messages -->
++<p-toast></p-toast>
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/dashboard/dashboard.component.ts b/Frontend/patrimonials-app/src/app/dashboard/dashboard.component.ts
+index 8691401..74038e7 100644
+--- a/Frontend/patrimonials-app/src/app/dashboard/dashboard.component.ts
++++ b/Frontend/patrimonials-app/src/app/dashboard/dashboard.component.ts
+@@ -2,109 +2,115 @@ import { Component, OnInit } from '@angular/core';
+ import { Router } from '@angular/router';
+ import { AuthService } from '../core/auth.service';
+ import { MenuItem } from 'primeng/api';
+-
++import { MessageService } from 'primeng/api';
+ 
+ @Component({
+   selector: 'app-dashboard',
+   standalone: false,
+   templateUrl: './dashboard.component.html',
+-  styleUrls: ['./dashboard.component.css']
++  styleUrls: ['./dashboard.component.css'],
++  providers: [MessageService]
+ })
+ export class DashboardComponent implements OnInit {
+   mobileMenuOpen = false;
+   usuario: any = null;
+   rolesPermitidos: string[] = [];
+   accesoDenegado: boolean = false;
+-   menuItems: MenuItem[] = [];
++  
++  menuItems: MenuItem[] = [];
+   panelMenuItems: MenuItem[] = [];
+ 
+-  constructor(private authService: AuthService, private router: Router) {}
+-
+-ngOnInit() {
+-  this.usuario = this.authService.getUsuario();
+-  console.log('Usuario actual:', this.usuario);
++  constructor(
++    private authService: AuthService, 
++    public router: Router,
++    private messageService: MessageService
++  ) {}
+ 
+-  if (!this.usuario) {
+-    this.accesoDenegado = true;
+-    console.error('No se encontró información de usuario');
+-  }
++  ngOnInit() {
++    this.usuario = this.authService.getUsuario();
++    console.log('Usuario actual:', this.usuario);
+ 
+-  this.menuItems = [
+-    {
+-      label: 'Bienes',
+-      icon: 'pi pi-box',
+-      routerLink: '/bienes',
+-      visible: this.puedeAcceder(['ADMIN', 'GESTOR'])
+-    },
+-    {
+-      label: 'Responsables',
+-      icon: 'pi pi-users',
+-      routerLink: '/responsables',
+-      visible: this.puedeAcceder(['ADMIN', 'GESTOR'])
+-    },
+-    {
+-      label: 'Categorías',
+-      icon: 'pi pi-tags',
+-      routerLink: '/categorias',
+-      visible: this.puedeAcceder(['ADMIN', 'GESTOR'])
+-    },
+-    {
+-      label: 'Ubicaciones',
+-      icon: 'pi pi-map-marker',
+-      routerLink: '/ubicaciones',
+-      visible: this.puedeAcceder(['ADMIN', 'GESTOR'])
+-    },
+-    {
+-      label: 'Movimientos',
+-      icon: 'pi pi-exchange',
+-      routerLink: '/movimientos',
+-      visible: this.puedeAcceder(['ADMIN', 'GESTOR', 'AUDITOR'])
+-    },
+-    {
+-      label: 'Reportes',
+-      icon: 'pi pi-chart-bar',
+-      routerLink: '/reportes',
+-      visible: this.puedeAcceder(['ADMIN', 'GESTOR', 'AUDITOR', 'CONSULTA'])
+-    },
+-    {
+-      label: 'Historial de Auditoría',
+-      icon: 'pi pi-history',
+-      routerLink: '/historial-auditoria',
+-      visible: this.puedeAcceder(['ADMIN', 'AUDITOR'])
+-    },
+-    {
+-      label: 'Documentos',
+-      icon: 'pi pi-file',
+-      routerLink: '/documentos',
+-      visible: this.puedeAcceder(['ADMIN', 'GESTOR'])
+-    },
+-    {
+-      label: 'Notificaciones',
+-      icon: 'pi pi-bell',
+-      routerLink: '/notificaciones',
+-      badge: '3'
+-    },
+-    {
+-      label: 'Mantenimientos',
+-      icon: 'pi pi-cog',
+-      routerLink: '/mantenimientos',
+-      visible: this.puedeAcceder(['ADMIN', 'GESTOR'])
+-    },
+-    {
+-      label: 'Etiquetas Digitales',
+-      icon: 'pi pi-qrcode',
+-      routerLink: '/etiquetas-digitales',
+-      visible: this.puedeAcceder(['ADMIN', 'GESTOR'])
++    if (!this.usuario) {
++      this.accesoDenegado = true;
++      console.error('No se encontró información de usuario');
+     }
+-  ];
+ 
+-  this.panelMenuItems = [
+-    {
+-      label: 'Menú Principal',
+-      items: this.menuItems.filter(item => item.visible !== false)
+-    }
+-  ];
+-}
++    this.menuItems = [
++      {
++        label: 'Bienes',
++        icon: 'pi pi-box',
++        routerLink: '/bienes',
++        visible: this.puedeAcceder(['ADMIN', 'GESTOR'])
++      },
++      {
++        label: 'Responsables',
++        icon: 'pi pi-users',
++        routerLink: '/responsables',
++        visible: this.puedeAcceder(['ADMIN', 'GESTOR'])
++      },
++      {
++        label: 'Categorías',
++        icon: 'pi pi-tags',
++        routerLink: '/categorias',
++        visible: this.puedeAcceder(['ADMIN', 'GESTOR'])
++      },
++      {
++        label: 'Ubicaciones',
++        icon: 'pi pi-map-marker',
++        routerLink: '/ubicaciones',
++        visible: this.puedeAcceder(['ADMIN', 'GESTOR'])
++      },
++      {
++        label: 'Movimientos',
++        icon: 'pi pi-exchange',
++        routerLink: '/movimientos',
++        visible: this.puedeAcceder(['ADMIN', 'GESTOR', 'AUDITOR'])
++      },
++      {
++        label: 'Reportes',
++        icon: 'pi pi-chart-bar',
++        routerLink: '/reportes',
++        visible: this.puedeAcceder(['ADMIN', 'GESTOR', 'AUDITOR', 'CONSULTA'])
++      },
++      {
++        label: 'Historial de Auditoría',
++        icon: 'pi pi-history',
++        routerLink: '/historial-auditoria',
++        visible: this.puedeAcceder(['ADMIN', 'AUDITOR'])
++      },
++      {
++        label: 'Documentos',
++        icon: 'pi pi-file',
++        routerLink: '/documentos',
++        visible: this.puedeAcceder(['ADMIN', 'GESTOR'])
++      },
++      {
++        label: 'Notificaciones',
++        icon: 'pi pi-bell',
++        routerLink: '/notificaciones',
++        badge: '3'
++      },
++      {
++        label: 'Mantenimientos',
++        icon: 'pi pi-cog',
++        routerLink: '/mantenimientos',
++        visible: this.puedeAcceder(['ADMIN', 'GESTOR'])
++      },
++      {
++        label: 'Etiquetas Digitales',
++        icon: 'pi pi-qrcode',
++        routerLink: '/etiquetas-digitales',
++        visible: this.puedeAcceder(['ADMIN', 'GESTOR'])
++      }
++    ];
++
++    this.panelMenuItems = [
++      {
++        label: 'Menú Principal',
++        items: this.menuItems.filter(item => item.visible !== false)
++      }
++    ];
++  }
+ 
+   toggleMobileMenu() {
+     this.mobileMenuOpen = !this.mobileMenuOpen;
+@@ -114,10 +120,39 @@ ngOnInit() {
+     this.mobileMenuOpen = false;
+   }
+ 
++  // Método para navegar a una ruta
++  navigateToRoute(route: string | undefined) {
++    if (route) {
++      this.router.navigate([route]);
++      this.closeMobileMenu();
++    }
++  }
++
++  // Método para obtener la severidad del rol
++  getRoleSeverity(rol: string): "success" | "info" | "warning" | "danger" | "secondary" | "contrast" | undefined {
++    switch(rol?.toUpperCase()) {
++      case 'ADMIN':
++        return 'danger';
++      case 'GESTOR':
++        return 'warning';
++      case 'AUDITOR':
++        return 'info';
++      case 'CONSULTA':
++        return 'success';
++      default:
++        return 'secondary';
++    }
++  }
++
+   cerrarSesion() {
+-    this.authService.logout(); 
++    this.authService.logout();
++    this.messageService.add({
++      severity: 'success',
++      summary: 'Sesión cerrada',
++      detail: 'Has cerrado sesión exitosamente'
++    });
+     this.router.navigate(['/login']);
+-  } 
++  }
+ 
+   // Método para verificar si una ruta es accesible
+   puedeAcceder(rolesRequeridos: string[]): boolean {
+diff --git a/Frontend/patrimonials-app/src/app/historial-auditoria/historial-auditoria-list/historial-auditoria-list.component.html b/Frontend/patrimonials-app/src/app/historial-auditoria/historial-auditoria-list/historial-auditoria-list.component.html
+index d766e17..65bbde8 100644
+--- a/Frontend/patrimonials-app/src/app/historial-auditoria/historial-auditoria-list/historial-auditoria-list.component.html
++++ b/Frontend/patrimonials-app/src/app/historial-auditoria/historial-auditoria-list/historial-auditoria-list.component.html
+@@ -1 +1,55 @@
+-<p>historial-auditoria-list works!</p>
++<div *ngIf="loading">Cargando...</div>
++<div *ngIf="error" class="error">{{ error }}</div>
++
++<!-- Formulario de alta/edición -->
++<form (ngSubmit)="guardar()" *ngIf="editMode || !form.id">
++  <input type="date" [(ngModel)]="form.fecha" name="fecha" required placeholder="Fecha" />
++
++  <select [(ngModel)]="form.usuario" name="usuario" required>
++    <option [ngValue]="null">Seleccione usuario</option>
++    <option *ngFor="let u of usuarios" [ngValue]="u.id">{{ u.username }}</option>
++  </select>
++
++  <input type="text" [(ngModel)]="form.accion" name="accion" required placeholder="Acción" />
++  <input type="text" [(ngModel)]="form.detalle" name="detalle" required placeholder="Detalle" />
++
++  <select [(ngModel)]="form.bien" name="bien" required>
++    <option [ngValue]="null">Seleccione bien</option>
++    <option *ngFor="let b of bienes" [ngValue]="b.id">{{ b.codigo }}</option>
++  </select>
++
++  <input type="text" [(ngModel)]="form.ip" name="ip" placeholder="IP" />
++  <input type="text" [(ngModel)]="form.user_agent" name="user_agent" placeholder="User Agent" />
++  <button type="submit">{{ editMode ? 'Actualizar' : 'Crear' }}</button>
++  <button type="button" (click)="cancelar()">Cancelar</button>
++</form>
++
++<table *ngIf="!loading && historial.length">
++  <thead>
++    <tr>
++      <th>Fecha</th>
++      <th>Usuario</th>
++      <th>Acción</th>
++      <th>Detalle</th>
++      <th>Bien</th>
++      <th>IP</th>
++      <th>User Agent</th>
++      <th>Acciones</th>
++    </tr>
++  </thead>
++  <tbody>
++    <tr *ngFor="let h of historial">
++      <td>{{ h.fecha | date:'short' }}</td>
++      <td>{{ getUsuarioNombre(h.usuario) }}</td>
++      <td>{{ h.accion }}</td>
++      <td>{{ h.detalle }}</td>
++      <td>{{ getBienCodigo(h.bien) }}</td>
++      <td>{{ h.ip }}</td>
++      <td>{{ h.user_agent }}</td>
++      <td>
++        <button (click)="editar(h)">Editar</button>
++        <button (click)="eliminar(h.id)">Eliminar</button>
++      </td>
++    </tr>
++  </tbody>
++</table>
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/historial-auditoria/historial-auditoria-list/historial-auditoria-list.component.ts b/Frontend/patrimonials-app/src/app/historial-auditoria/historial-auditoria-list/historial-auditoria-list.component.ts
+index 31b6092..d981831 100644
+--- a/Frontend/patrimonials-app/src/app/historial-auditoria/historial-auditoria-list/historial-auditoria-list.component.ts
++++ b/Frontend/patrimonials-app/src/app/historial-auditoria/historial-auditoria-list/historial-auditoria-list.component.ts
+@@ -1,4 +1,8 @@
+-import { Component } from '@angular/core';
++import { Component, OnInit } from '@angular/core';
++import { HistorialAuditoria } from '../../models/historial-auditoria.model';
++import { ApiService } from '../../core/api.service';
++import { Usuario } from '../../models/usuario.model';
++import { Bien } from '../../models/bien.model';
+ 
+ @Component({
+   selector: 'app-historial-auditoria-list',
+@@ -6,6 +10,90 @@ import { Component } from '@angular/core';
+   templateUrl: './historial-auditoria-list.component.html',
+   styleUrl: './historial-auditoria-list.component.css'
+ })
+-export class HistorialAuditoriaListComponent {
++export class HistorialAuditoriaListComponent implements OnInit {
++  historial: HistorialAuditoria[] = [];
++  usuarios: Usuario[] = [];
++  bienes: Bien[] = [];
++  loading = false;
++  error: string | null = null;
+ 
+-}
++  form: Partial<HistorialAuditoria> = {};
++  editMode = false;
++
++  constructor(private api: ApiService) {}
++
++  ngOnInit() {
++    this.getHistorial();
++    this.api.getUsuarios().subscribe(data => this.usuarios = data);
++    this.api.getBienes().subscribe(data => this.bienes = data);
++  }
++
++  getUsuarioNombre(id: number): string {
++    const usuario = this.usuarios.find(u => u.id === id);
++    return usuario ? usuario.username : id?.toString();
++  }
++  
++  getBienCodigo(id: number): string {
++    const bien = this.bienes.find(b => b.id === id);
++    return bien ? bien.codigo : id?.toString();
++  }
++  getHistorial() {
++    this.loading = true;
++    this.api.getHistorialAuditoria().subscribe({
++      next: (data) => {
++        this.historial = data;
++        this.loading = false;
++      },
++      error: () => {
++        this.error = 'Error al cargar historial';
++        this.loading = false;
++      }
++    });
++  }
++
++  eliminar(id: number) {
++    if (confirm('¿Eliminar este registro de auditoría?')) {
++      this.api.deleteHistorialAuditoria(id).subscribe({
++        next: () => this.getHistorial(),
++        error: () => alert('No se pudo eliminar el registro')
++      });
++    }
++  }
++
++  editar(h: HistorialAuditoria) {
++    this.form = { ...h };
++      if (this.form.fecha) {
++      this.form.fecha = this.form.fecha.split("T")[0];
++    }
++     this.editMode = true;
++  }
++
++
++  cancelar() {
++    this.form = {};
++    this.editMode = false;
++  }
++
++  guardar() {
++    if (this.editMode && this.form.id) {
++      this.api.updateHistorialAuditoria(this.form.id, this.form).subscribe({
++        next: () => {
++          this.getHistorial();
++          this.cancelar();
++        },
++        error: () => alert('No se pudo actualizar el registro')
++      });
++    } else {
++      this.api.createHistorialAuditoria(this.form).subscribe({
++        next: () => {
++          this.getHistorial();
++          this.cancelar();
++        },
++        error: (err) => {
++          alert('No se pudo crear el registro');
++          console.error(err);
++        }
++      });
++    }
++  }
++}
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/login/login.component.css b/Frontend/patrimonials-app/src/app/login/login.component.css
+index 93e0854..ffeeebe 100644
+--- a/Frontend/patrimonials-app/src/app/login/login.component.css
++++ b/Frontend/patrimonials-app/src/app/login/login.component.css
+@@ -1,29 +1,151 @@
++/* General wrapper styling */
+ .login-wrapper {
+-  background: linear-gradient(135deg, #e0f2fe, #f8fafc);
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  min-height: 100vh;
++  background: linear-gradient(135deg, #e5e7eb, #f3f4f6);
++  padding: 1rem;
+ }
+ 
++/* PrimeNG card styling */
+ .p-card {
+-  transition: transform 0.3s ease;
++  max-width: 28rem;
++  width: 100%;
++  border-radius: 12px;
++  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
++  background: linear-gradient(145deg, #ffffff, #f8fafc);
++  transition: transform 0.3s ease, box-shadow 0.3s ease;
+ }
+ 
+ .p-card:hover {
+   transform: translateY(-5px);
++  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+ }
+ 
+-.p-inputtext-lg {
+-  padding: 0.75rem;
+-  font-size: 1.1rem;
++.p-card .p-card-title {
++  font-size: 1.5rem;
++  font-weight: 600;
++  color: #1f2937;
++  text-align: center;
+ }
+ 
+-.p-button-lg {
+-  padding: 0.75rem;
+-  font-size: 1.1rem;
++.p-card .p-card-subtitle {
++  font-size: 1rem;
++  color: #6b7280;
++  text-align: center;
++  margin-bottom: 1.5rem;
+ }
+ 
+-.p-error {
++/* Form field styling */
++.p-fluid .p-field {
++  margin-bottom: 1.5rem;
++}
++
++.p-field label {
+   font-size: 0.875rem;
++  font-weight: 500;
++  color: #374151;
++  margin-bottom: 0.5rem;
++  display: block;
++}
++
++.p-input-icon-left > .p-inputtext,
++.p-password {
++  width: 100%;
++  border-radius: 8px;
++  border: 1px solid #d1d5db;
++  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
++  font-size: 1rem;
++  transition: border-color 0.3s, box-shadow 0.3s;
++}
++
++.p-input-icon-left > .pi {
++  color: #6b7280;
++  left: 0.75rem;
++}
++
++.p-inputtext:focus,
++.p-password input:focus {
++  outline: none;
++  border-color: #0284c7;
++  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
++}
++
++.ng-invalid.ng-dirty {
++  border-color: #dc2626;
++}
++
++.p-error {
++  font-size: 0.75rem;
++  color: #dc2626;
++  margin-top: 0.25rem;
++}
++
++/* Password toggle icon */
++.p-password .pi-eye,
++.p-password .pi-eye-slash {
++  color: #6b7280;
++  cursor: pointer;
+ }
+ 
++/* Button styling */
++.p-button {
++  width: 100%;
++  padding: 0.75rem;
++  font-size: 1rem;
++  font-weight: 500;
++  border-radius: 8px;
++  background: linear-gradient(90deg, #0284c7, #0ea5e9);
++  border: none;
++  transition: background 0.3s, transform 0.3s;
++}
++
++.p-button:hover {
++  background: linear-gradient(90deg, #026ca3, #0c91d1);
++  transform: translateY(-2px);
++}
++
++.p-button:disabled {
++  background: #9ca3af;
++  cursor: not-allowed;
++  opacity: 0.7;
++}
++
++.p-button .pi-sign-in {
++  margin-right: 0.5rem;
++}
++
++/* Register link styling */
+ .register-link {
++  font-size: 0.875rem;
++  color: #0284c7;
+   text-decoration: none;
++  font-weight: 500;
++  transition: color 0.3s;
++}
++
++.register-link:hover {
++  color: #0ea5e9;
++  text-decoration: underline;
++}
++
++/* Responsive adjustments */
++@media (max-width: 640px) {
++  .p-card {
++    max-width: 90%;
++  }
++
++  .p-card .p-card-title {
++    font-size: 1.25rem;
++  }
++
++  .p-card .p-card-subtitle {
++    font-size: 0.875rem;
++  }
++
++  .p-button {
++    padding: 0.65rem;
++    font-size: 0.875rem;
++  }
+ }
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/login/login.component.html b/Frontend/patrimonials-app/src/app/login/login.component.html
+index bfd4b55..2da78d9 100644
+--- a/Frontend/patrimonials-app/src/app/login/login.component.html
++++ b/Frontend/patrimonials-app/src/app/login/login.component.html
+@@ -8,7 +8,6 @@
+     [style]="{'border-radius': '12px', 'background': 'linear-gradient(145deg, #ffffff, #f8fafc)'}"
+   >
+     <form [formGroup]="loginForm" (ngSubmit)="login()" class="p-fluid p-4">
+-      <!-- Username Field -->
+       <div class="p-field mb-4">
+         <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+         <span class="p-input-icon-left">
+@@ -30,7 +29,6 @@
+         >
+       </div>
+ 
+-      <!-- Password Field -->
+       <div class="p-field mb-4">
+         <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+         <span class="p-input-icon-left">
+@@ -52,7 +50,6 @@
+         >
+       </div>
+ 
+-      <!-- Submit Button -->
+       <p-button
+         type="submit"
+         label="Iniciar Sesión"
+@@ -63,7 +60,6 @@
+         [style]="{'border-radius': '8px', 'background': 'linear-gradient(90deg, #0284c7, #0ea5e9)', 'transition': 'all 0.3s'}"
+       ></p-button>
+ 
+-      <!-- Register Link -->
+       <div class="mt-4 text-center">
+         <a
+           (click)="goToRegistro()"
+diff --git a/Frontend/patrimonials-app/src/app/login/login.component.ts b/Frontend/patrimonials-app/src/app/login/login.component.ts
+index 47d979b..ab1ee72 100644
+--- a/Frontend/patrimonials-app/src/app/login/login.component.ts
++++ b/Frontend/patrimonials-app/src/app/login/login.component.ts
+@@ -9,7 +9,7 @@ import { MessageService } from 'primeng/api';
+   standalone: false,
+   templateUrl: './login.component.html',
+   styleUrls: ['./login.component.css'],
+-  providers: [MessageService], // Provide MessageService for p-toast
++  providers: [MessageService], 
+ })
+ export class LoginComponent {
+   loginForm: FormGroup;
+diff --git a/Frontend/patrimonials-app/src/app/models/movimiento.model.ts b/Frontend/patrimonials-app/src/app/models/movimiento.model.ts
+index 081b7ae..2212e27 100644
+--- a/Frontend/patrimonials-app/src/app/models/movimiento.model.ts
++++ b/Frontend/patrimonials-app/src/app/models/movimiento.model.ts
+@@ -1,12 +1,12 @@
+ export interface Movimiento {
+-    id: number;
+-    tipo: 'ASIGNACION' | 'TRASLADO' | 'BAJA' | 'MANTENIMIENTO' | 'LIBERACION' | 'REPARACION' | 'RETORNO';
+-    fecha: string; // ISO date string
+-    descripcion: string;
+-    observaciones?: string;
+-    bien: number; // ID of Bien
+-    responsable: number; // ID of Responsable
+-    origen?: number; // ID of Ubicacion
+-    destino?: number; // ID of Ubicacion
+-    usuario_registro: number; // ID of Usuario
+-  }
+\ No newline at end of file
++  id: number;
++  tipo: string;
++  fecha?: string;
++  descripcion: string;
++  observaciones?: string;
++  bien: string; // Debe ser el código de BienPatrimonial
++  responsable: string; // Debe ser el username del Usuario asociado al Responsable
++  origen?: string; // Debe ser el código de Ubicacion
++  destino?: string; // Debe ser el código de Ubicacion
++  usuario_registro: string; // Debe ser el username del Usuario
++}
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/models/reporte.model.ts b/Frontend/patrimonials-app/src/app/models/reporte.model.ts
+index 3cc0fdd..0c0c8cb 100644
+--- a/Frontend/patrimonials-app/src/app/models/reporte.model.ts
++++ b/Frontend/patrimonials-app/src/app/models/reporte.model.ts
+@@ -1,10 +1,10 @@
+ export interface Reporte {
+-    id: number;
+-    tipo: 'INVENTARIO' | 'DEPRECIACION' | 'ESTADO' | 'MOVIMIENTOS' | 'BAJAS' | 'MANTENIMIENTOS';
+-    fecha_generacion: string; // ISO date string
+-    contenido: string;
+-    formato: 'PDF' | 'EXCEL' | 'HTML' | 'CSV';
+-    parametros: { [key: string]: any }; // JSON object for filters
+-    usuario: number; // ID of Usuario
+-    archivo?: string; // URL or path to the file
+-  }
+\ No newline at end of file
++  id: number;
++  tipo: 'INVENTARIO' | 'DEPRECIACION' | 'ESTADO' | 'MOVIMIENTOS' | 'BAJAS' | 'MANTENIMIENTOS';
++  fecha_generacion: string; 
++  contenido: string;
++  formato: 'PDF' | 'EXCEL' | 'HTML' | 'CSV';
++  parametros: { [key: string]: any };
++  usuario: number; 
++  archivo?: string; 
++}
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/models/responsable.model.ts b/Frontend/patrimonials-app/src/app/models/responsable.model.ts
+index 69437af..858ec10 100644
+--- a/Frontend/patrimonials-app/src/app/models/responsable.model.ts
++++ b/Frontend/patrimonials-app/src/app/models/responsable.model.ts
+@@ -2,7 +2,6 @@ import { Usuario } from "./usuario.model";
+ export interface Responsable {
+   id: number;
+   usuario: Usuario; 
+-  nombre?: string;  
+   cargo: string;
+   departamento: string;
+   fecha_asignacion: string; 
+diff --git a/Frontend/patrimonials-app/src/app/models/ubicacion.model.ts b/Frontend/patrimonials-app/src/app/models/ubicacion.model.ts
+index 9b29fea..7820cb6 100644
+--- a/Frontend/patrimonials-app/src/app/models/ubicacion.model.ts
++++ b/Frontend/patrimonials-app/src/app/models/ubicacion.model.ts
+@@ -1,11 +1,12 @@
+ export interface Ubicacion {
+-    id: number;
+-    codigo: string;
+-    edificio: string;
+-    piso: string;
+-    oficina: string;
+-    direccion: string;
+-    responsable?: number; // ID of Responsable
+-    capacidad: number;
+-    ocupados: number;
+-  }
+\ No newline at end of file
++  id: number;
++  codigo: string;
++  edificio: string;
++  piso: string;
++  oficina: string;
++  direccion: string;
++  responsable?: number;
++  capacidad: number;
++  ocupados: number;
++  espacio_disponible?: number; // Añadido
++}
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/models/usuario.model.ts b/Frontend/patrimonials-app/src/app/models/usuario.model.ts
+index aa539bd..744b064 100644
+--- a/Frontend/patrimonials-app/src/app/models/usuario.model.ts
++++ b/Frontend/patrimonials-app/src/app/models/usuario.model.ts
+@@ -5,7 +5,7 @@ export interface Usuario {
+     rol: 'ADMIN' | 'GESTOR' | 'AUDITOR' | 'CONSULTA';
+     departamento?: string;
+     telefono?: string;
+-    fecha_creacion: string; // ISO date string (e.g., '2025-05-30T12:00:00Z')
++    fecha_creacion: string; 
+     ultimo_acceso?: string;
+     first_name?: string;
+     last_name?: string;
+diff --git a/Frontend/patrimonials-app/src/app/movimiento/movimiento-detail/movimiento-detail.component.html b/Frontend/patrimonials-app/src/app/movimiento/movimiento-detail/movimiento-detail.component.html
+index c0073ce..ba1e41a 100644
+--- a/Frontend/patrimonials-app/src/app/movimiento/movimiento-detail/movimiento-detail.component.html
++++ b/Frontend/patrimonials-app/src/app/movimiento/movimiento-detail/movimiento-detail.component.html
+@@ -1,8 +1,10 @@
+-<div>
+-  <h2>{{ esNuevo ? 'Nuevo Movimiento' : 'Editar Movimiento' }}</h2>
+-  <form (ngSubmit)="guardar()">
++<div *ngIf="loading">Cargando...</div>
++<div *ngIf="!loading">
++  <h2>{{ esNuevo ? 'Nuevo Movimiento' : 'Detalle de Movimiento: ' + (movimiento?.id || '') }}</h2>
++  <form [formGroup]="movimientoForm" (ngSubmit)="guardar()">
+     <label>Tipo:
+-      <select [(ngModel)]="movimiento.tipo" name="tipo" required>
++      <select formControlName="tipo" required>
++        <option value="" disabled>Seleccione un tipo</option>
+         <option value="ASIGNACION">Asignación</option>
+         <option value="TRASLADO">Traslado</option>
+         <option value="BAJA">Baja</option>
+@@ -11,34 +13,53 @@
+         <option value="REPARACION">Enviado a reparación</option>
+         <option value="RETORNO">Retorno de reparación</option>
+       </select>
++      <span *ngIf="isFieldInvalid('tipo')" style="color:red">El tipo es requerido.</span>
+     </label>
+     <br>
+-    <label>Bien (ID):
+-      <input [(ngModel)]="movimiento.bien" name="bien" required>
++    <label>Descripción:
++      <textarea formControlName="descripcion" required></textarea>
++      <span *ngIf="isFieldInvalid('descripcion')" style="color:red">La descripción es requerida.</span>
+     </label>
+     <br>
+-    <label>Responsable (ID):
+-      <input [(ngModel)]="movimiento.responsable" name="responsable" required>
++    <label>Observaciones:
++      <textarea formControlName="observaciones"></textarea>
+     </label>
+     <br>
+-    <label>Descripción:
+-      <textarea [(ngModel)]="movimiento.descripcion" name="descripcion"></textarea>
++    <label>Bien:
++      <select formControlName="bien" required>
++        <option value="" disabled>Seleccione un bien</option>
++        <option *ngFor="let bien of bienes" [value]="bien.codigo">{{ bien.codigo }} - {{ bien.descripcion | slice:0:50 }}</option>
++      </select>
++      <span *ngIf="isFieldInvalid('bien')" style="color:red">El bien es requerido.</span>
+     </label>
+     <br>
+-    <label>Observaciones:
+-      <textarea [(ngModel)]="movimiento.observaciones" name="observaciones"></textarea>
++    <label>Responsable:
++      <select formControlName="responsable" required>
++        <option value="" disabled>Seleccione un responsable</option>
++        <option *ngFor="let resp of responsables" [value]="resp.usuario.username">
++          {{ (resp.usuario.first_name || '') + ' ' + (resp.usuario.last_name || '') || resp.usuario.username }} ({{ resp.cargo }})
++        </option>
++      </select>
++      <span *ngIf="isFieldInvalid('responsable')" style="color:red">El responsable es requerido.</span>
+     </label>
+     <br>
+-    <label>Origen (Ubicación ID):
+-      <input [(ngModel)]="movimiento.origen" name="origen">
++    <label>Origen:
++      <select formControlName="origen">
++        <option value="">Ninguno</option>
++        <option *ngFor="let ubi of ubicaciones" [value]="ubi.codigo">{{ ubi.codigo }} - {{ ubi.edificio }}</option>
++      </select>
+     </label>
+     <br>
+-    <label>Destino (Ubicación ID):
+-      <input [(ngModel)]="movimiento.destino" name="destino">
++    <label>Destino:
++      <select formControlName="destino">
++        <option value="">Ninguno</option>
++        <option *ngFor="let ubi of ubicaciones" [value]="ubi.codigo">{{ ubi.codigo }} - {{ ubi.edificio }}</option>
++      </select>
+     </label>
+     <br>
+-    <div *ngIf="error" style="color:red">{{error}}</div>
+-    <button type="submit">Guardar</button>
+-    <button type="button" (click)="cancelar()">Cancelar</button>
++    <div *ngIf="error" style="color:red">{{ error }}</div>
++    <button type="submit" [disabled]="movimientoForm.invalid || loading || !usuarioActual">Guardar</button>
++    <button type="button" (click)="cancelar()" [disabled]="loading">Cancelar</button>
++    <button *ngIf="!esNuevo" type="button" (click)="eliminar()" [disabled]="loading">Eliminar</button>
+   </form>
+ </div>
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/movimiento/movimiento-detail/movimiento-detail.component.ts b/Frontend/patrimonials-app/src/app/movimiento/movimiento-detail/movimiento-detail.component.ts
+index 0edaa8d..05b05d4 100644
+--- a/Frontend/patrimonials-app/src/app/movimiento/movimiento-detail/movimiento-detail.component.ts
++++ b/Frontend/patrimonials-app/src/app/movimiento/movimiento-detail/movimiento-detail.component.ts
+@@ -1,47 +1,184 @@
+ import { Component, OnInit } from '@angular/core';
+ import { Movimiento } from '../../models/movimiento.model';
++import { Bien } from '../../models/bien.model';
++import { Responsable } from '../../models/responsable.model';
++import { Ubicacion } from '../../models/ubicacion.model';
++import { Usuario } from '../../models/usuario.model';
+ import { ApiService } from '../../core/api.service';
+ import { ActivatedRoute, Router } from '@angular/router';
++import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+ 
+ @Component({
+   selector: 'app-movimiento-detail',
+   standalone: false,
+   templateUrl: './movimiento-detail.component.html',
+-  styleUrl: './movimiento-detail.component.css'
++  styleUrls: ['./movimiento-detail.component.css']
+ })
+ export class MovimientoDetailComponent implements OnInit {
+-  movimiento: Partial<Movimiento> = {};
+-  id: string | null = null;
+-  esNuevo = false;
++  movimientoForm: FormGroup;
++  movimiento: Movimiento | null = null;
++  bienes: Bien[] = [];
++  responsables: Responsable[] = [];
++  ubicaciones: Ubicacion[] = [];
++  usuarioActual: Usuario | null = null;
++  loading = false;
+   error = '';
++  esNuevo = false;
+ 
+   constructor(
+     private route: ActivatedRoute,
+     private api: ApiService,
+-    private router: Router
+-  ) {}
++    private router: Router,
++    private fb: FormBuilder
++  ) {
++    this.movimientoForm = this.fb.group({
++      tipo: ['', [Validators.required]],
++      descripcion: ['', [Validators.required]],
++      observaciones: [''],
++      bien: ['', [Validators.required]],
++      responsable: ['', [Validators.required]],
++      origen: [''],
++      destino: ['']
++    });
++  }
+ 
+   ngOnInit(): void {
+-    this.id = this.route.snapshot.paramMap.get('id');
+-    this.esNuevo = this.id === 'nuevo';
+-    if (!this.esNuevo && this.id) {
+-      this.api.getMovimiento(Number(this.id)).subscribe({
+-        next: (mov) => this.movimiento = mov,
+-        error: () => this.error = 'No se pudo cargar el movimiento'
++    // Cargar usuario actual
++    this.loading = true;
++    this.api.get<Usuario>('auth/usuario/').subscribe({
++      next: (user) => {
++        this.usuarioActual = user;
++        this.loadData();
++      },
++      error: () => {
++        this.error = 'No se pudo cargar el usuario actual';
++        this.loading = false;
++      }
++    });
++
++    const id = this.route.snapshot.paramMap.get('id');
++    this.esNuevo = id === 'nuevo';
++    if (!this.esNuevo && id) {
++      this.api.getMovimiento(Number(id)).subscribe({
++        next: (mov) => {
++          this.movimiento = mov;
++          this.movimientoForm.patchValue({
++            tipo: mov.tipo,
++            descripcion: mov.descripcion,
++            observaciones: mov.observaciones || '',
++            bien: mov.bien,
++            responsable: mov.responsable,
++            origen: mov.origen || '',
++            destino: mov.destino || ''
++          });
++          this.loading = false;
++        },
++        error: () => {
++          this.error = 'No se pudo cargar el movimiento';
++          this.loading = false;
++        }
+       });
++    } else {
++      this.loadData();
+     }
+   }
+ 
++  loadData() {
++    // Cargar bienes
++    this.api.getBienes().subscribe({
++      next: (bienes) => {
++        this.bienes = bienes;
++      },
++      error: () => {
++        this.error = 'No se pudieron cargar los bienes';
++      }
++    });
++
++    // Cargar responsables
++    this.api.getResponsables().subscribe({
++      next: (responsables) => {
++        this.responsables = responsables;
++      },
++      error: () => {
++        this.error = 'No se pudieron cargar los responsables';
++      }
++    });
++
++    // Cargar ubicaciones
++    this.api.getUbicaciones().subscribe({
++      next: (ubicaciones) => {
++        this.ubicaciones = ubicaciones;
++        this.loading = false;
++      },
++      error: () => {
++        this.error = 'No se pudieron cargar las ubicaciones';
++        this.loading = false;
++      }
++    });
++  }
++
+   guardar() {
+-    if (this.esNuevo) {
+-      this.api.createMovimiento(this.movimiento).subscribe({
+-        next: () => this.router.navigate(['/movimientos']),
+-        error: () => this.error = 'No se pudo crear el movimiento'
+-      });
+-    } else if (this.id) {
+-      this.api.updateMovimiento(Number(this.id), this.movimiento).subscribe({
+-        next: () => this.router.navigate(['/movimientos']),
+-        error: () => this.error = 'No se pudo actualizar el movimiento'
++  if (this.movimientoForm.invalid) {
++    this.movimientoForm.markAllAsTouched();
++    this.error = 'Por favor, complete todos los campos requeridos correctamente.';
++    return;
++  }
++
++  if (!this.usuarioActual?.username) { // Verificar username en lugar de id
++    this.error = 'Usuario no autenticado';
++    return;
++  }
++
++  const movimiento: Partial<Movimiento> = {
++    tipo: this.movimientoForm.value.tipo,
++    descripcion: this.movimientoForm.value.descripcion,
++    observaciones: this.movimientoForm.value.observaciones || undefined,
++    bien: this.movimientoForm.value.bien, // Enviar el código como string
++    responsable: this.movimientoForm.value.responsable, // Enviar el username como string
++    origen: this.movimientoForm.value.origen || undefined,
++    destino: this.movimientoForm.value.destino || undefined,
++    usuario_registro: this.usuarioActual.username // Enviar username, no id
++  };
++
++  this.loading = true;
++  if (this.esNuevo) {
++    this.api.createMovimiento(movimiento).subscribe({
++      next: () => {
++        this.loading = false;
++        this.router.navigate(['/movimientos']);
++      },
++      error: (err) => {
++        this.loading = false;
++        this.error = err.error?.message || 'No se pudo crear el movimiento. Verifique los datos.';
++        console.error('Error del servidor:', err.error);
++      }
++    });
++  } else if (this.movimiento?.id) {
++    this.api.updateMovimiento(this.movimiento.id, movimiento).subscribe({
++      next: () => {
++        this.loading = false;
++        this.router.navigate(['/movimientos']);
++      },
++      error: (err) => {
++        this.loading = false;
++        this.error = err.error?.message || 'No se pudo actualizar el movimiento. Verifique los datos.';
++        console.error('Error del servidor:', err.error);
++      }
++    });
++  }
++}
++  eliminar() {
++    if (this.movimiento?.id && confirm('¿Seguro que desea eliminar este movimiento?')) {
++      this.loading = true;
++      this.api.deleteMovimiento(this.movimiento.id).subscribe({
++        next: () => {
++          this.loading = false;
++          this.router.navigate(['/movimientos']);
++        },
++        error: () => {
++          this.loading = false;
++          this.error = 'No se pudo eliminar el movimiento';
++        }
+       });
+     }
+   }
+@@ -49,4 +186,9 @@ export class MovimientoDetailComponent implements OnInit {
+   cancelar() {
+     this.router.navigate(['/movimientos']);
+   }
++
++  isFieldInvalid(field: string): boolean {
++    const control = this.movimientoForm.get(field);
++    return !!control && control.invalid && (control.touched || control.dirty);
++  }
+ }
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/movimiento/movimiento-list/movimiento-list.component.html b/Frontend/patrimonials-app/src/app/movimiento/movimiento-list/movimiento-list.component.html
+index b9615a3..7799321 100644
+--- a/Frontend/patrimonials-app/src/app/movimiento/movimiento-list/movimiento-list.component.html
++++ b/Frontend/patrimonials-app/src/app/movimiento/movimiento-list/movimiento-list.component.html
+@@ -1,28 +1,34 @@
+-<div>
+-  <h2>Movimientos</h2>
+-  <button (click)="crearMovimiento()">Nuevo Movimiento</button>
+-  <div *ngIf="loading">Cargando...</div>
+-  <div *ngIf="error">{{error}}</div>
+-  <table *ngIf="movimientos.length">
++<div *ngIf="loading">Cargando...</div>
++<div *ngIf="!loading">
++  <h2>Lista de Movimientos</h2>
++  <button (click)="crearMovimiento()">Crear Movimiento</button>
++  <div *ngIf="error" style="color:red">{{ error }}</div>
++  <table>
+     <thead>
+       <tr>
++        <th>ID</th>
+         <th>Tipo</th>
+-        <th>Bien</th>
+-        <th>Responsable</th>
+         <th>Fecha</th>
+         <th>Descripción</th>
++        <th>Bien</th>
++        <th>Responsable</th>
++        <th>Origen</th>
++        <th>Destino</th>
+         <th>Acciones</th>
+       </tr>
+     </thead>
+     <tbody>
+       <tr *ngFor="let mov of movimientos">
+-        <td>{{mov.tipo}}</td>
+-        <td>{{mov.bien}}</td>
+-        <td>{{mov.responsable}}</td>
+-        <td>{{mov.fecha | date:'short'}}</td>
+-        <td>{{mov.descripcion}}</td>
++        <td>{{ mov.id }}</td>
++        <td>{{ mov.tipo }}</td>
++        <td>{{ mov.fecha | date:'short' }}</td>
++        <td>{{ mov.descripcion | slice:0:50 }}</td>
++        <td>{{ mov.bien }}</td>
++        <td>{{ mov.responsable }}</td>
++        <td>{{ mov.origen || 'N/A' }}</td>
++        <td>{{ mov.destino || 'N/A' }}</td>
+         <td>
+-          <button (click)="verDetalle(mov.id)">Ver/Editar</button>
++          <button (click)="verDetalle(mov.id)">Ver</button>
+           <button (click)="eliminarMovimiento(mov.id)">Eliminar</button>
+         </td>
+       </tr>
+diff --git a/Frontend/patrimonials-app/src/app/movimiento/movimiento-list/movimiento-list.component.ts b/Frontend/patrimonials-app/src/app/movimiento/movimiento-list/movimiento-list.component.ts
+index e3d31d2..1fa3172 100644
+--- a/Frontend/patrimonials-app/src/app/movimiento/movimiento-list/movimiento-list.component.ts
++++ b/Frontend/patrimonials-app/src/app/movimiento/movimiento-list/movimiento-list.component.ts
+@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
+   selector: 'app-movimiento-list',
+   standalone: false,
+   templateUrl: './movimiento-list.component.html',
+-  styleUrl: './movimiento-list.component.css'
++  styleUrls: ['./movimiento-list.component.css']
+ })
+ export class MovimientoListComponent implements OnInit {
+   movimientos: Movimiento[] = [];
+@@ -23,8 +23,14 @@ export class MovimientoListComponent implements OnInit {
+   getMovimientos() {
+     this.loading = true;
+     this.api.getMovimientos().subscribe({
+-      next: (data) => { this.movimientos = data; this.loading = false; },
+-      error: () => { this.error = 'Error al cargar movimientos'; this.loading = false; }
++      next: (data) => {
++        this.movimientos = data;
++        this.loading = false;
++      },
++      error: () => {
++        this.error = 'Error al cargar movimientos';
++        this.loading = false;
++      }
+     });
+   }
+ 
+@@ -36,7 +42,9 @@ export class MovimientoListComponent implements OnInit {
+     if (confirm('¿Eliminar este movimiento?')) {
+       this.api.deleteMovimiento(id).subscribe({
+         next: () => this.getMovimientos(),
+-        error: () => alert('No se pudo eliminar el movimiento')
++        error: () => {
++          this.error = 'No se pudo eliminar el movimiento';
++        }
+       });
+     }
+   }
+@@ -44,4 +52,4 @@ export class MovimientoListComponent implements OnInit {
+   crearMovimiento() {
+     this.router.navigate(['/movimientos', 'nuevo']);
+   }
+-}
++}
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/registro/registro.component.css b/Frontend/patrimonials-app/src/app/registro/registro.component.css
+index 45592c9..22062b1 100644
+--- a/Frontend/patrimonials-app/src/app/registro/registro.component.css
++++ b/Frontend/patrimonials-app/src/app/registro/registro.component.css
+@@ -1,9 +1,261 @@
++/* General wrapper styling with subtle background animation */
++.card {
++  display: flex;
++  flex-direction: column;
++  max-width: 32rem;
++  width: 100%;
++  margin: 2rem auto;
++  border-radius: 12px;
++  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
++  background: linear-gradient(145deg, #ffffff, #f8fafc);
++  padding: 2rem;
++  position: relative;
++  z-index: 1;
++  transition: transform 0.3s ease, box-shadow 0.3s ease;
++}
++
++.card:hover {
++  transform: translateY(-5px);
++  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
++}
++
++/* Background animation for the page */
++body {
++  background: linear-gradient(135deg, #e5e7eb, #f3f4f6);
++  min-height: 100vh;
++  position: relative;
++  overflow-x: hidden;
++}
++
++body::before {
++  content: '';
++  position: absolute;
++  top: 0;
++  left: 0;
++  width: 200%;
++  height: 200%;
++  background: radial-gradient(circle at 30% 30%, rgba(2, 132, 199, 0.1), transparent 70%);
++  animation: subtlePulse 15s ease-in-out infinite;
++  z-index: 0;
++}
++
++@keyframes subtlePulse {
++  0%, 100% {
++    transform: translate(-25%, -25%) scale(1);
++    opacity: 0.3;
++  }
++  50% {
++    transform: translate(-25%, -25%) scale(1.1);
++    opacity: 0.5;
++  }
++}
++
++/* Form title styling */
++.card h2 {
++  font-size: 1.5rem;
++  font-weight: 600;
++  color: #1f2937;
++  text-align: center;
++  position: relative;
++  padding-bottom: 0.5rem;
++  margin-bottom: 1.5rem;
++}
++
++.card h2::after {
++  content: '';
++  position: absolute;
++  bottom: 0;
++  left: 50%;
++  transform: translateX(-50%);
++  width: 50px;
++  height: 2px;
++  background: #0284c7;
++  border-radius: 2px;
++}
++
++/* Form field styling */
++.field {
++  margin-bottom: 1.5rem;
++}
++
++.field label {
++  font-size: 0.875rem;
++  font-weight: 500;
++  color: #374151;
++  margin-bottom: 0.5rem;
++  display: block;
++  transition: color 0.3s ease;
++}
++
++.field label:hover {
++  color: #0284c7;
++}
++
++.p-inputtext,
++.p-password,
++.p-select {
++  width: 100%;
++  border-radius: 8px;
++  border: 1px solid #d1d5db;
++  padding: 0.75rem;
++  font-size: 1rem;
++  transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
++  background: #fff;
++}
++
++.p-inputtext:focus,
++.p-password input:focus,
++.p-select:focus {
++  outline: none;
++  border-color: #0284c7;
++  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
++  transform: scale(1.02);
++}
++
++.p-inputtext:hover,
++.p-password:hover,
++.p-select:hover {
++  border-color: #0284c7;
++}
++
++.ng-invalid.ng-dirty {
++  border-color: #dc2626;
++  animation: shake 0.3s ease;
++}
++
++@keyframes shake {
++  0%, 100% { transform: translateX(0); }
++  25% { transform: translateX(-3px); }
++  75% { transform: translateX(3px); }
++}
++
+ .p-error {
+   font-size: 0.75rem;
+-  color: #f44336;
++  color: #dc2626;
++  margin-top: 0.25rem;
++  animation: fadeIn 0.3s ease;
+ }
+ 
+-.card {
+-  max-width: 600px;
+-  margin: 30px auto;
++@keyframes fadeIn {
++  from { opacity: 0; transform: translateY(-5px); }
++  to { opacity: 1; transform: translateY(0); }
+ }
++
++/* Password toggle icon */
++.p-password .pi-eye,
++.p-password .pi-eye-slash {
++  color: #6b7280;
++  cursor: pointer;
++  transition: color 0.3s;
++}
++
++.p-password .pi-eye:hover,
++.p-password .pi-eye-slash:hover {
++  color: #0284c7;
++}
++
++/* Dropdown (p-select) specific styling */
++.p-select .p-dropdown {
++  width: 100%;
++  border-radius: 8px;
++  border: 1px solid #d1d5db;
++}
++
++.p-select .p-dropdown .p-dropdown-label {
++  padding: 0.75rem;
++  font-size: 1rem;
++}
++
++.p-select .p-dropdown:hover {
++  border-color: #0284c7;
++}
++
++.p-select .p-dropdown:focus {
++  border-color: #0284c7;
++  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
++}
++
++/* Button styling with ripple effect */
++.p-button {
++  width: 100%;
++  padding: 0.75rem;
++  font-size: 1rem;
++  font-weight: 500;
++  border-radius: 8px;
++  background: linear-gradient(90deg, #0284c7, #0ea5e9);
++  border: none;
++  position: relative;
++  overflow: hidden;
++  transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
++}
++
++.p-button::before {
++  content: '';
++  position: absolute;
++  top: 50%;
++  left: 50%;
++  width: 0;
++  height: 0;
++  background: rgba(255, 255, 255, 0.3);
++  border-radius: 50%;
++  transform: translate(-50%, -50%);
++  transition: width 0.6s ease, height 0.6s ease;
++}
++
++.p-button:hover::before {
++  width: 300px;
++  height: 300px;
++}
++
++.p-button:hover {
++  background: linear-gradient(90deg, #026ca3, #0c91d1);
++  transform: translateY(-2px);
++  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
++}
++
++.p-button:disabled {
++  background: #9ca3af;
++  cursor: not-allowed;
++  opacity: 0.7;
++}
++
++.p-button .pi-user-plus {
++  margin-right: 0.5rem;
++}
++
++/* Responsive adjustments */
++@media (max-width: 640px) {
++  .card {
++    max-width: 90%;
++    padding: 1.5rem;
++  }
++
++  .card h2 {
++    font-size: 1.25rem;
++    margin-bottom: 1rem;
++  }
++
++  .field {
++    margin-bottom: 1.25rem;
++  }
++
++  .field label {
++    font-size: 0.8125rem;
++  }
++
++  .p-inputtext,
++  .p-password,
++  .p-select .p-dropdown {
++    padding: 0.65rem;
++    font-size: 0.9375rem;
++  }
++
++  .p-button {
++    padding: 0.65rem;
++    font-size: 0.875rem;
++  }
++
++  body::before {
++    animation-duration: 20s;
++  }
++}
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/reporte/reporte-detail/reporte-detail.component.html b/Frontend/patrimonials-app/src/app/reporte/reporte-detail/reporte-detail.component.html
+index 9ad0a03..ee27a38 100644
+--- a/Frontend/patrimonials-app/src/app/reporte/reporte-detail/reporte-detail.component.html
++++ b/Frontend/patrimonials-app/src/app/reporte/reporte-detail/reporte-detail.component.html
+@@ -1,18 +1,44 @@
+ <div *ngIf="loading">Cargando...</div>
+-<div *ngIf="reporte">
+-  <h2>Detalle de Reporte #{{ reporte.id }}</h2>
+-  <p><strong>Tipo:</strong> {{ reporte.tipo || '-' }}</p>
+-  <p><strong>Fecha de generación:</strong> {{ reporte.fecha_generacion ? (reporte.fecha_generacion | date:'short') : '-' }}</p>
+-  <p><strong>Formato:</strong> {{ reporte.formato || '-' }}</p>
+-  <p><strong>Usuario ID:</strong> {{ reporte.usuario || '-' }}</p>
+-  <p><strong>Parámetros:</strong>
+-    <span *ngIf="reporte.parametros && (reporte.parametros | json) !== '{}'">{{ reporte.parametros | json }}</span>
+-    <span *ngIf="!reporte.parametros || (reporte.parametros | json) === '{}'">-</span>
+-  </p>
+-  <p><strong>Archivo:</strong>
+-    <a *ngIf="reporte.archivo" [href]="reporte.archivo" target="_blank">Descargar</a>
+-    <span *ngIf="!reporte.archivo">-</span>
+-  </p>
+-  <p><strong>Contenido:</strong> {{ reporte.contenido || '-' }}</p>
+-  <button (click)="volver()">Volver</button>
++<div *ngIf="!loading">
++  <h2>{{ esNuevo ? 'Nuevo Reporte' : 'Detalle de Reporte: ' + (reporte?.id || '') }}</h2>
++  <form [formGroup]="reporteForm" (ngSubmit)="guardar()">
++    <label>Tipo:
++      <select formControlName="tipo" required>
++        <option value="" disabled>Seleccione un tipo</option>
++        <option value="INVENTARIO">Inventario</option>
++        <option value="DEPRECIACION">Depreciación</option>
++        <option value="ESTADO">Estado</option>
++        <option value="MOVIMIENTOS">Movimientos</option>
++        <option value="BAJAS">Bajas</option>
++        <option value="MANTENIMIENTOS">Mantenimientos</option>
++      </select>
++      <span *ngIf="isFieldInvalid('tipo')" style="color:red">El tipo es requerido.</span>
++    </label>
++    <br>
++    <label>Formato:
++      <select formControlName="formato" required>
++        <option value="" disabled>Seleccione un formato</option>
++        <option value="PDF">PDF</option>
++        <option value="EXCEL">Excel</option>
++        <option value="HTML">HTML</option>
++        <option value="CSV">CSV</option>
++      </select>
++      <span *ngIf="isFieldInvalid('formato')" style="color:red">El formato es requerido.</span>
++    </label>
++    <br>
++    <label>Contenido:
++      <textarea formControlName="contenido" [readonly]="!esNuevo"></textarea>
++      <span *ngIf="isFieldInvalid('contenido')" style="color:red">El contenido es requerido.</span>
++    </label>
++    <br>
++    <label *ngIf="!esNuevo">Archivo generado:
++      <a *ngIf="reporte?.archivo" [href]="reporte!.archivo" target="_blank">Descargar</a>
++      <span *ngIf="!reporte?.archivo">No hay archivo disponible</span>
++    </label>
++    <br>
++    <div *ngIf="error" style="color:red">{{ error }}</div>
++    <button type="submit" [disabled]="reporteForm.invalid || loading || !usuarioActual">Guardar</button>
++    <button type="button" (click)="volver()" [disabled]="loading">Volver</button>
++    <button *ngIf="!esNuevo" type="button" (click)="eliminar()" [disabled]="loading">Eliminar</button>
++  </form>
+ </div>
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/reporte/reporte-detail/reporte-detail.component.ts b/Frontend/patrimonials-app/src/app/reporte/reporte-detail/reporte-detail.component.ts
+index 7bfc212..d7ada1d 100644
+--- a/Frontend/patrimonials-app/src/app/reporte/reporte-detail/reporte-detail.component.ts
++++ b/Frontend/patrimonials-app/src/app/reporte/reporte-detail/reporte-detail.component.ts
+@@ -2,32 +2,142 @@ import { Component, OnInit } from '@angular/core';
+ import { Reporte } from '../../models/reporte.model';
+ import { ActivatedRoute, Router } from '@angular/router';
+ import { ApiService } from '../../core/api.service';
++import { FormBuilder, FormGroup, Validators } from '@angular/forms';
++import { Usuario } from '../../models/usuario.model';
+ 
+ @Component({
+   selector: 'app-reporte-detail',
+   standalone: false,
+   templateUrl: './reporte-detail.component.html',
+-  styleUrl: './reporte-detail.component.css'
++  styleUrls: ['./reporte-detail.component.css']
+ })
+ export class ReporteDetailComponent implements OnInit {
+-  reporte?: Reporte;
++  reporteForm: FormGroup;
++  reporte: Reporte | null = null;
+   loading = false;
++  error = '';
++  esNuevo = false;
++  usuarioActual: Usuario | null = null;
+ 
+-  constructor(private route: ActivatedRoute, private api: ApiService, private router: Router) {}
++  constructor(
++    private route: ActivatedRoute,
++    private api: ApiService,
++    private router: Router,
++    private fb: FormBuilder
++  ) {
++    this.reporteForm = this.fb.group({
++      tipo: ['', [Validators.required]],
++      formato: ['', [Validators.required]],
++      contenido: ['', [Validators.required]] // Obligatorio según modelo Django
++    });
++  }
+ 
+   ngOnInit(): void {
+-    const id = Number(this.route.snapshot.paramMap.get('id'));
++    // Obtener usuario actual
+     this.loading = true;
+-    this.api.getReporte(id).subscribe({
+-      next: (data) => {
+-        this.reporte = data;
++    this.api.get<Usuario>('auth/usuario/').subscribe({
++      next: (user) => {
++        this.usuarioActual = user;
+         this.loading = false;
+       },
+-      error: () => { this.loading = false; }
++      error: () => {
++        this.error = 'No se pudo cargar el usuario actual';
++        this.loading = false;
++      }
+     });
+-    
++
++    const id = this.route.snapshot.paramMap.get('id');
++    this.esNuevo = id === 'nuevo';
++    if (!this.esNuevo && id) {
++      this.loading = true;
++      this.api.getReporte(Number(id)).subscribe({
++        next: (data) => {
++          this.reporte = data;
++          this.reporteForm.patchValue({
++            tipo: data.tipo,
++            formato: data.formato,
++            contenido: data.contenido || 'Reporte generado'
++          });
++          this.loading = false;
++        },
++        error: () => {
++          this.error = 'No se pudo cargar el reporte';
++          this.loading = false;
++        }
++      });
++    }
+   }
+-   volver() {
++
++  guardar() {
++    if (this.reporteForm.invalid) {
++      this.reporteForm.markAllAsTouched();
++      this.error = 'Por favor, complete todos los campos requeridos correctamente.';
++      return;
++    }
++
++    if (!this.usuarioActual?.id) {
++      this.error = 'Usuario no autenticado';
++      return;
++    }
++
++    const reporte: Partial<Reporte> = {
++      tipo: this.reporteForm.value.tipo,
++      formato: this.reporteForm.value.formato,
++      contenido: this.reporteForm.value.contenido,
++      usuario: this.usuarioActual.id,
++      parametros: {} // Enviar objeto JSON vacío por defecto
++    };
++
++    this.loading = true;
++    if (this.esNuevo) {
++      this.api.createReporte(reporte).subscribe({
++        next: () => {
++          this.loading = false;
++          this.router.navigate(['/reportes']);
++        },
++        error: (err) => {
++          this.loading = false;
++          this.error = err.error?.message || 'No se pudo crear el reporte. Verifique los datos.';
++          console.error('Error del servidor:', err.error);
++        }
++      });
++    } else if (this.reporte?.id) {
++      this.api.updateReporte(this.reporte.id, reporte).subscribe({
++        next: () => {
++          this.loading = false;
++          this.router.navigate(['/reportes']);
++        },
++        error: (err) => {
++          this.loading = false;
++          this.error = err.error?.message || 'No se pudo actualizar el reporte. Verifique los datos.';
++          console.error('Error del servidor:', err.error);
++        }
++      });
++    }
++  }
++
++  eliminar() {
++    if (this.reporte?.id && confirm('¿Seguro que desea eliminar este reporte?')) {
++      this.loading = true;
++      this.api.deleteReporte(this.reporte.id).subscribe({
++        next: () => {
++          this.loading = false;
++          this.router.navigate(['/reportes']);
++        },
++        error: () => {
++          this.loading = false;
++          this.error = 'No se pudo eliminar el reporte';
++        }
++      });
++    }
++  }
++
++  volver() {
+     this.router.navigate(['/reportes']);
+   }
++
++  isFieldInvalid(field: string): boolean {
++    const control = this.reporteForm.get(field);
++    return !!control && control.invalid && (control.touched || control.dirty);
++  }
+ }
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/responsable/responsable-detail/responsable-detail.component.css b/Frontend/patrimonials-app/src/app/responsable/responsable-detail/responsable-detail.component.css
+index e716ce6..9859f4e 100644
+--- a/Frontend/patrimonials-app/src/app/responsable/responsable-detail/responsable-detail.component.css
++++ b/Frontend/patrimonials-app/src/app/responsable/responsable-detail/responsable-detail.component.css
+@@ -1,83 +1,20 @@
+-/* Puedes usar este CSS en responsable-list.component.css y responsable-detail.component.css */
+-
+-/* Títulos */
+-h2 {
+-  text-align: center;
+-  margin-bottom: 1.5rem;
+-  color: #2c3e50;
+-}
+-
+-/* Tabla */
+-table {
+-  width: 100%;
+-  border-collapse: collapse;
+-  margin-bottom: 1.5rem;
+-  background: #fff;
+-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
++.container {
++  padding: 20px;
+ }
+ 
+-th, td {
+-  padding: 0.75rem 1rem;
+-  border-bottom: 1px solid #e0e0e0;
+-  text-align: left;
++.form-group {
++  margin-bottom: 15px;
+ }
+ 
+-th {
+-  background: #f5f6fa;
+-  font-weight: 600;
+-  color: #34495e;
++.btn {
++  margin-right: 10px;
+ }
+ 
+-tbody tr:nth-child(even) {
+-  background: #f9f9f9;
+-}
+-
+-a {
+-  color: #1976d2;
+-  text-decoration: none;
+-  font-weight: 500;
+-}
+-
+-a:hover {
+-  text-decoration: underline;
+-}
+-
+-/* Detalle */
+-p {
+-  font-size: 1rem;
+-  margin: 0.5rem 0;
+-}
+-
+-strong {
+-  color: #34495e;
++.loading {
++  text-align: center;
++  padding: 20px;
+ }
+ 
+-/* Responsive */
+-@media (max-width: 700px) {
+-  table, thead, tbody, th, td, tr {
+-    display: block;
+-  }
+-  thead tr {
+-    display: none;
+-  }
+-  tr {
+-    margin-bottom: 1rem;
+-    border-bottom: 2px solid #e0e0e0;
+-  }
+-  td {
+-    position: relative;
+-    padding-left: 50%;
+-    border: none;
+-    border-bottom: 1px solid #eee;
+-  }
+-  td:before {
+-    position: absolute;
+-    top: 0;
+-    left: 0;
+-    width: 45%;
+-    padding-left: 1rem;
+-    font-weight: bold;
+-    color: #888;
+-    content: attr(data-label);
+-  }
++.alert {
++  margin-top: 10px;
+ }
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/responsable/responsable-detail/responsable-detail.component.html b/Frontend/patrimonials-app/src/app/responsable/responsable-detail/responsable-detail.component.html
+index da09e1b..94b8861 100644
+--- a/Frontend/patrimonials-app/src/app/responsable/responsable-detail/responsable-detail.component.html
++++ b/Frontend/patrimonials-app/src/app/responsable/responsable-detail/responsable-detail.component.html
+@@ -1,29 +1,43 @@
+-<h2>Detalle del Responsable</h2>
+-<p><strong>Usuario:</strong>
+-  <ng-container *ngIf="responsable && isUsuarioObject(responsable.usuario); else soloId">
+-    {{ responsable.usuario.username }}
+-  </ng-container>
+-  <ng-template #soloId>
+-    {{ responsable?.usuario }}
+-  </ng-template>
+-</p>
+-<p><strong>Email:</strong>
+-  <ng-container *ngIf="responsable && isUsuarioObject(responsable.usuario) && responsable.usuario.email; else soloEmail">
+-    {{ responsable.usuario.email }}
+-  </ng-container>
+-  <ng-template #soloEmail>
+-    {{ responsable?.usuario }}
+-  </ng-template>
+-</p>
+-<p><strong>Rol:</strong>
+-  <ng-container *ngIf="responsable && isUsuarioObject(responsable.usuario) && responsable.usuario.rol; else soloRol">
+-    {{ responsable.usuario.rol }}
+-  </ng-container>
+-  <ng-template #soloRol>
+-    {{ responsable?.usuario }}
+-  </ng-template>
+-</p>
+-<p><strong>Cargo:</strong> {{ responsable?.cargo }}</p>
+-<p><strong>Departamento:</strong> {{ responsable?.departamento }}</p>
+-<p><strong>Fecha de asignación:</strong> {{ responsable?.fecha_asignacion | date:'longDate' }}</p>
+-<p><strong>Activo:</strong> {{ responsable?.activo ? 'Sí' : 'No' }}</p>
+\ No newline at end of file
++<div class="container">
++  <h2>Detalles del Responsable</h2>
++
++  <div *ngIf="loading" class="loading">Cargando...</div>
++  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
++
++  <div *ngIf="responsable && !loading">
++    <div *ngIf="!isEditing">
++      <p><strong>ID:</strong> {{ responsable.id }}</p>
++      <p><strong>Usuario:</strong> {{ isUsuarioObject(responsable.usuario) ? responsable.usuario.username : 'N/A' }}</p>
++      <p><strong>Cargo:</strong> {{ responsable.cargo }}</p>
++      <p><strong>Departamento:</strong> {{ responsable.departamento }}</p>
++      <p><strong>Activo:</strong> {{ responsable.activo ? 'Sí' : 'No' }}</p>
++      <button (click)="toggleEdit()" class="btn btn-primary">Editar</button>
++      <button (click)="router.navigate(['/responsables'])" class="btn btn-secondary">Volver</button>
++    </div>
++
++    <!-- Formulario de edición -->
++    <div *ngIf="isEditing">
++      <form [formGroup]="editForm" (ngSubmit)="updateResponsable()">
++        <div class="form-group">
++          <label for="usuario_id">Usuario ID</label>
++          <input type="number" id="usuario_id" formControlName="usuario_id" class="form-control" />
++        </div>
++        <div class="form-group">
++          <label for="cargo">Cargo</label>
++          <input type="text" id="cargo" formControlName="cargo" class="form-control" />
++        </div>
++        <div classRouteParams="form-group">
++          <label for="departamento">Departamento</label>
++          <input type="text" id="departamento" formControlName="departamento" class="form-control" />
++        </div>
++        <div class="form-group">
++          <label>
++            <input type="checkbox" formControlName="activo" /> Activo
++          </label>
++        </div>
++        <button type="submit" class="btn btn-success" [disabled]="editForm.invalid">Guardar</button>
++        <button type="button" (click)="toggleEdit()" class="btn btn-secondary">Cancelar</button>
++      </form>
++    </div>
++  </div>
++</div>
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/responsable/responsable-detail/responsable-detail.component.ts b/Frontend/patrimonials-app/src/app/responsable/responsable-detail/responsable-detail.component.ts
+index d86ea24..2805f78 100644
+--- a/Frontend/patrimonials-app/src/app/responsable/responsable-detail/responsable-detail.component.ts
++++ b/Frontend/patrimonials-app/src/app/responsable/responsable-detail/responsable-detail.component.ts
+@@ -1,41 +1,91 @@
+ import { Component, OnInit } from '@angular/core';
+ import { Responsable } from '../../models/responsable.model';
+-import { ActivatedRoute } from '@angular/router';
++import { ActivatedRoute, Router } from '@angular/router';
+ import { ApiService } from '../../core/api.service';
++import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+ 
+ @Component({
+   selector: 'app-responsable-detail',
+   standalone: false,
+   templateUrl: './responsable-detail.component.html',
+-  styleUrl: './responsable-detail.component.css'
++  styleUrls: ['./responsable-detail.component.css']
+ })
+ export class ResponsableDetailComponent implements OnInit {
+   responsable: Responsable | null = null;
+   loading = false;
+   error: string | null = null;
++  editForm: FormGroup;
++  isEditing = false;
+ 
+   constructor(
+     private route: ActivatedRoute,
+-    private apiService: ApiService
+-  ) {}
++    private apiService: ApiService,
++    public router: Router, // Changed from private to public
++    private fb: FormBuilder
++  ) {
++    this.editForm = this.fb.group({
++      usuario_id: ['', Validators.required],
++      cargo: ['', Validators.required],
++      departamento: ['', Validators.required],
++      activo: [true]
++    });
++  }
+ 
+   ngOnInit() {
++    const id = this.route.snapshot.paramMap.get('id');
++    if (id) {
++      this.loadResponsable(+id);
++    }
++  }
++
++  loadResponsable(id: number) {
++    this.loading = true;
++    this.apiService.getResponsable(id).subscribe({
++      next: (data) => {
++        this.responsable = data;
++        this.editForm.patchValue({
++          usuario_id: data.usuario.id,
++          cargo: data.cargo,
++          departamento: data.departamento,
++          activo: data.activo
++        });
++        this.loading = false;
++      },
++      error: (err) => {
++        this.error = 'No se pudo cargar el responsable';
++        this.loading = false;
++      }
++    });
++  }
++
++  toggleEdit() {
++    this.isEditing = !this.isEditing;
++  }
++
++  updateResponsable() {
++    if (this.editForm.invalid) {
++      this.error = 'Por favor, completa todos los campos requeridos';
++      return;
++    }
++
+     const id = this.route.snapshot.paramMap.get('id');
+     if (id) {
+       this.loading = true;
+-      this.apiService.getResponsable(+id).subscribe({
+-        next: (data) => {
+-          this.responsable = data;
+-          this.loading = false;
++      this.apiService.updateResponsable(+id, this.editForm.value).subscribe({
++        next: () => {
++          this.loadResponsable(+id);
++          this.isEditing = false;
++          this.error = null;
+         },
+-        error: () => {
+-          this.error = 'No se pudo cargar el responsable';
++        error: (err) => {
++          this.error = err.message;
+           this.loading = false;
+         }
+       });
+     }
+   }
++
+   isUsuarioObject(usuario: any): usuario is { username: string, email?: string, rol?: string } {
+-  return usuario && typeof usuario === 'object' && 'username' in usuario;
+-}
++    return usuario && typeof usuario === 'object' && 'username' in usuario;
++  }
+ }
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.css b/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.css
+index 8ca60bf..b5769ff 100644
+--- a/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.css
++++ b/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.css
+@@ -1,64 +1,27 @@
+-/* Centra el título */
+-h2 {
+-  text-align: center;
+-  margin-bottom: 1.5rem;
++.container {
++  padding: 20px;
+ }
+ 
+-/* Tabla responsiva y estilizada */
+-.table {
+-  width: 100%;
+-  border-collapse: collapse;
+-  margin-bottom: 1rem;
+-  background-color: #fff;
++.create-form {
++  margin: 20px 0;
++  padding: 20px;
++  border: 1px solid #ccc;
++  border-radius: 5px;
+ }
+ 
+-.table th, .table td {
+-  padding: 0.75rem;
+-  text-align: left;
+-  border-bottom: 1px solid #dee2e6;
++.form-group {
++  margin-bottom: 15px;
+ }
+ 
+-.table th {
+-  background-color: #f8f9fa;
+-  font-weight: bold;
++.btn {
++  margin-right: 10px;
+ }
+ 
+-.table-striped tbody tr:nth-of-type(odd) {
+-  background-color: #f2f2f2;
++.loading {
++  text-align: center;
++  padding: 20px;
+ }
+ 
+ .alert {
+-  color: #721c24;
+-  background-color: #f8d7da;
+-  border: 1px solid #f5c6cb;
+-  padding: 0.75rem;
+-  margin-bottom: 1rem;
+-  border-radius: 0.25rem;
+-}
+-
+-@media (max-width: 600px) {
+-  .table, .table thead, .table tbody, .table th, .table td, .table tr {
+-    display: block;
+-  }
+-  .table th {
+-    position: absolute;
+-    top: -9999px;
+-    left: -9999px;
+-  }
+-  .table td {
+-    position: relative;
+-    padding-left: 50%;
+-    border: none;
+-    border-bottom: 1px solid #eee;
+-  }
+-  .table td:before {
+-    position: absolute;
+-    top: 0;
+-    left: 0;
+-    width: 45%;
+-    padding-left: 0.75rem;
+-    font-weight: bold;
+-    white-space: nowrap;
+-    content: attr(data-label);
+-  }
++  margin-top: 10px;
+ }
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.html b/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.html
+index 5f0e66c..fde2e60 100644
+--- a/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.html
++++ b/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.html
+@@ -1,6 +1,44 @@
+-<table>
++<div>
++  <h2>Lista de Responsables</h2>
++  <button (click)="toggleCreateForm()">Crear Responsable</button>
++</div>
++
++<div *ngIf="showCreateForm">
++  <h3>Crear Nuevo Responsable</h3>
++  <form [formGroup]="createForm" (ngSubmit)="createResponsable()">
++    <div>
++      <label>Usuario:</label>
++      <select formControlName="usuario_id">
++        <option value="" disabled>Selecciona un usuario</option>
++        <option *ngFor="let usuario of usuarios" [value]="usuario.id">
++          {{ usuario.username }} ({{ usuario.email }})
++        </option>
++      </select>
++    </div>
++    <div>
++      <label>Cargo:</label>
++      <input type="text" formControlName="cargo" placeholder="Cargo">
++    </div>
++    <div>
++      <label>Departamento:</label>
++      <input type="text" formControlName="departamento" placeholder="Departamento">
++    </div>
++    <div>
++      <label><input type="checkbox" formControlName="activo"> Activo</label>
++    </div>
++    <button type="submit" [disabled]="createForm.invalid">Crear</button>
++    <button type="button" (click)="toggleCreateForm()">Cancelar</button>
++  </form>
++</div>
++
++<div *ngIf="error" class="error">{{ error }}</div>
++
++<div *ngIf="loading">Cargando...</div>
++
++<table *ngIf="!loading && responsables.length">
+   <thead>
+     <tr>
++      <th>ID</th>
+       <th>Usuario</th>
+       <th>Cargo</th>
+       <th>Departamento</th>
+@@ -10,19 +48,14 @@
+   </thead>
+   <tbody>
+     <tr *ngFor="let responsable of responsables">
+-      <td data-label="Usuario">
+-        <ng-container *ngIf="isUsuarioObject(responsable.usuario); else soloId">
+-          {{ responsable.usuario.username }}
+-        </ng-container>
+-        <ng-template #soloId>
+-          {{ responsable.usuario }}
+-        </ng-template>
+-      </td>
+-      <td data-label="Cargo">{{ responsable.cargo }}</td>
+-      <td data-label="Departamento">{{ responsable.departamento }}</td>
+-      <td data-label="Activo">{{ responsable.activo ? 'Sí' : 'No' }}</td>
+-      <td data-label="Acciones">
+-        <a [routerLink]="['/responsables', responsable.id]">Ver detalle</a>
++      <td>{{ responsable.id }}</td>
++      <td>{{ isUsuarioObject(responsable.usuario) ? responsable.usuario.username : 'N/A' }}</td>
++      <td>{{ responsable.cargo }}</td>
++      <td>{{ responsable.departamento }}</td>
++      <td>{{ responsable.activo ? 'Sí' : 'No' }}</td>
++      <td>
++        <button (click)="navigateToDetail(responsable.id)">Ver Detalle</button>
++        <button (click)="deleteResponsable(responsable.id)">Eliminar</button>
+       </td>
+     </tr>
+   </tbody>
+diff --git a/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.spec.ts b/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.spec.ts
+index 1520c46..5205e99 100644
+--- a/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.spec.ts
++++ b/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.spec.ts
+@@ -3,16 +3,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
+ import { ResponsableListComponent } from './responsable-list.component';
+ 
+ describe('ResponsableListComponent', () => {
+-  let component: ResponsableListComponent;
+-  let fixture: ComponentFixture<ResponsableListComponent>;
++  let component: ResponsableFormComponent;
++  let fixture: ComponentFixture<ResponsableFormComponent>;
+ 
+   beforeEach(async () => {
+     await TestBed.configureTestingModule({
+-      declarations: [ResponsableListComponent]
++      declarations: [ResponsableFormComponent]
+     })
+     .compileComponents();
+ 
+-    fixture = TestBed.createComponent(ResponsableListComponent);
++    fixture = TestBed.createComponent(ResponsableFormComponent);
+     component = fixture.componentInstance;
+     fixture.detectChanges();
+   });
+@@ -20,4 +20,4 @@ describe('ResponsableListComponent', () => {
+   it('should create', () => {
+     expect(component).toBeTruthy();
+   });
+-});
++});
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.ts b/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.ts
+index a43b960..e658f60 100644
+--- a/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.ts
++++ b/Frontend/patrimonials-app/src/app/responsable/responsable-list/responsable-list.component.ts
+@@ -1,21 +1,43 @@
+ import { Component, OnInit } from '@angular/core';
+ import { Responsable } from '../../models/responsable.model';
++import { Usuario } from '../../models/usuario.model';
+ import { ApiService } from '../../core/api.service';
++import { Router } from '@angular/router';
++import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+ 
+ @Component({
+   selector: 'app-responsable-list',
+   standalone: false,
+   templateUrl: './responsable-list.component.html',
+-  styleUrl: './responsable-list.component.css'
++  styleUrls: ['./responsable-list.component.css']
+ })
+ export class ResponsableListComponent implements OnInit {
+   responsables: Responsable[] = [];
++  usuarios: Usuario[] = [];
+   loading = false;
+   error: string | null = null;
++  createForm: FormGroup;
++  showCreateForm = false;
+ 
+-  constructor(private apiService: ApiService) {}
++  constructor(
++    private apiService: ApiService,
++    private router: Router,
++    private fb: FormBuilder
++  ) {
++    this.createForm = this.fb.group({
++      usuario_id: ['', Validators.required],
++      cargo: ['', Validators.required],
++      departamento: ['', Validators.required],
++      activo: [true]
++    });
++  }
+ 
+   ngOnInit() {
++    this.loadResponsables();
++    this.loadUsuariosDisponibles();
++  }
++
++  loadResponsables() {
+     this.loading = true;
+     this.apiService.getResponsables().subscribe({
+       next: (data) => {
+@@ -23,13 +45,77 @@ export class ResponsableListComponent implements OnInit {
+         this.loading = false;
+       },
+       error: (err) => {
+-        this.error = 'Error al cargar responsables';
++        this.error = 'Error al cargar los responsables';
++        this.loading = false;
++        console.error('Error fetching responsables:', err);
++      }
++    });
++  }
++
++  loadUsuariosDisponibles() {
++    this.loading = true;
++    this.apiService.getUsuariosDisponibles().subscribe({
++      next: (data) => {
++        this.usuarios = data;
++        this.loading = false;
++      },
++      error: (err) => {
++        this.error = 'No se pudieron cargar los usuarios disponibles. Por favor, intenta de nuevo más tarde.';
++        this.loading = false;
++        console.error('Error fetching available users:', err);
++      }
++    });
++  }
++
++  toggleCreateForm() {
++    this.showCreateForm = !this.showCreateForm;
++  }
++
++  createResponsable() {
++    if (this.createForm.invalid) {
++      this.error = 'Por favor, completa todos los campos requeridos';
++      return;
++    }
++
++    console.log('Datos enviados:', this.createForm.value);
++    this.loading = true;
++    this.apiService.createResponsable(this.createForm.value).subscribe({
++      next: () => {
++        this.loadResponsables();
++        this.createForm.reset({ activo: true });
++        this.showCreateForm = false;
++        this.error = null;
++      },
++      error: (err) => {
++        this.error = err.error?.usuario_id?.[0] || err.message || 'Error al crear el responsable';
+         this.loading = false;
++        console.error('Error creating responsable:', err);
+       }
+     });
+   }
+ 
+- isUsuarioObject(usuario: any): usuario is { username: string, email?: string, rol?: string } {
+-  return usuario && typeof usuario === 'object' && 'username' in usuario;
+-}
+-}
++  deleteResponsable(id: number) {
++    if (confirm('¿Estás seguro de que deseas eliminar este responsable?')) {
++      this.loading = true;
++      this.apiService.deleteResponsable(id).subscribe({
++        next: () => {
++          this.loadResponsables();
++          this.error = null;
++        },
++        error: (err) => {
++          this.error = err.message;
++          this.loading = false;
++          console.error('Error deleting responsable:', err);
++        }
++      });
++    }
++  }
++
++  navigateToDetail(id: number) {
++    this.router.navigate(['/responsables', id]);
++  }
++
++  isUsuarioObject(usuario: any): usuario is { username: string; email?: string; rol?: string } {
++    return usuario && typeof usuario === 'object' && 'username' in usuario;
++  }
++}
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-detail/ubicacion-detail.component.html b/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-detail/ubicacion-detail.component.html
+index 08967d4..a99b3c3 100644
+--- a/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-detail/ubicacion-detail.component.html
++++ b/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-detail/ubicacion-detail.component.html
+@@ -1,44 +1,61 @@
+-<div *ngIf="ubicacion">
+-  <h2>{{ esNuevo ? 'Nueva Ubicación' : 'Detalle de Ubicación: ' + ubicacion.codigo }}</h2>
+-  <form (ngSubmit)="guardar()">
++<div *ngIf="loading">Cargando...</div>
++<div *ngIf="!loading">
++  <h2>{{ esNuevo ? 'Nueva Ubicación' : 'Detalle de Ubicación: ' + ubicacionForm.value.codigo }}</h2>
++  <form [formGroup]="ubicacionForm" (ngSubmit)="guardar()">
+     <label>Código:
+-      <input [(ngModel)]="ubicacion.codigo" name="codigo" required [readonly]="!esNuevo">
++      <input formControlName="codigo" [readonly]="!esNuevo" required>
++      <span *ngIf="isFieldInvalid('codigo')" style="color:red">El código es requerido.</span>
+     </label>
+     <br>
+     <label>Edificio:
+-      <input [(ngModel)]="ubicacion.edificio" name="edificio" required>
++      <input formControlName="edificio" required>
++      <span *ngIf="isFieldInvalid('edificio')" style="color:red">El edificio es requerido.</span>
+     </label>
+     <br>
+     <label>Piso:
+-      <input [(ngModel)]="ubicacion.piso" name="piso" required>
++      <input formControlName="piso" required>
++      <span *ngIf="isFieldInvalid('piso')" style="color:red">El piso es requerido.</span>
+     </label>
+     <br>
+     <label>Oficina:
+-      <input [(ngModel)]="ubicacion.oficina" name="oficina" required>
++      <input formControlName="oficina" required>
++      <span *ngIf="isFieldInvalid('oficina')" style="color:red">La oficina es requerida.</span>
+     </label>
+     <br>
+     <label>Dirección:
+-      <input [(ngModel)]="ubicacion.direccion" name="direccion" required>
++      <input formControlName="direccion" required>
++      <span *ngIf="isFieldInvalid('direccion')" style="color:red">La dirección es requerida.</span>
+     </label>
+     <br>
+     <label>Capacidad:
+-      <input type="number" [(ngModel)]="ubicacion.capacidad" name="capacidad" required>
++      <input type="number" formControlName="capacidad" required>
++      <span *ngIf="isFieldInvalid('capacidad')" style="color:red">La capacidad debe ser un número mayor a 0.</span>
+     </label>
+     <br>
+     <label>Ocupados:
+-      <input type="number" [(ngModel)]="ubicacion.ocupados" name="ocupados" required>
++      <input type="number" formControlName="ocupados" required>
++      <span *ngIf="isFieldInvalid('ocupados')" style="color:red">Ocupados debe ser un número mayor o igual a 0.</span>
+     </label>
+     <br>
+-    <div *ngIf="error" style="color:red">{{error}}</div>
+-    <button type="submit">Guardar</button>
+-    <button type="button" (click)="cancelar()">Cancelar</button>
+-    <button *ngIf="!esNuevo" type="button" (click)="eliminar()">Eliminar</button>
++    <label>Responsable (opcional):
++      <input type="number" formControlName="responsable" placeholder="ID del responsable">
++      <span *ngIf="isFieldInvalid('responsable')" style="color:red">El ID del responsable debe ser un número válido.</span>
++    </label>
++    <br>
++    <div *ngIf="ubicacionForm.errors?.['ocupadosExcedeCapacidad']" style="color:red">
++      El número de ocupados no puede ser mayor que la capacidad.
++    </div>
++    <div *ngIf="error" style="color:red">{{ error }}</div>
++    <button type="submit" [disabled]="ubicacionForm.invalid || loading">Guardar</button>
++    <button type="button" (click)="cancelar()" [disabled]="loading">Cancelar</button>
++    <button *ngIf="!esNuevo" type="button" (click)="eliminar()" [disabled]="loading">Eliminar</button>
+   </form>
+ 
+-  <h3>Bienes en esta ubicación</h3>
+-  <ul>
++  <h3 *ngIf="!esNuevo">Bienes en esta ubicación</h3>
++  <ul *ngIf="!esNuevo">
+     <li *ngFor="let bien of bienes">
+       {{ bien.codigo }} - {{ bien.descripcion }}
+     </li>
++    <li *ngIf="bienes.length === 0">No hay bienes en esta ubicación.</li>
+   </ul>
+ </div>
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-detail/ubicacion-detail.component.ts b/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-detail/ubicacion-detail.component.ts
+index 3ce2836..3a9fe59 100644
+--- a/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-detail/ubicacion-detail.component.ts
++++ b/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-detail/ubicacion-detail.component.ts
+@@ -3,15 +3,16 @@ import { Ubicacion } from '../../models/ubicacion.model';
+ import { Bien } from '../../models/bien.model';
+ import { ApiService } from '../../core/api.service';
+ import { ActivatedRoute, Router } from '@angular/router';
++import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+ 
+ @Component({
+   selector: 'app-ubicacion-detail',
+   standalone: false,
+   templateUrl: './ubicacion-detail.component.html',
+-  styleUrl: './ubicacion-detail.component.css'
++  styleUrls: ['./ubicacion-detail.component.css']
+ })
+ export class UbicacionDetailComponent implements OnInit {
+-  ubicacion: Partial<Ubicacion> = {};
++  ubicacionForm: FormGroup;
+   bienes: Bien[] = [];
+   id: string | null = null;
+   esNuevo = false;
+@@ -21,8 +22,27 @@ export class UbicacionDetailComponent implements OnInit {
+   constructor(
+     private route: ActivatedRoute,
+     private api: ApiService,
+-    private router: Router
+-  ) {}
++    private router: Router,
++    private fb: FormBuilder
++  ) {
++    this.ubicacionForm = this.fb.group({
++      codigo: ['', [Validators.required, Validators.minLength(1)]],
++      edificio: ['', [Validators.required, Validators.minLength(1)]],
++      piso: ['', [Validators.required, Validators.minLength(1)]],
++      oficina: ['', [Validators.required, Validators.minLength(1)]],
++      direccion: ['', [Validators.required, Validators.minLength(1)]],
++      capacidad: [0, [Validators.required, Validators.min(1), Validators.pattern('^[0-9]+$')]],
++      ocupados: [0, [Validators.required, Validators.min(0), Validators.pattern('^[0-9]+$')]],
++      responsable: [null] // Campo opcional, inicializado como null
++    }, { validators: this.capacidadOcupadosValidator });
++  }
++
++  // Validador personalizado para verificar que ocupados <= capacidad
++  capacidadOcupadosValidator(form: FormGroup): { [key: string]: any } | null {
++    const capacidad = Number(form.get('capacidad')?.value);
++    const ocupados = Number(form.get('ocupados')?.value);
++    return ocupados <= capacidad ? null : { ocupadosExcedeCapacidad: true };
++  }
+ 
+   ngOnInit(): void {
+     this.id = this.route.snapshot.paramMap.get('id');
+@@ -31,40 +51,97 @@ export class UbicacionDetailComponent implements OnInit {
+       this.loading = true;
+       this.api.getUbicacion(Number(this.id)).subscribe({
+         next: (data) => {
+-          this.ubicacion = data;
++          this.ubicacionForm.patchValue({
++            codigo: data.codigo,
++            edificio: data.edificio,
++            piso: data.piso,
++            oficina: data.oficina,
++            direccion: data.direccion,
++            capacidad: data.capacidad ?? 0,
++            ocupados: data.ocupados ?? 0,
++            responsable: data.responsable ?? null
++          });
+           this.loading = false;
+         },
+-        error: () => { this.error = 'No se pudo cargar la ubicación'; this.loading = false; }
++        error: () => {
++          this.error = 'No se pudo cargar la ubicación';
++          this.loading = false;
++        }
+       });
+ 
+-      // Cargar bienes en esta ubicación
+       this.api.getBienes().subscribe({
+         next: (bienes) => {
+           this.bienes = bienes.filter(b => b.ubicacion === Number(this.id));
++        },
++        error: () => {
++          this.error = 'No se pudo cargar los bienes';
+         }
+       });
+     }
+   }
+ 
+   guardar() {
++    if (this.ubicacionForm.invalid) {
++      this.ubicacionForm.markAllAsTouched();
++      this.error = 'Por favor, complete todos los campos requeridos correctamente.';
++      return;
++    }
++
++    // Construir el objeto Ubicacion
++    const ubicacion: Ubicacion = {
++      id: this.esNuevo ? 0 : Number(this.id), // id=0 para POST, ya que el servidor lo genera
++      codigo: this.ubicacionForm.value.codigo,
++      edificio: this.ubicacionForm.value.edificio,
++      piso: this.ubicacionForm.value.piso,
++      oficina: this.ubicacionForm.value.oficina,
++      direccion: this.ubicacionForm.value.direccion,
++      capacidad: Number(this.ubicacionForm.value.capacidad),
++      ocupados: Number(this.ubicacionForm.value.ocupados),
++      responsable: this.ubicacionForm.value.responsable || null // Enviar null si no se proporciona
++    };
++
++    this.loading = true;
+     if (this.esNuevo) {
+-      this.api.createUbicacion(this.ubicacion).subscribe({
+-        next: () => this.router.navigate(['/ubicaciones']),
+-        error: () => this.error = 'No se pudo crear la ubicación'
++      // No incluir id en la solicitud POST
++      const { id, ...ubicacionSinId } = ubicacion;
++      this.api.createUbicacion(ubicacionSinId).subscribe({
++        next: () => {
++          this.loading = false;
++          this.router.navigate(['/ubicaciones']);
++        },
++        error: (err) => {
++          this.loading = false;
++          this.error = err.error?.message || 'No se pudo crear la ubicación. Verifique los datos.';
++          console.error('Error del servidor:', err.error); // Para depuración
++        }
+       });
+     } else if (this.id) {
+-      this.api.updateUbicacion(Number(this.id), this.ubicacion).subscribe({
+-        next: () => this.router.navigate(['/ubicaciones']),
+-        error: () => this.error = 'No se pudo actualizar la ubicación'
++      this.api.updateUbicacion(Number(this.id), ubicacion).subscribe({
++        next: () => {
++          this.loading = false;
++          this.router.navigate(['/ubicaciones']);
++        },
++        error: (err) => {
++          this.loading = false;
++          this.error = err.error?.message || 'No se pudo actualizar la ubicación. Verifique los datos.';
++          console.error('Error del servidor:', err.error); // Para depuración
++        }
+       });
+     }
+   }
+ 
+   eliminar() {
+     if (this.id && confirm('¿Eliminar esta ubicación?')) {
++      this.loading = true;
+       this.api.deleteUbicacion(Number(this.id)).subscribe({
+-        next: () => this.router.navigate(['/ubicaciones']),
+-        error: () => this.error = 'No se pudo eliminar la ubicación'
++        next: () => {
++          this.loading = false;
++          this.router.navigate(['/ubicaciones']);
++        },
++        error: () => {
++          this.loading = false;
++          this.error = 'No se pudo eliminar la ubicación';
++        }
+       });
+     }
+   }
+@@ -72,4 +149,9 @@ export class UbicacionDetailComponent implements OnInit {
+   cancelar() {
+     this.router.navigate(['/ubicaciones']);
+   }
++
++  isFieldInvalid(field: string): boolean {
++    const control = this.ubicacionForm.get(field);
++    return !!control && control.invalid && (control.touched || control.dirty);
++  }
+ }
+\ No newline at end of file
+diff --git a/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-list/ubicacion-list.component.html b/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-list/ubicacion-list.component.html
+index 7a29cc1..f44c6d3 100644
+--- a/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-list/ubicacion-list.component.html
++++ b/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-list/ubicacion-list.component.html
+@@ -21,6 +21,8 @@
+       <td>{{ ubicacion.capacidad }}</td>
+       <td>{{ ubicacion.ocupados }}</td>
+       <td>
++        <button (click)="nuevaUbicacion()">Nueva ubicación</button>
++
+         <button (click)="verDetalle(ubicacion.id)">Ver detalle</button>
+       </td>
+     </tr>
+diff --git a/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-list/ubicacion-list.component.ts b/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-list/ubicacion-list.component.ts
+index 8720796..f0bfaf9 100644
+--- a/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-list/ubicacion-list.component.ts
++++ b/Frontend/patrimonials-app/src/app/ubicacion/ubicacion-list/ubicacion-list.component.ts
+@@ -29,4 +29,7 @@ export class UbicacionListComponent implements OnInit {
+   verDetalle(id: number) {
+     this.router.navigate(['/ubicaciones', id]);
+   }
++  nuevaUbicacion() {
++  this.router.navigate(['/ubicaciones', 'nuevo']);
++}
+ }

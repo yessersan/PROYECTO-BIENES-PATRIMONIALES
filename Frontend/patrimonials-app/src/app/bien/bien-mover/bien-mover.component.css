@@ -1,0 +1,119 @@
+/* Layout Principal */
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+  background-color: #f8f9fa;
+  overflow: hidden;
+}
+
+/* Sidebar Estático */
+.sidebar-container {
+  width: 280px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-navigation {
+  flex: 1;
+  padding: 1rem 0;
+  overflow-y: auto;
+}
+
+.sidebar-nav-item {
+  color: rgba(255,255,255,0.8) !important;
+  padding: 0.75rem 1.5rem;
+  margin: 0.25rem 0;
+  border-radius: 0;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+  background-color: rgba(255,255,255,0.1);
+  color: white !important;
+  border-left-color: #fff;
+}
+
+.sidebar-nav-item.active {
+  background-color: rgba(255,255,255,0.2);
+  color: white !important;
+  border-left-color: #ffc107;
+  font-weight: 600;
+}
+
+.sidebar-footer {
+  padding: 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-footer .btn-outline-danger {
+  border-color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.9);
+}
+
+.sidebar-footer .btn-outline-danger:hover {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+.main-content {
+  flex: 1;
+  margin-left: 280px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
+}
+.bien-mover-container {
+  padding: 1rem;
+}
+
+.bien-mover-container h2 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.bien-mover-container .success-message {
+  color: #28a745;
+  margin-bottom: 1rem;
+}
+
+.bien-mover-container .error-message {
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+
+.bien-mover-container label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.bien-mover-container select {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.3rem;
+}
+
+.bien-mover-container button {
+  margin-right: 0.5rem;
+}

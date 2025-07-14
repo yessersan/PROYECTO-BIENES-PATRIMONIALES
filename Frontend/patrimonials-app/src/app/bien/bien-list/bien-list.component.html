@@ -1,6 +1,7 @@
 <p>bien-list works!</p>
 <div class="container">
     <h2>Lista de Bienes</h2>
+      <button (click)="crearBien()">Crear Bien</button>
     <table *ngIf="bienes.length; else noBienes">
       <thead>
         <tr>

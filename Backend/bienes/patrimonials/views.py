@@ -1,14 +1,23 @@
+from datetime import date
 from rest_framework import generics, permissions, status
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+from rest_framework.views import APIView
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from django.contrib.auth import authenticate
+from rest_framework.decorators import api_view, permission_classes
+
 from patrimonials.models import (
     Usuario, Categoria, Ubicacion, Responsable, BienPatrimonial,
     Movimiento, Reporte, HistorialAuditoria, DocumentoAdjunto,
     Notificacion, Mantenimiento, EtiquetaDigital
 )
 from patrimonials.serializers import (
-    UsuarioSerializer, CategoriaSerializer, UbicacionSerializer, ResponsableSerializer,
+    RegistroSerializer, UsuarioSerializer, CategoriaSerializer, UbicacionSerializer, ResponsableSerializer,
     BienPatrimonialSerializer, MovimientoSerializer, ReporteSerializer,
     HistorialAuditoriaSerializer, DocumentoAdjuntoSerializer,
     NotificacionSerializer, MantenimientoSerializer, EtiquetaDigitalSerializer
@@ -29,20 +38,28 @@ class IsAuthenticatedWithPermission(permissions.BasePermission):
         return request.user.tiene_permiso(required_permission)
 
 class LoginView(generics.GenericAPIView):
+    permission_classes = [AllowAny]
     serializer_class = UsuarioSerializer
 
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
         user = authenticate(username=username, password=password)
-        if user:
-            token, created = Token.objects.get_or_create(user=user)
+        if user is not None:
+            token, _ = Token.objects.get_or_create(user=user)
             return Response({
                 'token': token.key,
                 'user': UsuarioSerializer(user).data
             })
         return Response({'error': 'Credenciales inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
 
+class UsuarioActualView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UsuarioSerializer(request.user)
+        return Response(serializer.data)
+    
 class UsuarioListCreateView(generics.ListCreateAPIView):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
@@ -57,10 +74,23 @@ class UsuarioListCreateView(generics.ListCreateAPIView):
             bien=None
         )
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_usuarios_disponibles(request):
+    usuarios_con_responsable = Responsable.objects.values_list('usuario_id', flat=True)
+    usuarios_disponibles = Usuario.objects.exclude(id__in=usuarios_con_responsable)
+    serializer = UsuarioSerializer(usuarios_disponibles, many=True)
+    return Response(serializer.data)
 class UsuarioRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
     permission_classes = [IsAuthenticatedWithPermission]
+
+class RegistroUsuarioAPIView(generics.CreateAPIView):
+    queryset = Usuario.objects.all()
+    serializer_class = RegistroSerializer
+    permission_classes = [AllowAny]
+    
 
 class CategoriaListCreateView(generics.ListCreateAPIView):
     queryset = Categoria.objects.all()
@@ -156,12 +186,16 @@ class BienPatrimonialMoverView(generics.GenericAPIView):
             if not nueva_ubicacion_id:
                 return Response({'error': 'Se requiere nueva_ubicacion_id'}, status=status.HTTP_400_BAD_REQUEST)
             nueva_ubicacion = Ubicacion.objects.get(id=nueva_ubicacion_id)
-            success, message = bien.ubicacion.mover_bien(bien, nueva_ubicacion)
+            if not bien.ubicacion:
+                return Response({'error': 'El bien no tiene ubicación actual asignada'}, status=status.HTTP_400_BAD_REQUEST)        
+            success, message = bien.ubicacion.mover_bien(bien, nueva_ubicacion, request.user)
             if not success:
                 return Response({'error': message}, status=status.HTTP_400_BAD_REQUEST)
             return Response({'message': message}, status=status.HTTP_200_OK)
         except Ubicacion.DoesNotExist:
             return Response({'error': 'Ubicación no encontrada'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class BienPatrimonialDarBajaView(generics.GenericAPIView):
     queryset = BienPatrimonial.objects.all()
@@ -212,6 +246,11 @@ class ReporteRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticatedWithPermission]
 
 class HistorialAuditoriaListView(generics.ListAPIView):
+    queryset = HistorialAuditoria.objects.all()
+    serializer_class = HistorialAuditoriaSerializer
+    permission_classes = [IsAuthenticatedWithPermission]
+
+class HistorialAuditoriaViewSet(viewsets.ModelViewSet):
     queryset = HistorialAuditoria.objects.all()
     serializer_class = HistorialAuditoriaSerializer
     permission_classes = [IsAuthenticatedWithPermission]
