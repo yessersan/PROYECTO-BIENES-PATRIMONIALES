@@ -5,6 +5,7 @@ import { Usuario } from '../../models/usuario.model';
 import { ApiService } from '../../core/api.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import * as L from 'leaflet';
 
 @Component({
   selector: 'app-ubicacion-detail',
@@ -19,8 +20,12 @@ export class UbicacionDetailComponent implements OnInit {
   esNuevo = false;
   loading = false;
   error = '';
-  usuarioActual: Usuario | null = null;
-  rolUsuario = '';
+  map!: L.Map;
+  marker: L.Marker | null = null;
+  coordenadasPendientes: { lat: number, lon: number } | null = null;
+
+  usuarioActual!: Usuario;
+  rolUsuario: string = '';
   menuItems: any[] = [];
 
   constructor(
@@ -30,22 +35,24 @@ export class UbicacionDetailComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.ubicacionForm = this.fb.group({
-      codigo: ['', [Validators.required, Validators.minLength(1)]],
-      edificio: ['', [Validators.required, Validators.minLength(1)]],
-      piso: ['', [Validators.required, Validators.minLength(1)]],
-      oficina: ['', [Validators.required, Validators.minLength(1)]],
-      direccion: ['', [Validators.required, Validators.minLength(1)]],
-      capacidad: [0, [Validators.required, Validators.min(1), Validators.pattern('^[0-9]+$')]],
-      ocupados: [0, [Validators.required, Validators.min(0), Validators.pattern('^[0-9]+$')]],
-      responsable: [null]
+      codigo: ['', Validators.required],
+      edificio: ['', Validators.required],
+      piso: ['', Validators.required],
+      oficina: ['', Validators.required],
+      direccion: ['', Validators.required],
+      capacidad: [0, [Validators.required, Validators.min(1)]],
+      ocupados: [0, [Validators.required, Validators.min(0)]],
+      responsable: [null],
+      latitud: [null, Validators.required],
+      longitud: [null, Validators.required]
     }, { validators: this.capacidadOcupadosValidator });
   }
 
-  capacidadOcupadosValidator(form: FormGroup): { [key: string]: any } | null {
+  capacidadOcupadosValidator = (form: FormGroup) => {
     const capacidad = Number(form.get('capacidad')?.value);
     const ocupados = Number(form.get('ocupados')?.value);
     return ocupados <= capacidad ? null : { ocupadosExcedeCapacidad: true };
-  }
+  };
 
   ngOnInit(): void {
     this.api.get<Usuario>('auth/usuario/').subscribe({
@@ -97,11 +104,23 @@ export class UbicacionDetailComponent implements OnInit {
       this.loading = true;
       this.api.getUbicacion(Number(this.id)).subscribe({
         next: (data) => {
-          this.ubicacionForm.patchValue(data);
+          this.ubicacionForm.patchValue({
+            codigo: data.codigo,
+            edificio: data.edificio,
+            piso: data.piso,
+            oficina: data.oficina,
+            direccion: data.direccion,
+            capacidad: data.capacidad,
+            ocupados: data.ocupados,
+            responsable: data.responsable,
+            latitud: data.latitud,
+            longitud: data.longitud
+          });
           this.loading = false;
+          setTimeout(() => this.inicializarMapa());
         },
         error: () => {
-          this.error = 'no se pudo cargar la ubicación';
+          this.error = 'No se pudo cargar la ubicación';
           this.loading = false;
         }
       });
@@ -111,28 +130,88 @@ export class UbicacionDetailComponent implements OnInit {
           this.bienes = bienes.filter(b => b.ubicacion === Number(this.id));
         },
         error: () => {
-          this.error = 'no se pudo cargar los bienes';
+          this.error = 'No se pudo cargar los bienes';
         }
       });
+    } else {
+      setTimeout(() => this.inicializarMapa());
+    }
+  }
+
+  inicializarMapa() {
+    if (this.map || !document.getElementById('map')) return;
+
+    this.map = L.map('map').setView([-9.93, -76.24], 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(this.map);
+
+    this.map.on('click', (e: L.LeafletMouseEvent) => {
+      const lat = e.latlng.lat;
+      const lon = e.latlng.lng;
+
+      this.ubicacionForm.patchValue({
+        latitud: lat,
+        longitud: lon
+      });
+
+      if (this.marker) {
+        this.marker.setLatLng(e.latlng);
+      } else {
+        this.marker = L.marker(e.latlng).addTo(this.map);
+      }
+    });
+
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
+      iconUrl: 'assets/leaflet/marker-icon.png',
+      shadowUrl: 'assets/leaflet/marker-shadow.png'
+    });
+
+    if (this.ubicacionForm.value.latitud && this.ubicacionForm.value.longitud) {
+      this.setMarkerOnMap();
+    }
+  }
+
+  setMarkerOnMap() {
+    const { latitud, longitud } = this.ubicacionForm.value;
+    if (latitud && longitud && this.map) {
+      const latlng = L.latLng(Number(latitud), Number(longitud));
+      if (this.marker) {
+        this.marker.setLatLng(latlng);
+      } else {
+        this.marker = L.marker(latlng).addTo(this.map);
+      }
+      this.map.setView(latlng, 16);
     }
   }
 
   guardar() {
     if (this.ubicacionForm.invalid) {
       this.ubicacionForm.markAllAsTouched();
-      this.error = 'por favor complete todos los campos requeridos';
+      this.error = 'Complete correctamente todos los campos.';
       return;
     }
+
+    if (this.ubicacionForm.value.latitud === null || this.ubicacionForm.value.longitud === null) {
+      this.error = 'Debe seleccionar una ubicación en el mapa.';
+      return;
+    }
+
+    const latitudRedondeada = Number(this.ubicacionForm.value.latitud).toFixed(6);
+    const longitudRedondeada = Number(this.ubicacionForm.value.longitud).toFixed(6);
 
     const ubicacion: Ubicacion = {
       id: this.esNuevo ? 0 : Number(this.id),
       ...this.ubicacionForm.value,
-      capacidad: Number(this.ubicacionForm.value.capacidad),
-      ocupados: Number(this.ubicacionForm.value.ocupados),
-      responsable: this.ubicacionForm.value.responsable || null
+      latitud: latitudRedondeada,
+      longitud: longitudRedondeada
     };
 
     this.loading = true;
+
     if (this.esNuevo) {
       const { id, ...ubicacionSinId } = ubicacion;
       this.api.createUbicacion(ubicacionSinId).subscribe({
@@ -154,12 +233,12 @@ export class UbicacionDetailComponent implements OnInit {
   }
 
   eliminar() {
-    if (this.id && confirm('¿eliminar esta ubicación?')) {
+    if (this.id && confirm('¿Eliminar esta ubicación?')) {
       this.loading = true;
       this.api.deleteUbicacion(Number(this.id)).subscribe({
         next: () => this.router.navigate(['/ubicaciones']),
         error: () => {
-          this.error = 'no se pudo eliminar la ubicación';
+          this.error = 'No se pudo eliminar';
           this.loading = false;
         }
       });

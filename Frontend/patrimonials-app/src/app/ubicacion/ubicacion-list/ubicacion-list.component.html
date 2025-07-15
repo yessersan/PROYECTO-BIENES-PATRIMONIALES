@@ -2,7 +2,7 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-title">
-      <i class="pi pi-box"></i> Sistema
+      <i class="pi pi-box"></i> Sistema de Bienes
     </div>
     <ul class="menu">
       <li *ngFor="let item of menuItems" routerLinkActive="active" [routerLink]="item.routerLink">
@@ -15,9 +15,11 @@
   <main class="content container">
     <h2>Ubicaciones</h2>
 
-    <button class="btn btn-primary mb-3" (click)="nuevaUbicacion()">Nueva ubicación</button>
+    <button (click)="nuevaUbicacion()">Nueva ubicación</button>
 
-    <table class="table table-striped" *ngIf="ubicaciones.length > 0">
+    <div *ngIf="loading">Cargando ubicaciones...</div>
+
+    <table *ngIf="!loading">
       <thead>
         <tr>
           <th>Código</th>
@@ -38,18 +40,13 @@
           <td>{{ ubicacion.capacidad }}</td>
           <td>{{ ubicacion.ocupados }}</td>
           <td>
-            <button class="btn btn-secondary btn-sm" (click)="verDetalle(ubicacion.id)">Ver detalle</button>
+            <button (click)="verDetalle(ubicacion.id)">Ver detalle</button>
           </td>
+        </tr>
+        <tr *ngIf="ubicaciones.length === 0">
+          <td colspan="7">No hay ubicaciones registradas.</td>
         </tr>
       </tbody>
     </table>
-
-    <div *ngIf="ubicaciones.length === 0 && !loading">
-      No hay ubicaciones disponibles.
-    </div>
-
-    <div *ngIf="loading" class="loading">
-      Cargando...
-    </div>
   </main>
 </div>

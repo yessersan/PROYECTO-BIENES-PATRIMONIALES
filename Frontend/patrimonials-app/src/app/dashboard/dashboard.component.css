@@ -20,14 +20,14 @@
 
 .sidebar-header {
   padding: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(20, 1, 1, 0.1);
 }
 
 .sidebar-header h4 {
   margin: 0;
   font-size: 1.3rem;
   font-weight: 600;
-  color: #ffd93d;
+  color: #ff5a3d;
 }
 
 .user-info-card {

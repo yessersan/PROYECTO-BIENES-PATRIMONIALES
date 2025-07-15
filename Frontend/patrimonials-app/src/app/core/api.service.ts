@@ -259,4 +259,9 @@ deleteHistorialAuditoria(id: number): Observable<void> {
   generarQR(id: number): Observable<any> {
     return this.http.post(`${this.apiUrl}etiquetas-digitales/${id}/generar-qr/`, {});
   }
+  getQrImageFromUrl(url: string) {
+  return this.http.get(url, { responseType: 'blob' });
+}
+
+
 }

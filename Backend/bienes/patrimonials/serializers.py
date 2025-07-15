@@ -53,9 +53,17 @@ class UbicacionSerializer(serializers.ModelSerializer):
     responsable = serializers.PrimaryKeyRelatedField(queryset=Responsable.objects.all(), allow_null=True)
     espacio_disponible = serializers.ReadOnlyField()
 
+    latitud = serializers.DecimalField(max_digits=9, decimal_places=6, allow_null=True, required=False)
+    longitud = serializers.DecimalField(max_digits=9, decimal_places=6, allow_null=True, required=False)
+
+
     class Meta:
         model = Ubicacion
-        fields = ['id', 'codigo', 'edificio', 'piso', 'oficina', 'direccion', 'responsable', 'capacidad', 'ocupados', 'espacio_disponible']
+        fields = [
+            'id', 'codigo', 'edificio', 'piso', 'oficina', 'direccion',
+            'responsable', 'capacidad', 'ocupados', 'espacio_disponible',
+            'latitud', 'longitud'
+        ]
 
 class ResponsableSerializer(serializers.ModelSerializer):
     usuario = UsuarioSerializer(read_only=True)
@@ -66,10 +74,6 @@ class ResponsableSerializer(serializers.ModelSerializer):
         fields = ['id', 'usuario', 'usuario_id', 'cargo', 'departamento', 'fecha_asignacion', 'activo']
 
 class BienPatrimonialSerializer(serializers.ModelSerializer):
-    categoria = serializers.PrimaryKeyRelatedField(queryset=Categoria.objects.all())
-    ubicacion = serializers.PrimaryKeyRelatedField(queryset=Ubicacion.objects.all())
-    responsable = serializers.PrimaryKeyRelatedField(queryset=Responsable.objects.all(), allow_null=True)
-    valor_actual = serializers.ReadOnlyField()
 
     class Meta:
         model = BienPatrimonial
@@ -78,7 +82,6 @@ class BienPatrimonialSerializer(serializers.ModelSerializer):
             'fecha_adquisicion', 'estado', 'depreciacion', 'valor_residual', 'categoria',
             'ubicacion', 'responsable', 'fecha_registro', 'fecha_actualizacion', 'activo', 'valor_actual'
         ]
-        read_only_fields = ['fecha_registro', 'fecha_actualizacion', 'depreciacion', 'valor_actual']
 
     def validate_estado(self, value):
         if value not in dict(BienPatrimonial.ESTADOS).keys():

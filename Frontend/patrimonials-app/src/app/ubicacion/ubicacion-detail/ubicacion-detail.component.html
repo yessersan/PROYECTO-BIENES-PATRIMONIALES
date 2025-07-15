@@ -2,7 +2,7 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-title">
-      <i class="pi pi-box"></i> Sistema
+      <i class="pi pi-box"></i> Sistema de Bienes
     </div>
     <ul class="menu">
       <li *ngFor="let item of menuItems" routerLinkActive="active" [routerLink]="item.routerLink">
@@ -13,81 +13,86 @@
 
   <!-- Contenido principal -->
   <main class="content container">
-    <div *ngIf="loading" class="loading">Cargando...</div>
+    <div *ngIf="loading">cargando...</div>
 
     <div *ngIf="!loading">
-      <h2>{{ esNuevo ? 'Nueva Ubicación' : 'Detalle de Ubicación: ' + ubicacionForm.value.codigo }}</h2>
+      <h2>{{ esNuevo ? 'nueva ubicación' : 'detalle de ubicación: ' + ubicacionForm.value.codigo }}</h2>
+
       <form [formGroup]="ubicacionForm" (ngSubmit)="guardar()">
         <div class="form-group">
-          <label for="codigo">Código:</label>
-          <input id="codigo" formControlName="codigo" [readonly]="!esNuevo" required class="form-control" />
-          <span *ngIf="isFieldInvalid('codigo')" class="error-text">El código es requerido.</span>
+          <label for="codigo">código:</label>
+          <input id="codigo" type="text" formControlName="codigo" />
         </div>
 
         <div class="form-group">
-          <label for="edificio">Edificio:</label>
-          <input id="edificio" formControlName="edificio" required class="form-control" />
-          <span *ngIf="isFieldInvalid('edificio')" class="error-text">El edificio es requerido.</span>
+          <label for="edificio">edificio:</label>
+          <input id="edificio" type="text" formControlName="edificio" />
         </div>
 
         <div class="form-group">
-          <label for="piso">Piso:</label>
-          <input id="piso" formControlName="piso" required class="form-control" />
-          <span *ngIf="isFieldInvalid('piso')" class="error-text">El piso es requerido.</span>
+          <label for="piso">piso:</label>
+          <input id="piso" type="text" formControlName="piso" />
         </div>
 
         <div class="form-group">
-          <label for="oficina">Oficina:</label>
-          <input id="oficina" formControlName="oficina" required class="form-control" />
-          <span *ngIf="isFieldInvalid('oficina')" class="error-text">La oficina es requerida.</span>
+          <label for="oficina">oficina:</label>
+          <input id="oficina" type="text" formControlName="oficina" />
         </div>
 
         <div class="form-group">
-          <label for="direccion">Dirección:</label>
-          <input id="direccion" formControlName="direccion" required class="form-control" />
-          <span *ngIf="isFieldInvalid('direccion')" class="error-text">La dirección es requerida.</span>
+          <label for="direccion">dirección:</label>
+          <input id="direccion" type="text" formControlName="direccion" />
         </div>
 
         <div class="form-group">
-          <label for="capacidad">Capacidad:</label>
-          <input id="capacidad" type="number" formControlName="capacidad" required class="form-control" />
-          <span *ngIf="isFieldInvalid('capacidad')" class="error-text">La capacidad debe ser un número mayor a 0.</span>
+          <label for="capacidad">capacidad:</label>
+          <input id="capacidad" type="number" formControlName="capacidad" />
         </div>
 
         <div class="form-group">
-          <label for="ocupados">Ocupados:</label>
-          <input id="ocupados" type="number" formControlName="ocupados" required class="form-control" />
-          <span *ngIf="isFieldInvalid('ocupados')" class="error-text">Ocupados debe ser un número mayor o igual a 0.</span>
+          <label for="ocupados">ocupados:</label>
+          <input id="ocupados" type="number" formControlName="ocupados" />
         </div>
 
         <div class="form-group">
-          <label for="responsable">Responsable (opcional):</label>
-          <input id="responsable" type="number" formControlName="responsable" placeholder="ID del responsable" class="form-control" />
-          <span *ngIf="isFieldInvalid('responsable')" class="error-text">El ID del responsable debe ser un número válido.</span>
+          <label for="responsable">responsable:</label>
+          <input id="responsable" type="number" formControlName="responsable" />
         </div>
 
-        <div *ngIf="ubicacionForm.errors?.['ocupadosExcedeCapacidad']" class="error-text">
-          El número de ocupados no puede ser mayor que la capacidad.
+        <div class="form-group">
+          <label for="latitud">latitud:</label>
+          <input id="latitud" formControlName="latitud" readonly />
         </div>
 
-        <div *ngIf="error" class="error-text">{{ error }}</div>
+        <div class="form-group">
+          <label for="longitud">longitud:</label>
+          <input id="longitud" formControlName="longitud" readonly />
+        </div>
+
+        <div id="map" style="height: 300px; margin: 1rem 0;"></div>
+
+        <div *ngIf="ubicacionForm.errors?.['ocupadosExcedeCapacidad']" class="error-message">
+          el número de ocupados no puede ser mayor que la capacidad.
+        </div>
+
+        <p>espacio disponible: {{ ubicacionForm.value.capacidad - ubicacionForm.value.ocupados }}</p>
+
+        <div *ngIf="error" class="error-message">{{ error }}</div>
 
         <div class="form-actions">
-          <button type="submit" class="btn btn-success" [disabled]="ubicacionForm.invalid || loading">Guardar</button>
-          <button type="button" (click)="cancelar()" class="btn btn-secondary" [disabled]="loading">Cancelar</button>
-          <button *ngIf="!esNuevo" type="button" (click)="eliminar()" class="btn btn-danger" [disabled]="loading">Eliminar</button>
+          <button type="submit" [disabled]="ubicacionForm.invalid || loading">guardar</button>
+          <button type="button" (click)="cancelar()" [disabled]="loading">cancelar</button>
+          <button *ngIf="!esNuevo" type="button" (click)="eliminar()" [disabled]="loading">eliminar</button>
         </div>
       </form>
 
-      <section *ngIf="!esNuevo" class="bienes-section">
-        <h3>Bienes en esta ubicación</h3>
-        <ul>
-          <li *ngFor="let bien of bienes">
-            {{ bien.codigo }} - {{ bien.descripcion }}
-          </li>
-          <li *ngIf="bienes.length === 0">No hay bienes en esta ubicación.</li>
-        </ul>
-      </section>
+      <h3 *ngIf="!esNuevo">bienes en esta ubicación</h3>
+      <ul *ngIf="!esNuevo">
+        <li *ngFor="let bien of bienes">
+          {{ bien.codigo }} - {{ bien.descripcion }}
+        </li>
+        <li *ngIf="bienes.length === 0">no hay bienes en esta ubicación.</li>
+      </ul>
     </div>
   </main>
 </div>

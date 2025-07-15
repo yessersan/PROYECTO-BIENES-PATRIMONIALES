@@ -1,6 +1,7 @@
 export interface Bien {
   id: number;
   codigo: string;
+  nombre?: string;
   serie?: string | null;
   descripcion: string;
   marca?: string | null;

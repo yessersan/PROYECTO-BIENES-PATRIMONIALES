@@ -10,7 +10,7 @@
 .sidebar-container {
   width: 280px;
   background: linear-gradient(135deg, #4e54c8, #8f94fb);
-  color: white;
+  color: rgb(255, 255, 255);
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -24,7 +24,7 @@
 }
 
 .sidebar-header .text-primary {
-  color: #ffd93d !important;
+  color: #fafaf7 !important;
 }
 
 .sidebar-header h4 {

@@ -2,27 +2,26 @@
 .layout {
   display: flex;
   min-height: 100vh;
-  background-color: #f4f6fa;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f7ff;
 }
 
 /* sidebar */
 .sidebar {
   width: 260px;
   background: linear-gradient(135deg, #3a3a90, #6f75f3);
-  color: #fff;
+  color: white;
   padding: 2rem 1rem;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-title {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: bold;
   margin-bottom: 2rem;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  color: #ffd93d;
+  gap: 0.5rem;
 }
 
 .menu {
@@ -32,146 +31,125 @@
 }
 
 .menu li {
-  padding: 0.75rem 1rem;
+  padding: 0.8rem 1rem;
   border-radius: 8px;
   margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.3s;
 }
 
 .menu li:hover,
 .menu li.active {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* contenido */
 .content.container {
   flex: 1;
-  padding: 2.5rem;
-  background-color: #fff;
+  padding: 2rem 3rem;
+  background-color: #ffffff;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* títulos */
+/* título principal */
 h2 {
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: 1.8rem;
   color: #3a3a90;
   margin-bottom: 1.5rem;
 }
 
-h3 {
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  color: #3a3a90;
-}
-
-/* botones */
-button {
-  padding: 0.6rem 1.2rem;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.btn-success {
-  background-color: #2e7d32;
-  color: white;
-}
-.btn-secondary {
-  background-color: #ccc;
-  color: #333;
-}
-.btn-danger {
-  background-color: #d32f2f;
-  color: white;
-}
-
-.btn-success:hover {
-  background-color: #256429;
-}
-.btn-secondary:hover {
-  background-color: #b0b0b0;
-}
-.btn-danger:hover {
-  background-color: #c62828;
-}
-
-/* formulario */
+/* formularios */
 form {
-  background: #fefefe;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  background-color: #f9fafe;
   padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
-  max-width: 600px;
+  border-radius: 1rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
 .form-group {
-  margin-bottom: 1.2rem;
   display: flex;
   flex-direction: column;
 }
 
 label {
-  font-weight: 600;
-  margin-bottom: 0.4rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+input {
+  padding: 0.6rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+input:focus {
+  outline: none;
+  border-color: #6f75f3;
+  box-shadow: 0 0 0 2px rgba(111, 117, 243, 0.2);
+}
+
+/* mapa */
+#map {
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* mensajes */
+.error-message {
+  color: #d8000c;
+  background-color: #ffbaba;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+/* botones */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+button {
+  background-color: #3a3a90;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background-color: #2c2c6d;
+}
+
+button[disabled] {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* listado de bienes */
+h3 {
+  margin-top: 2rem;
   color: #3a3a90;
 }
 
-input, select, textarea {
-  padding: 0.6rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-  background-color: #fff;
+ul {
+  list-style: none;
+  padding: 0;
 }
 
-input[readonly] {
-  background-color: #f0f0f0;
-}
-
-/* mensajes de error */
-.error-text {
-  color: #d93025;
-  font-size: 0.9rem;
-  margin-top: 0.3rem;
-}
-
-.error {
-  background-color: #fdecea;
-  color: #d93025;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-}
-
-/* acciones */
-.form-actions {
-  margin-top: 1.5rem;
-  display: flex;
-  gap: 1rem;
-}
-
-/* bienes relacionados */
-.bienes-section {
-  margin-top: 2rem;
-  background-color: #fdfdfd;
-  padding: 1.5rem;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-}
-
-.bienes-section ul {
-  margin: 0;
-  padding-left: 1.2rem;
-}
-
-.bienes-section li {
-  margin-bottom: 0.5rem;
+ul li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+  font-weight: 500;
 }

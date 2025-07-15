@@ -8,5 +8,7 @@ export interface Ubicacion {
   responsable?: number;
   capacidad: number;
   ocupados: number;
-  espacio_disponible?: number; // Añadido
+  espacio_disponible?: number;
+  latitud: number;
+  longitud: number;
 }

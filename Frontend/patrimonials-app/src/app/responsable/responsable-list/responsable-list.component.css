@@ -2,17 +2,18 @@
 .layout {
   display: flex;
   min-height: 100vh;
-  background-color: #f4f6fa;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f7ff;
 }
 
 /* sidebar */
 .sidebar {
-  width: 260px;
-  background: linear-gradient(135deg, #3a3a90, #6f75f3);
-  color: #fff;
-  padding: 2rem 1rem;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+  width: 270px;
+  background: linear-gradient(135deg, #4e54c8, #8f94fb);
+  color: rgb(245, 240, 240);
+  padding: 2rem 1.2rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar-title {
@@ -22,7 +23,7 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  color: #ffd93d;
+  color: #f3f2ef;
 }
 
 .menu {

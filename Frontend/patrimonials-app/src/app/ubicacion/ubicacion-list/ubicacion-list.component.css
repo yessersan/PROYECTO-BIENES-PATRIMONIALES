@@ -2,27 +2,26 @@
 .layout {
   display: flex;
   min-height: 100vh;
-  background-color: #f4f6fa;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f7ff;
 }
 
 /* sidebar */
 .sidebar {
   width: 260px;
   background: linear-gradient(135deg, #3a3a90, #6f75f3);
-  color: #fff;
+  color: white;
   padding: 2rem 1rem;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-title {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: bold;
   margin-bottom: 2rem;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  color: #ffd93d;
+  gap: 0.5rem;
 }
 
 .menu {
@@ -32,104 +31,101 @@
 }
 
 .menu li {
-  padding: 0.75rem 1rem;
+  padding: 0.8rem 1rem;
   border-radius: 8px;
   margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.3s;
 }
 
 .menu li:hover,
 .menu li.active {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
-/* contenido */
+/* contenido principal */
 .content.container {
   flex: 1;
-  padding: 2.5rem;
-  background-color: #fff;
+  padding: 2.5rem 3rem;
+  background-color: #ffffff;
+  border-left: 1px solid #eee;
 }
 
 /* título */
 h2 {
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: 1.8rem;
   color: #3a3a90;
   margin-bottom: 1.5rem;
 }
 
-/* botones */
+/* botón principal */
 button {
-  padding: 0.5rem 1rem;
-  font-size: 0.95rem;
-  font-weight: 600;
+  background-color: #3a3a90;
+  color: white;
+  padding: 0.6rem 1.2rem;
   border: none;
   border-radius: 8px;
+  font-weight: bold;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
-.btn-primary {
-  background-color: #3a3a90;
-  color: #fff;
+button:hover {
+  background-color: #2e2e70;
+  transform: translateY(-1px);
 }
 
-.btn-secondary {
-  background-color: #6c757d;
-  color: #fff;
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
-.btn-sm {
-  padding: 0.4rem 0.75rem;
-  font-size: 0.85rem;
-}
-
-.btn-primary:hover {
-  background-color: #2e2e75;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
-}
-
-/* tabla */
-.table {
+/* tabla de ubicaciones */
+table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1rem;
-  background-color: #fff;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.table th,
-.table td {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid #eaeaea;
-}
-
-.table thead {
-  background-color: #f1f1f8;
-  color: #3a3a90;
-}
-
-.table-striped tbody tr:nth-child(odd) {
+  margin-top: 1.5rem;
   background-color: #fafafa;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-/* mensajes */
-.loading {
-  margin-top: 2rem;
-  font-size: 1rem;
+thead {
+  background-color: #3a3a90;
+  color: white;
+}
+
+th, td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+tbody tr:hover {
+  background-color: #eef0ff;
+}
+
+td:last-child {
+  text-align: center;
+}
+
+td button {
+  background-color: #ffbb00;
+  color: #333;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+td button:hover {
+  background-color: #e6a700;
+}
+
+/* mensaje de carga */
+[ngIf="loading"] {
+  font-style: italic;
   color: #555;
-}
-
-.mb-3 {
-  margin-bottom: 1rem;
+  margin-top: 1rem;
 }

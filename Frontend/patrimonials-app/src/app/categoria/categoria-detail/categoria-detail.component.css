@@ -27,7 +27,7 @@
 }
 
 .sidebar-header .text-primary {
-  color: #ffd93d !important;
+  color: #ebe9e5 !important;
 }
 
 .sidebar-header h4 {
@@ -62,7 +62,7 @@
 .sidebar-nav-item.active {
   background-color: rgba(255,255,255,0.2);
   color: #fff !important;
-  border-left-color: #ffd93d;
+  border-left-color: #eae9e9;
   font-weight: bold;
 }
 

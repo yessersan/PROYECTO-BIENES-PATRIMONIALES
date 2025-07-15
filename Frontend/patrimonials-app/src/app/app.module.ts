@@ -67,6 +67,9 @@ import { MenuModule } from 'primeng/menu';
 import { RippleModule } from 'primeng/ripple';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { BienCreateComponent } from './bien/bien-create/bien-create.component';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ProgressBarModule } from 'primeng/progressbar';
+
 
 
 @NgModule({
@@ -137,7 +140,9 @@ import { BienCreateComponent } from './bien/bien-create/bien-create.component';
     ChipModule,
     MenuModule,
     RippleModule,
-    InputNumberModule
+    InputNumberModule,
+    ConfirmDialogModule,
+    ProgressBarModule
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

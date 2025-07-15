@@ -10,11 +10,10 @@
 .sidebar {
   width: 270px;
   background: linear-gradient(135deg, #4e54c8, #8f94fb);
-  color: #fff;
+  color: rgb(245, 240, 240);
+  padding: 2rem 1.2rem;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem 1rem;
-  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-header {
