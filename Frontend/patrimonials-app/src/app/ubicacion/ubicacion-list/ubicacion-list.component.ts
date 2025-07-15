@@ -3,12 +3,14 @@ import { Ubicacion } from '../../models/ubicacion.model';
 import { Usuario } from '../../models/usuario.model';
 import { ApiService } from '../../core/api.service';
 import { Router } from '@angular/router';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-ubicacion-list',
   standalone: false,
   templateUrl: './ubicacion-list.component.html',
-  styleUrl: './ubicacion-list.component.css'
+  styleUrls: ['./ubicacion-list.component.css'],
+  providers: [ConfirmationService, MessageService]
 })
 export class UbicacionListComponent implements OnInit {
   ubicaciones: Ubicacion[] = [];
@@ -17,7 +19,12 @@ export class UbicacionListComponent implements OnInit {
   rolUsuario = '';
   menuItems: any[] = [];
 
-  constructor(private api: ApiService, private router: Router) {}
+  constructor(
+    private api: ApiService, 
+    private router: Router,
+    private confirmationService: ConfirmationService,
+    private messageService: MessageService
+  ) {}
 
   ngOnInit(): void {
     this.api.get<Usuario>('auth/usuario/').subscribe({
@@ -27,7 +34,11 @@ export class UbicacionListComponent implements OnInit {
 
         const rolesPermitidos = ['ADMIN', 'GESTOR'];
         if (!rolesPermitidos.includes(this.rolUsuario)) {
-          alert('no tienes permiso para acceder a ubicaciones');
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Acceso denegado',
+            detail: 'No tienes permiso para acceder a ubicaciones'
+          });
           this.router.navigate(['/dashboard']);
           return;
         }
@@ -36,7 +47,11 @@ export class UbicacionListComponent implements OnInit {
         this.cargarUbicaciones();
       },
       error: () => {
-        alert('no se pudo cargar el usuario actual');
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo cargar el usuario actual'
+        });
         this.router.navigate(['/dashboard']);
       }
     });
@@ -70,7 +85,11 @@ export class UbicacionListComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
-        alert('error al cargar las ubicaciones');
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Error al cargar las ubicaciones'
+        });
       }
     });
   }
@@ -81,5 +100,32 @@ export class UbicacionListComponent implements OnInit {
 
   nuevaUbicacion() {
     this.router.navigate(['/ubicaciones', 'nuevo']);
+  }
+
+  confirmarEliminacion(id: number) {
+    this.confirmationService.confirm({
+      message: '¿Está seguro que desea eliminar esta ubicación?',
+      header: 'Confirmación',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.api.deleteUbicacion(id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Éxito',
+              detail: 'Ubicación eliminada correctamente'
+            });
+            this.cargarUbicaciones();
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudo eliminar la ubicación'
+            });
+          }
+        });
+      }
+    });
   }
 }

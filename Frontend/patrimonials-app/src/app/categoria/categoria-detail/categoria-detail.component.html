@@ -7,7 +7,6 @@
         <h4 class="mb-0 text-primary">Sistema</h4>
       </div>
     </div>
-
     <!-- Navegación del Sidebar -->
     <div class="sidebar-navigation">
       <nav class="nav flex-column">
@@ -23,7 +22,6 @@
         </ng-container>
       </nav>
     </div>
-
     <!-- Footer del Sidebar -->
     <div class="sidebar-footer">
       <button type="button" class="btn btn-outline-danger w-100" (click)="cerrarSesion()">
@@ -59,33 +57,33 @@
                 <ng-template pTemplate="header">
                   <h3>{{ esNuevo ? 'Nueva Categoría' : 'Editar Categoría' }}</h3>
                 </ng-template>
-                <form (ngSubmit)="guardar()" *ngIf="!error">
+                <form (ngSubmit)="guardar()" #categoriaForm="ngForm" autocomplete="off">
                   <div class="p-field">
-                    <label for="nombre">Nombre</label>
-                    <input pInputText id="nombre" [(ngModel)]="categoria.nombre" name="nombre" required>
+                    <label for="nombre">Nombre <span class="text-danger">*</span></label>
+                    <input pInputText id="nombre" [(ngModel)]="categoria.nombre" name="nombre" required maxlength="100" />
                   </div>
                   <div class="p-field">
                     <label for="descripcion">Descripción</label>
-                    <textarea pInputTextarea id="descripcion" [(ngModel)]="categoria.descripcion" name="descripcion" rows="3"></textarea>
+                    <textarea pInputTextarea id="descripcion" [(ngModel)]="categoria.descripcion" name="descripcion" rows="3" maxlength="255"></textarea>
                   </div>
                   <div class="p-field">
-                    <label for="vida_util">Vida útil (años)</label>
+                    <label for="vida_util">Vida útil (años) <span class="text-danger">*</span></label>
                     <p-inputNumber id="vida_util" [(ngModel)]="categoria.vida_util" name="vida_util" required [min]="0"></p-inputNumber>
                   </div>
                   <div class="p-field">
-                    <label for="tasa_depreciacion">Tasa de depreciación (%)</label>
+                    <label for="tasa_depreciacion">Tasa de depreciación (%) <span class="text-danger">*</span></label>
                     <p-inputNumber id="tasa_depreciacion" [(ngModel)]="categoria.tasa_depreciacion" name="tasa_depreciacion" required [min]="0" [max]="100"></p-inputNumber>
                   </div>
                   <div class="p-field-checkbox">
                     <p-checkbox [(ngModel)]="categoria.activa" name="activa" binary="true"></p-checkbox>
                     <label for="activa">Activa</label>
                   </div>
-                  <div class="p-field">
-  <button pButton type="submit" label="Guardar" class="p-button-primary"></button>
-  <button pButton type="button" label="Cancelar" (click)="cancelar()" class="p-button-secondary" style="margin-left: 1rem;"></button>
-  <button pButton type="button" label="Volver" icon="pi pi-arrow-left" (click)="volver()" class="p-button-secondary" style="margin-left: 1rem;"></button>
-</div>
-
+                  <div class="p-field mt-4">
+                    <button pButton type="submit" label="Guardar" class="p-button-primary" [disabled]="categoriaForm.invalid"></button>
+                    <button pButton type="button" label="Cancelar" (click)="cancelar()" class="p-button-secondary" style="margin-left: 1rem;"></button>
+                    <button pButton type="button" label="Volver" icon="pi pi-arrow-left" (click)="volver()" class="p-button-secondary" style="margin-left: 1rem;"></button>
+                    <button *ngIf="!esNuevo" pButton type="button" label="Eliminar" icon="pi pi-trash" (click)="eliminar()" class="p-button-danger" style="margin-left: 1rem;"></button>
+                  </div>
                 </form>
                 <p-message *ngIf="error" severity="error" [text]="error" [style]="{'display': 'block'}"></p-message>
               </p-card>

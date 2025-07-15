@@ -1,39 +1,77 @@
-<div *ngIf="loading">Cargando...</div>
 
-<div *ngIf="!loading">
-  <h2>{{ esNuevo ? 'Nueva Ubicación' : 'Detalle de Ubicación: ' + ubicacionForm.value.codigo }}</h2>
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
 
-  <form [formGroup]="ubicacionForm" (ngSubmit)="guardar()">
-    <label>Código:<input formControlName="codigo"></label><br>
-    <label>Edificio:<input formControlName="edificio"></label><br>
-    <label>Piso:<input formControlName="piso"></label><br>
-    <label>Oficina:<input formControlName="oficina"></label><br>
-    <label>Dirección:<input formControlName="direccion"></label><br>
-    <label>Capacidad:<input type="number" formControlName="capacidad"></label><br>
-    <label>Ocupados:<input type="number" formControlName="ocupados"></label><br>
-    <label>Responsable:<input type="number" formControlName="responsable"></label><br>
-    <label>Latitud:<input formControlName="latitud" readonly></label><br>
-    <label>Longitud:<input formControlName="longitud" readonly></label><br>
+<div class="p-card p-shadow-3 p-p-4 p-mb-4">
+  <h2 class="p-text-center p-mb-4">{{ esNuevo ? 'Nueva Ubicación' : 'Editar Ubicación: ' + ubicacionForm.value.codigo }}</h2>
 
-    <div id="map" style="height: 300px; margin: 10px 0;"></div>
+  <form [formGroup]="ubicacionForm" (ngSubmit)="guardar()" class="p-fluid p-formgrid p-grid">
 
-    <div *ngIf="ubicacionForm.errors?.['ocupadosExcedeCapacidad']" style="color:red">
-      El número de ocupados no puede ser mayor que la capacidad.
+    <div class="p-col-12 p-md-6">
+      <label for="codigo">Código</label>
+      <input pInputText id="codigo" formControlName="codigo" />
     </div>
 
-    <p>Espacio disponible: {{ ubicacionForm.value.capacidad - ubicacionForm.value.ocupados }}</p>
-    <div *ngIf="error" style="color:red">{{ error }}</div>
+    <div class="p-col-12 p-md-6">
+      <label for="edificio">Edificio</label>
+      <input pInputText id="edificio" formControlName="edificio" />
+    </div>
 
-    <button type="submit" [disabled]="ubicacionForm.invalid || loading">Guardar</button>
-    <button type="button" (click)="cancelar()" [disabled]="loading">Cancelar</button>
-    <button *ngIf="!esNuevo" type="button" (click)="eliminar()" [disabled]="loading">Eliminar</button>
+    <div class="p-col-12 p-md-4">
+      <label for="piso">Piso</label>
+      <input pInputText id="piso" formControlName="piso" />
+    </div>
+
+    <div class="p-col-12 p-md-4">
+      <label for="oficina">Oficina</label>
+      <input pInputText id="oficina" formControlName="oficina" />
+    </div>
+
+    <div class="p-col-12 p-md-4">
+      <label for="direccion">Dirección</label>
+      <input pInputText id="direccion" formControlName="direccion" />
+    </div>
+
+    <div class="p-col-12 p-md-4">
+      <label for="capacidad">Capacidad</label>
+      <p-inputNumber formControlName="capacidad" [min]="1"></p-inputNumber>
+    </div>
+
+    <div class="p-col-12 p-md-4">
+      <label for="ocupados">Ocupados</label>
+      <p-inputNumber formControlName="ocupados" [min]="0"></p-inputNumber>
+    </div>
+
+    <div class="p-col-12 p-md-4">
+      <label>Disponibles</label>
+      <p-inputNumber [value]="ubicacionForm.value.capacidad - ubicacionForm.value.ocupados" [readonly]="true"></p-inputNumber>
+    </div>
+
+    <div class="p-col-12 p-md-6">
+      <label>Latitud</label>
+      <input pInputText formControlName="latitud" readonly />
+    </div>
+
+    <div class="p-col-12 p-md-6">
+      <label>Longitud</label>
+      <input pInputText formControlName="longitud" readonly />
+    </div>
+
+    <div class="p-col-12">
+      <label>Selecciona ubicación en el mapa</label>
+      <div id="map" class="map-container"></div>
+    </div>
+
+    <div *ngIf="ubicacionForm.errors?.['ocupadosExcedeCapacidad']" class="p-error p-m-2">
+      El número de ocupados no puede superar la capacidad.
+    </div>
+
+    <div *ngIf="error" class="p-error p-m-2">{{ error }}</div>
+
+    <div class="p-col-12 p-d-flex p-jc-end p-mt-3">
+      <button pButton type="submit" icon="pi pi-save" label="Guardar" class="p-button-success p-mr-2" [disabled]="ubicacionForm.invalid || loading"></button>
+      <button pButton type="button" icon="pi pi-times" label="Cancelar" class="p-button-secondary" (click)="cancelar()"></button>
+    </div>
+
   </form>
-
-  <h3 *ngIf="!esNuevo">Bienes en esta ubicación</h3>
-  <ul *ngIf="!esNuevo">
-    <li *ngFor="let bien of bienes">
-      {{ bien.codigo }} - {{ bien.descripcion }}
-    </li>
-    <li *ngIf="bienes.length === 0">No hay bienes en esta ubicación.</li>
-  </ul>
 </div>

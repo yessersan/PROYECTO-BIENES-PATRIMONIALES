@@ -2,7 +2,7 @@ from django.db import router
 from rest_framework.routers import DefaultRouter
 from django.urls import include, path
 from .views import (
-    HistorialAuditoriaViewSet, LoginView, UsuarioActualView, UsuarioListCreateView, UsuarioRetrieveUpdateDestroyView,
+    HistorialAuditoriaViewSet, LoginView, ToggleCategoriaActivaAPIView, UsuarioActualView, UsuarioListCreateView, UsuarioRetrieveUpdateDestroyView,
     CategoriaListCreateView, CategoriaRetrieveUpdateDestroyView,
     UbicacionListCreateView, UbicacionRetrieveUpdateDestroyView,
     ResponsableListCreateView, ResponsableRetrieveUpdateDestroyView,
@@ -29,6 +29,7 @@ urlpatterns = [
     path('usuarios/disponibles/', views.get_usuarios_disponibles, name='usuarios-disponibles'),
     path('categorias/', CategoriaListCreateView.as_view(), name='categoria-list-create'),
     path('categorias/<int:pk>/', CategoriaRetrieveUpdateDestroyView.as_view(), name='categoria-detail'),
+    path('categorias/<int:pk>/toggle-activa/', ToggleCategoriaActivaAPIView.as_view(), name='categoria-toggle-activa'),
     path('ubicaciones/', UbicacionListCreateView.as_view(), name='ubicacion-list-create'),
     path('ubicaciones/<int:pk>/', UbicacionRetrieveUpdateDestroyView.as_view(), name='ubicacion-detail'),
     path('responsables/', ResponsableListCreateView.as_view(), name='responsable-list-create'),

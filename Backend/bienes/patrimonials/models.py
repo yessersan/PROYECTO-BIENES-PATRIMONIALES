@@ -518,7 +518,7 @@ class HistorialAuditoria(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.PROTECT)
     accion = models.CharField(max_length=100)
     detalle = models.TextField()
-    bien = models.ForeignKey(BienPatrimonial, on_delete=models.CASCADE, related_name='auditorias')
+    bien = models.ForeignKey(BienPatrimonial, on_delete=models.CASCADE, related_name='auditorias', null=True, blank=True)  # <-- Cambiado aquí
     ip = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.CharField(max_length=255, null=True, blank=True)
 

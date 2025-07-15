@@ -43,11 +43,22 @@ class RegistroSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
-
+    
 class CategoriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Categoria
         fields = ['id', 'nombre', 'descripcion', 'vida_util', 'tasa_depreciacion', 'activa']
+
+    def validate_nombre(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("El nombre no puede estar vacío.")
+        qs = Categoria.objects.filter(nombre=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("Ya existe una categoría con este nombre.")
+        return value
 
 class UbicacionSerializer(serializers.ModelSerializer):
     responsable = serializers.PrimaryKeyRelatedField(queryset=Responsable.objects.all(), allow_null=True)

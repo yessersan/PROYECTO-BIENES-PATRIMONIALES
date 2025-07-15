@@ -1,30 +1,73 @@
-<h2>Ubicaciones</h2>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <i class="pi pi-box"></i> Sistema
+    </div>
+    <ul class="menu">
+      <li *ngFor="let item of menuItems" routerLinkActive="active" [routerLink]="item.routerLink">
+        <i [class]="item.icon"></i> {{ item.label }}
+      </li>
+    </ul>
+  </aside>
 
-<button (click)="nuevaUbicacion()">Nueva ubicación</button>
+  <!-- Contenido principal -->
+  <main class="content">
+    <div class="header-actions">
+      <h2>Ubicaciones</h2>
+      <button pButton pRipple 
+              icon="pi pi-plus" 
+              label="Nueva Ubicación" 
+              (click)="nuevaUbicacion()"
+              class="p-button-success"></button>
+    </div>
 
-<table>
-  <thead>
-    <tr>
-      <th>Código</th>
-      <th>Edificio</th>
-      <th>Piso</th>
-      <th>Oficina</th>
-      <th>Capacidad</th>
-      <th>Ocupados</th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let ubicacion of ubicaciones">
-      <td>{{ ubicacion.codigo }}</td>
-      <td>{{ ubicacion.edificio }}</td>
-      <td>{{ ubicacion.piso }}</td>
-      <td>{{ ubicacion.oficina }}</td>
-      <td>{{ ubicacion.capacidad }}</td>
-      <td>{{ ubicacion.ocupados }}</td>
-      <td>
-        <button (click)="verDetalle(ubicacion.id)">Ver detalle</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+    <p-toast></p-toast>
+    <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+
+    <div *ngIf="loading" class="loading-indicator">
+      <p-progressSpinner></p-progressSpinner>
+      <span>Cargando ubicaciones...</span>
+    </div>
+
+    <p-table *ngIf="ubicaciones.length" [value]="ubicaciones" [responsive]="true" styleClass="p-datatable-striped">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Código</th>
+          <th>Edificio</th>
+          <th>Piso</th>
+          <th>Oficina</th>
+          <th>Capacidad</th>
+          <th>Ocupados</th>
+          <th>Disponibles</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-ubicacion>
+        <tr>
+          <td>{{ ubicacion.codigo }}</td>
+          <td>{{ ubicacion.edificio }}</td>
+          <td>{{ ubicacion.piso }}</td>
+          <td>{{ ubicacion.oficina }}</td>
+          <td>{{ ubicacion.capacidad }}</td>
+          <td>{{ ubicacion.ocupados }}</td>
+          <td>{{ ubicacion.capacidad - ubicacion.ocupados }}</td>
+          <td>
+            <button pButton pRipple 
+                    icon="pi pi-eye" 
+                    class="p-button-info p-button-sm p-mr-2" 
+                    (click)="verDetalle(ubicacion.id)"></button>
+            <button pButton pRipple 
+                    icon="pi pi-trash" 
+                    class="p-button-danger p-button-sm" 
+                    (click)="confirmarEliminacion(ubicacion.id)"></button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <div *ngIf="ubicaciones.length === 0 && !loading" class="empty-message">
+      <p>No se encontraron ubicaciones registradas.</p>
+    </div>
+  </main>
+</div>

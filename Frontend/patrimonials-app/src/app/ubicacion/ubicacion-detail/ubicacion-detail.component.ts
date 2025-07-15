@@ -5,12 +5,14 @@ import { ApiService } from '../../core/api.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import * as L from 'leaflet';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-ubicacion-detail',
   standalone: false,
   templateUrl: './ubicacion-detail.component.html',
-  styleUrls: ['./ubicacion-detail.component.css']
+  styleUrls: ['./ubicacion-detail.component.css'],
+  providers: [ConfirmationService, MessageService]
 })
 export class UbicacionDetailComponent implements OnInit {
   ubicacionForm: FormGroup;
@@ -21,13 +23,15 @@ export class UbicacionDetailComponent implements OnInit {
   error = '';
   map!: L.Map;
   marker: L.Marker | null = null;
-  coordenadasPendientes: { lat: number, lon: number } | null = null;
+  displayDeleteConfirm = false;
 
   constructor(
     private route: ActivatedRoute,
     private api: ApiService,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private confirmationService: ConfirmationService,
+    private messageService: MessageService
   ) {
     this.ubicacionForm = this.fb.group({
       codigo: ['', Validators.required],
@@ -57,24 +61,12 @@ export class UbicacionDetailComponent implements OnInit {
       this.loading = true;
       this.api.getUbicacion(Number(this.id)).subscribe({
         next: (data) => {
-          this.ubicacionForm.patchValue({
-            codigo: data.codigo,
-            edificio: data.edificio,
-            piso: data.piso,
-            oficina: data.oficina,
-            direccion: data.direccion,
-            capacidad: data.capacidad,
-            ocupados: data.ocupados,
-            responsable: data.responsable,
-            latitud: data.latitud,
-            longitud: data.longitud
-          });
+          this.ubicacionForm.patchValue(data);
           this.loading = false;
-
           setTimeout(() => this.inicializarMapa());
         },
         error: () => {
-          this.error = 'No se pudo cargar la ubicación';
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar la ubicación' });
           this.loading = false;
         }
       });
@@ -84,35 +76,27 @@ export class UbicacionDetailComponent implements OnInit {
           this.bienes = bienes.filter(b => b.ubicacion === Number(this.id));
         },
         error: () => {
-          this.error = 'No se pudo cargar los bienes';
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar los bienes' });
         }
       });
     } else {
-      // Si es nuevo, inicializamos el mapa apenas cargue
       setTimeout(() => this.inicializarMapa());
     }
   }
 
   inicializarMapa() {
-    if (this.map) return; // evitar reinicializar
-
-    if (!document.getElementById('map')) return;
+    if (this.map) return;
+    const mapEl = document.getElementById('map');
+    if (!mapEl) return;
 
     this.map = L.map('map').setView([-9.93, -76.24], 14);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+      attribution: '© OpenStreetMap'
     }).addTo(this.map);
 
     this.map.on('click', (e: L.LeafletMouseEvent) => {
-      const lat = e.latlng.lat;
-      const lon = e.latlng.lng;
-
-      this.ubicacionForm.patchValue({
-        latitud: lat,
-        longitud: lon
-      });
-
+      this.ubicacionForm.patchValue({ latitud: e.latlng.lat, longitud: e.latlng.lng });
       if (this.marker) {
         this.marker.setLatLng(e.latlng);
       } else {
@@ -120,31 +104,15 @@ export class UbicacionDetailComponent implements OnInit {
       }
     });
 
-    delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
       iconUrl: 'assets/leaflet/marker-icon.png',
       shadowUrl: 'assets/leaflet/marker-shadow.png'
     });
 
-    // Si ya hay coordenadas cargadas, colocar marcador
     if (this.ubicacionForm.value.latitud && this.ubicacionForm.value.longitud) {
-      this.setMarkerOnMap();
-    }
-  }
-
-  setMarkerOnMap() {
-    if (this.ubicacionForm.value.latitud && this.ubicacionForm.value.longitud && this.map) {
-      const latlng = L.latLng(
-        Number(this.ubicacionForm.value.latitud),
-        Number(this.ubicacionForm.value.longitud)
-      );
-
-      if (this.marker) {
-        this.marker.setLatLng(latlng);
-      } else {
-        this.marker = L.marker(latlng).addTo(this.map);
-      }
+      const latlng = L.latLng(this.ubicacionForm.value.latitud, this.ubicacionForm.value.longitud);
+      this.marker = L.marker(latlng).addTo(this.map);
       this.map.setView(latlng, 16);
     }
   }
@@ -152,70 +120,56 @@ export class UbicacionDetailComponent implements OnInit {
   guardar() {
     if (this.ubicacionForm.invalid) {
       this.ubicacionForm.markAllAsTouched();
-      this.error = 'Complete correctamente todos los campos.';
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Complete todos los campos' });
       return;
     }
-
-    if (this.ubicacionForm.value.latitud === null || this.ubicacionForm.value.longitud === null) {
-      this.error = 'Debe seleccionar una ubicación en el mapa.';
-      return;
-    }
-
-    const latitudRedondeada = Number(this.ubicacionForm.value.latitud).toFixed(6);
-    const longitudRedondeada = Number(this.ubicacionForm.value.longitud).toFixed(6);
 
     const ubicacion: Ubicacion = {
       id: this.esNuevo ? 0 : Number(this.id),
-      ...this.ubicacionForm.value,
-      latitud: latitudRedondeada,
-      longitud: longitudRedondeada
+      ...this.ubicacionForm.value
     };
 
-    console.log('Datos a enviar:', ubicacion);
     this.loading = true;
+    const request = this.esNuevo
+      ? this.api.createUbicacion(ubicacion)
+      : this.api.updateUbicacion(Number(this.id), ubicacion);
 
-    if (this.esNuevo) {
-      const { id, ...ubicacionSinId } = ubicacion;
-      this.api.createUbicacion(ubicacionSinId).subscribe({
-        next: () => {
-          this.loading = false;
-          this.router.navigate(['/ubicaciones']);
-        },
-        error: (err) => {
-          this.loading = false;
-          console.error('Respuesta completa del backend:', err);
-          this.error = JSON.stringify(err.error, null, 2);
-        }
-      });
-    } else if (this.id) {
-      this.api.updateUbicacion(Number(this.id), ubicacion).subscribe({
-        next: () => {
-          this.loading = false;
-          this.router.navigate(['/ubicaciones']);
-        },
-        error: (err) => {
-          this.loading = false;
-          console.error('Respuesta completa del backend:', err);
-          this.error = JSON.stringify(err.error, null, 2);
-        }
-      });
-    }
+    request.subscribe({
+      next: () => {
+        this.loading = false;
+        this.messageService.add({ severity: 'success', summary: 'Guardado', detail: 'Ubicación guardada' });
+        this.router.navigate(['/ubicaciones']);
+      },
+      error: () => {
+        this.loading = false;
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
+      }
+    });
+  }
+
+  confirmarEliminacion() {
+    this.confirmationService.confirm({
+      message: '¿Eliminar esta ubicación?',
+      header: 'Confirmación',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => this.eliminar()
+    });
   }
 
   eliminar() {
-    if (this.id && confirm('¿Eliminar esta ubicación?')) {
-      this.loading = true;
-      this.api.deleteUbicacion(Number(this.id)).subscribe({
-        next: () => {
-          this.loading = false;
-          this.router.navigate(['/ubicaciones']);
-        },
-        error: () => {
-          this.loading = false;
-          this.error = 'No se pudo eliminar';
-        }
-      });
-    }
+    if (!this.id) return;
+    this.loading = true;
+    this.api.deleteUbicacion(Number(this.id)).subscribe({
+      next: () => {
+        this.loading = false;
+        this.messageService.add({ severity: 'success', summary: 'Eliminado', detail: 'Ubicación eliminada' });
+        this.router.navigate(['/ubicaciones']);
+      },
+      error: () => {
+        this.loading = false;
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar' });
+      }
+    });
   }
 
   cancelar() {

@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -69,6 +69,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { BienCreateComponent } from './bien/bien-create/bien-create.component';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+
 
 
 
@@ -142,8 +144,10 @@ import { ProgressBarModule } from 'primeng/progressbar';
     RippleModule,
     InputNumberModule,
     ConfirmDialogModule,
-    ProgressBarModule
+    ProgressBarModule,
+    ProgressSpinnerModule
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     provideAnimationsAsync(),
