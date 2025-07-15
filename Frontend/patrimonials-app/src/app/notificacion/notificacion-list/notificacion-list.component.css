@@ -1,153 +1,152 @@
-/* estructura general */
 .layout {
   display: flex;
   min-height: 100vh;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f4f6fa;
 }
 
-/* sidebar */
 .sidebar {
-  width: 260px;
-  background: linear-gradient(135deg, #3a3a90, #6f75f3);
-  color: #fff;
-  padding: 2rem 1rem;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+  width: 220px;
+  background-color: #2c3e50;
+  color: white;
+  padding: 1rem;
 }
 
 .sidebar-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  color: #ffd93d;
+}
+
+.sidebar-title i {
+  margin-right: 0.5rem;
 }
 
 .menu {
   list-style: none;
   padding: 0;
-  margin: 0;
 }
 
 .menu li {
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  padding: 0.75rem 0.5rem;
   cursor: pointer;
-  transition: background 0.2s ease;
 }
 
 .menu li:hover,
 .menu li.active {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: #34495e;
 }
 
-/* contenido */
+.menu li i {
+  margin-right: 0.5rem;
+}
+
 .content {
   flex: 1;
-  padding: 2.5rem;
-  background-color: #fff;
+  padding: 2rem;
 }
 
-/* encabezado */
-.content h2 {
-  font-size: 1.6rem;
-  color: #3a3a90;
-  font-weight: 700;
+.page-title {
+  font-size: 1.8rem;
   margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
 }
 
-/* filtros */
+.page-title i {
+  margin-right: 0.5rem;
+}
+
 .filtros {
   display: flex;
   align-items: center;
-  gap: 2rem;
   margin-bottom: 1.5rem;
 }
 
-.filtros mat-form-field {
-  width: 250px;
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.filtros mat-checkbox {
-  font-size: 0.95rem;
+.notification-card {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 0.6rem;
+  background-color: #fff;
 }
 
-/* tarjetas de notificaciones */
-.notificacion-card {
-  margin-bottom: 1rem;
-  border-left: 5px solid transparent;
-  transition: background 0.3s ease, border-color 0.3s ease;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+.notification-card.leido {
+  opacity: 0.7;
 }
 
-.notificacion-card.importante {
-  border-left-color: #e53935;
-}
-
-.notificacion-card.no-leido {
-  background-color: #eef2ff;
-}
-
-mat-card-title {
+.header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #3a3a90;
+  justify-content: space-between;
 }
 
-.badge-importante {
-  background-color: #e53935;
-  color: white;
-  padding: 0.25rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
+.header i {
+  font-size: 2rem;
+  color: #3498db;
+  margin-right: 0.8rem;
 }
 
-mat-card-subtitle {
-  font-size: 0.85rem;
+.info h4 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.info p {
+  margin: 0;
+  font-size: 0.9rem;
   color: #666;
 }
 
-/* acciones */
-mat-card-actions {
-  justify-content: flex-end;
+.estado {
+  text-align: right;
 }
 
-mat-card-actions button,
-mat-card-actions a {
-  font-size: 0.85rem;
+.badge-no-leido {
+  background-color: #f39c12;
+  color: #fff;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
 }
 
-/* cargando / errores */
-.loading {
+.badge-leido {
+  background-color: #2ecc71;
+  color: #fff;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.badge-archivado {
+  background-color: #7f8c8d;
+  color: #fff;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.badge-importante {
+  background-color: #e74c3c;
+  color: white;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+}
+
+.acciones {
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  color: #444;
-  margin-bottom: 1rem;
+  justify-content: flex-end;
+  margin-top: 0.8rem;
 }
 
-.error-msg {
-  color: #d32f2f;
-  font-size: 0.95rem;
-  margin-bottom: 1rem;
-}
-
-.empty {
-  font-size: 0.95rem;
+.empty-state {
+  margin-top: 1.5rem;
+  font-style: italic;
   color: #777;
-  margin-top: 2rem;
-}
-
-/* paginador */
-mat-paginator {
-  margin-top: 2rem;
 }

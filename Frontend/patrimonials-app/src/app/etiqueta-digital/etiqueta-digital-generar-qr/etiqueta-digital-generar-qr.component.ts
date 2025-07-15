@@ -2,12 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { Usuario } from '../../models/usuario.model';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-etiqueta-digital-generar-qr',
   standalone: false,
   templateUrl: './etiqueta-digital-generar-qr.component.html',
-  styleUrls: ['./etiqueta-digital-generar-qr.component.css']
+  styleUrls: ['./etiqueta-digital-generar-qr.component.css'],
+  providers: [ConfirmationService]
 })
 export class EtiquetaDigitalGenerarQrComponent implements OnInit {
   etiquetaId: number;
@@ -17,7 +19,11 @@ export class EtiquetaDigitalGenerarQrComponent implements OnInit {
   rolUsuario = '';
   menuItems: any[] = [];
 
-  constructor(private route: ActivatedRoute, private apiService: ApiService) {
+  constructor(
+    private route: ActivatedRoute,
+    private apiService: ApiService,
+    private confirmationService: ConfirmationService
+  ) {
     this.etiquetaId = +this.route.snapshot.paramMap.get('id')!;
   }
 
@@ -50,18 +56,45 @@ export class EtiquetaDigitalGenerarQrComponent implements OnInit {
       { label: 'Ubicaciones', icon: 'pi pi-map-marker', routerLink: '/ubicaciones', roles: ['ADMIN','GESTOR'] },
       { label: 'Mantenimientos', icon: 'pi pi-cog', routerLink: '/mantenimientos', roles: ['ADMIN','GESTOR'] },
     ];
-
     this.menuItems = menuCompleto.filter(item => item.roles.includes(this.rolUsuario));
   }
 
   generateQrCode() {
     this.apiService.generarQR(this.etiquetaId).subscribe({
       next: (response) => {
-        this.qrCodeUrl = response.qr_url || response.imagen_qr;
+        this.qrCodeUrl = 'http://localhost:8000' + (response.qr_url || response.imagen_qr);
       },
       error: (err) => {
         this.error = 'error generando qr: ' + (err.error?.message || 'desconocido');
       }
     });
   }
+
+  confirmarDescarga() {
+    this.confirmationService.confirm({
+      message: '¿Deseas descargar este código QR?',
+      header: 'Confirmación de descarga',
+      icon: 'pi pi-question-circle',
+      acceptLabel: 'Sí',
+      rejectLabel: 'Cancelar',
+      acceptButtonStyleClass: 'p-button-success',
+      rejectButtonStyleClass: 'p-button-secondary',
+      accept: () => {
+        this.descargarQR();
+      }
+    });
+  }
+
+  descargarQR() {
+    if (!this.qrCodeUrl) return;
+    this.apiService.getQrImageFromUrl(this.qrCodeUrl).subscribe(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `qr_BP-ELEC-${this.etiquetaId}.png`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }
+
 }

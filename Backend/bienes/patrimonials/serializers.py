@@ -74,10 +74,6 @@ class ResponsableSerializer(serializers.ModelSerializer):
         fields = ['id', 'usuario', 'usuario_id', 'cargo', 'departamento', 'fecha_asignacion', 'activo']
 
 class BienPatrimonialSerializer(serializers.ModelSerializer):
-    categoria = serializers.PrimaryKeyRelatedField(queryset=Categoria.objects.all())
-    ubicacion = serializers.PrimaryKeyRelatedField(queryset=Ubicacion.objects.all())
-    responsable = serializers.PrimaryKeyRelatedField(queryset=Responsable.objects.all(), allow_null=True)
-    valor_actual = serializers.ReadOnlyField()
 
     class Meta:
         model = BienPatrimonial
@@ -86,7 +82,6 @@ class BienPatrimonialSerializer(serializers.ModelSerializer):
             'fecha_adquisicion', 'estado', 'depreciacion', 'valor_residual', 'categoria',
             'ubicacion', 'responsable', 'fecha_registro', 'fecha_actualizacion', 'activo', 'valor_actual'
         ]
-        read_only_fields = ['fecha_registro', 'fecha_actualizacion', 'depreciacion', 'valor_actual']
 
     def validate_estado(self, value):
         if value not in dict(BienPatrimonial.ESTADOS).keys():

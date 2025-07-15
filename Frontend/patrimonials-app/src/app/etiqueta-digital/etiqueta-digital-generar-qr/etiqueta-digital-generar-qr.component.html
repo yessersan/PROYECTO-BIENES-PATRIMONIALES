@@ -19,9 +19,19 @@
 
     <div *ngIf="qrCodeUrl" class="qr-section">
       <img [src]="qrCodeUrl" alt="Código QR" width="300">
-      <p><a [href]="qrCodeUrl" download>Descargar QR</a></p>
+
+      <!-- Botón con confirmación -->
+      <button pButton 
+              label="Descargar QR" 
+              icon="pi pi-download" 
+              class="p-button-primary" 
+              (click)="confirmarDescarga()">
+      </button>
     </div>
 
     <div *ngIf="!qrCodeUrl && !error">Generando QR...</div>
   </main>
 </div>
+
+<!-- ConfirmDialog de PrimeNG -->
+<p-confirmDialog></p-confirmDialog>
