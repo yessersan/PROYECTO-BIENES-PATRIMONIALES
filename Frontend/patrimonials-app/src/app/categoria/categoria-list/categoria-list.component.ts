@@ -3,14 +3,14 @@ import { Categoria } from '../../models/categoria.model';
 import { ApiService } from '../../core/api.service';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-categoria-list',
   standalone: false,
   templateUrl: './categoria-list.component.html',
   styleUrls: ['./categoria-list.component.css'],
-  providers: [MessageService]
+  providers: [MessageService, ConfirmationService]
 })
 export class CategoriaListComponent implements OnInit {
   categorias: Categoria[] = [];
@@ -24,7 +24,8 @@ export class CategoriaListComponent implements OnInit {
     private api: ApiService,
     private router: Router,
     private authService: AuthService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit(): void {
@@ -34,14 +35,12 @@ export class CategoriaListComponent implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
-
     this.rol = this.usuario.rol?.toUpperCase();
     if (!['ADMIN', 'GESTOR'].includes(this.rol)) {
       this.mostrarMensaje('error', 'Sin permiso', 'No tienes acceso a esta sección');
       this.router.navigate(['/dashboard']);
       return;
     }
-
     this.menuItems = this.filtrarMenuPorRol();
     this.getCategorias();
   }
@@ -61,7 +60,6 @@ export class CategoriaListComponent implements OnInit {
       { label: 'Ubicaciones', icon: 'pi pi-map-marker', routerLink: '/ubicaciones', roles: ['ADMIN', 'GESTOR'] },
       { label: 'Mantenimientos', icon: 'pi pi-cog', routerLink: '/mantenimientos', roles: ['ADMIN', 'GESTOR'] }
     ];
-
     return menu.filter(item => item.roles.includes(this.rol));
   }
 
@@ -80,18 +78,25 @@ export class CategoriaListComponent implements OnInit {
     });
   }
 
-  eliminarCategoria(id: number) {
-    if (confirm('¿Eliminar esta categoría?')) {
-      this.api.deleteCategoria(id).subscribe({
-        next: () => {
-          this.mostrarMensaje('success', 'Éxito', 'Categoría eliminada correctamente');
-          this.getCategorias();
-        },
-        error: () => {
-          this.mostrarMensaje('error', 'Error', 'No se pudo eliminar la categoría');
-        }
-      });
-    }
+  toggleActiva(cat: Categoria) {
+    this.confirmationService.confirm({
+      message: `¿Seguro que deseas ${cat.activa ? 'desactivar' : 'activar'} la categoría "${cat.nombre}"?`,
+      header: 'Confirmación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí',
+      rejectLabel: 'No',
+      accept: () => {
+        this.api.toggleCategoriaActiva(cat.id).subscribe({
+          next: (resp) => {
+            this.mostrarMensaje('success', 'Éxito', resp.mensaje);
+            this.getCategorias();
+          },
+          error: () => {
+            this.mostrarMensaje('error', 'Error', 'No se pudo cambiar el estado de la categoría');
+          }
+        });
+      }
+    });
   }
 
   crearCategoria() {
@@ -125,3 +130,4 @@ export class CategoriaListComponent implements OnInit {
     });
   }
 }
+

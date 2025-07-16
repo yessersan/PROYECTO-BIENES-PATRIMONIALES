@@ -10,6 +10,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework.decorators import api_view, permission_classes
+from . import serializers
+
 
 from patrimonials.models import (
     Usuario, Categoria, Ubicacion, Responsable, BienPatrimonial,
@@ -91,22 +93,17 @@ class RegistroUsuarioAPIView(generics.CreateAPIView):
     serializer_class = RegistroSerializer
     permission_classes = [AllowAny]
     
-
 class CategoriaListCreateView(generics.ListCreateAPIView):
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
     permission_classes = [IsAuthenticatedWithPermission]
 
     def perform_create(self, serializer):
-        success, message = serializer.instance.agregar_categoria()
-        if not success:
-            return Response({'error': message}, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+        categoria = serializer.save()
         HistorialAuditoria.objects.create(
             usuario=self.request.user,
             accion="CREACIÓN CATEGORÍA",
-            detalle=f"Categoría {serializer.instance.nombre} creada",
-            bien=None
+            detalle=f"Categoría {categoria.nombre} creada",
         )
 
 class CategoriaRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
@@ -115,16 +112,49 @@ class CategoriaRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticatedWithPermission]
 
     def perform_update(self, serializer):
-        success, message = serializer.instance.actualizar_categoria(**serializer.validated_data)
-        if not success:
-            return Response({'error': message}, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+        categoria = serializer.save()
+        HistorialAuditoria.objects.create(
+            usuario=self.request.user,
+            accion="ACTUALIZACIÓN CATEGORÍA",
+            detalle=f"Categoría {categoria.nombre} actualizada",
+            bien=None
+        )
 
     def perform_destroy(self, instance):
         success, message = instance.desactivar()
         if not success:
-            return Response({'error': message}, status=status.HTTP_400_BAD_REQUEST)
+            raise serializers.ValidationError({'error': message})
+        HistorialAuditoria.objects.create(
+            usuario=self.request.user,
+            accion="DESACTIVACIÓN CATEGORÍA",
+            detalle=f"Categoría {instance.nombre} desactivada",
+            bien=None
+        )
 
+class ToggleCategoriaActivaAPIView(APIView):
+    permission_classes = [IsAuthenticatedWithPermission]
+
+    def patch(self, request, pk):
+        try:
+            categoria = Categoria.objects.get(pk=pk)
+        except Categoria.DoesNotExist:
+            return Response({'error': 'Categoría no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+        categoria.activa = not categoria.activa
+        categoria.save()
+
+        accion = "activada" if categoria.activa else "desactivada"
+        HistorialAuditoria.objects.create(
+            usuario=request.user,
+            accion=f"{accion.upper()} CATEGORÍA",
+            detalle=f"Categoría {categoria.nombre} {accion}",
+        )
+
+        return Response({
+            'estado': categoria.activa,
+            'mensaje': f'Categoría {accion} correctamente.'
+        }, status=status.HTTP_200_OK)
+    
 class UbicacionListCreateView(generics.ListCreateAPIView):
     queryset = Ubicacion.objects.all()
     serializer_class = UbicacionSerializer

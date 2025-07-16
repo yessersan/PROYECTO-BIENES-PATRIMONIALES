@@ -74,6 +74,11 @@ patch(url: string, body: any): Observable<any> {
   deleteCategoria(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}categorias/${id}/`);
   }
+  toggleCategoriaActiva(id: number){
+    return this.http.patch<any>(this.apiUrl.endsWith('/') ?
+  `${this.apiUrl}categorias/${id}/toggle-activa/`: 
+  `${this.apiUrl}categorias/${id}/toggle-activa/`,{});
+  }
 
   // Ubicaciones
   getUbicaciones(): Observable<Ubicacion[]> {

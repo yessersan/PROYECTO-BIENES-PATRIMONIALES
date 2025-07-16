@@ -4,7 +4,7 @@
     <div class="sidebar-header">
       <div class="d-flex align-items-center mb-3">
         <i class="pi pi-home text-primary me-2" style="font-size: 1.5rem;"></i>
-        <h4 class="mb-0 text-primary">Sistema de Bienes</h4>
+        <h4 class="mb-0 text-primary">Sistema</h4>
       </div>
     </div>
 
@@ -62,8 +62,14 @@
                     <button pButton label="Nueva Categoría" (click)="crearCategoria()" class="p-button-primary"></button>
                   </div>
                 </ng-template>
+
+                <!-- Cargando -->
                 <div *ngIf="loading" class="text-center">Cargando...</div>
+
+                <!-- Mensaje de error -->
                 <p-message *ngIf="error" severity="error" [text]="error" [style]="{'display': 'block'}"></p-message>
+
+                <!-- Tabla de categorías -->
                 <p-table *ngIf="categorias.length" [value]="categorias" styleClass="p-datatable-sm">
                   <ng-template pTemplate="header">
                     <tr>
@@ -76,18 +82,28 @@
                   </ng-template>
                   <ng-template pTemplate="body" let-cat>
                     <tr>
-                      <td>{{cat.nombre}}</td>
-                      <td>{{cat.vida_util}}</td>
-                      <td>{{cat.tasa_depreciacion}}%</td>
-                      <td>{{cat.activa ? 'Sí' : 'No'}}</td>
+                      <td>{{ cat.nombre }}</td>
+                      <td>{{ cat.vida_util }}</td>
+                      <td>{{ cat.tasa_depreciacion }}%</td>
+                      <td>{{ cat.activa ? 'Sí' : 'No' }}</td>
                       <td>
                         <button pButton icon="pi pi-pencil" (click)="verDetalle(cat.id)" class="p-button-rounded p-button-success mr-2"></button>
-                        <button pButton icon="pi pi-trash" (click)="eliminarCategoria(cat.id)" class="p-button-rounded p-button-danger"></button>
+                        <button pButton 
+                                [icon]="cat.activa ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                                (click)="toggleActiva(cat)"
+                                class="p-button-rounded"
+                                [class.p-button-danger]="cat.activa"
+                                [class.p-button-info]="!cat.activa">
+                        </button>
                       </td>
                     </tr>
                   </ng-template>
                 </p-table>
-                <div *ngIf="!categorias.length && !loading && !error" class="text-center">No hay categorías disponibles.</div>
+
+                <!-- Sin categorías -->
+                <div *ngIf="!categorias.length && !loading && !error" class="text-center">
+                  No hay categorías disponibles.
+                </div>
               </p-card>
             </div>
           </div>
@@ -97,5 +113,9 @@
   </div>
 </div>
 
+<!-- ConfirmDialog para confirmar activación/desactivación -->
+<p-confirmDialog></p-confirmDialog>
+
 <!-- Toast para mensajes -->
 <p-toast></p-toast>
+

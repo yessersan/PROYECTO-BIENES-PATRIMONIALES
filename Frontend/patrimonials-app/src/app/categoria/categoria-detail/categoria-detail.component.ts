@@ -13,7 +13,14 @@ import { MessageService } from 'primeng/api';
   providers: [MessageService]
 })
 export class CategoriaDetailComponent implements OnInit {
-  categoria: Partial<Categoria> = {};
+  categoria: Partial<Categoria> = {
+    nombre: '',
+    descripcion: '',
+    vida_util: 0,
+    tasa_depreciacion: 0,
+    activa: false
+  };
+
   id: string | null = null;
   esNuevo = false;
   error = '';
@@ -76,25 +83,86 @@ export class CategoriaDetailComponent implements OnInit {
     return menu.filter(item => item.roles.includes(this.rol));
   }
 
-  guardar() {
-    if (this.esNuevo) {
-      this.api.createCategoria(this.categoria).subscribe({
+guardar() {
+  // Validación básica antes de enviar
+  if (!this.categoria.nombre || !this.categoria.nombre.trim()) {
+    this.mostrarMensaje('error', 'Error', 'El nombre es obligatorio');
+    return;
+  }
+  if (this.categoria.vida_util == null || isNaN(Number(this.categoria.vida_util)) || this.categoria.vida_util < 0) {
+    this.mostrarMensaje('error', 'Error', 'La vida útil debe ser mayor o igual a 0');
+    return;
+  }
+  if (
+    this.categoria.tasa_depreciacion == null ||
+    isNaN(Number(this.categoria.tasa_depreciacion)) ||
+    this.categoria.tasa_depreciacion < 0 ||
+    this.categoria.tasa_depreciacion > 100
+  ) {
+    this.mostrarMensaje('error', 'Error', 'La tasa de depreciación debe estar entre 0 y 100');
+    return;
+  }
+
+  const payload: Partial<Categoria> = {
+    nombre: (this.categoria.nombre ?? '').trim(),
+    descripcion: this.categoria.descripcion || '',
+    vida_util: Number(this.categoria.vida_util),
+    tasa_depreciacion: Number(this.categoria.tasa_depreciacion),
+    activa: !!this.categoria.activa
+  };
+
+  if (this.esNuevo) {
+    this.api.createCategoria(payload).subscribe({
+      next: () => {
+        this.mostrarMensaje('success', 'Éxito', 'Categoría creada correctamente');
+        this.router.navigate(['/categorias']);
+      },
+      error: (error) => {
+        let errorMessage = 'No se pudo crear la categoría';
+        if (error.error && typeof error.error === 'object') {
+          errorMessage = Object.values(error.error).flat().join(' ');
+        } else if (error.error && typeof error.error === 'string') {
+          errorMessage = error.error;
+        }
+        this.mostrarMensaje('error', 'Error', errorMessage);
+      }
+    });
+  } else if (this.id) {
+    this.api.updateCategoria(Number(this.id), payload).subscribe({
+      next: () => {
+        this.mostrarMensaje('success', 'Éxito', 'Categoría actualizada correctamente');
+        this.router.navigate(['/categorias']);
+      },
+      error: (error) => {
+        let errorMessage = 'No se pudo actualizar la categoría';
+        if (error.error && typeof error.error === 'object') {
+          errorMessage = Object.values(error.error).flat().join(' ');
+        } else if (error.error && typeof error.error === 'string') {
+          errorMessage = error.error;
+        }
+        this.mostrarMensaje('error', 'Error', errorMessage);
+      }
+    });
+  }
+}
+  eliminar() {
+    if (this.id && confirm('¿Eliminar esta categoría?')) {
+      this.api.deleteCategoria(Number(this.id)).subscribe({
         next: () => {
-          this.mostrarMensaje('success', 'Éxito', 'Categoría creada correctamente');
+          this.mostrarMensaje('success', 'Éxito', 'Categoría eliminada correctamente');
           this.router.navigate(['/categorias']);
         },
-        error: () => this.mostrarMensaje('error', 'Error', 'No se pudo crear la categoría')
-      });
-    } else if (this.id) {
-      this.api.updateCategoria(Number(this.id), this.categoria).subscribe({
-        next: () => {
-          this.mostrarMensaje('success', 'Éxito', 'Categoría actualizada correctamente');
-          this.router.navigate(['/categorias']);
-        },
-        error: () => this.mostrarMensaje('error', 'Error', 'No se pudo actualizar la categoría')
+        error: (err) => {
+          let msg = 'No se pudo eliminar la categoría';
+          if (err.error && err.error.error) {
+            msg = err.error.error;
+          }
+          this.mostrarMensaje('error', 'Error', msg);
+        }
       });
     }
   }
+  // ...existing code...
 
   cancelar() {
     this.router.navigate(['/categorias']);
@@ -115,7 +183,7 @@ export class CategoriaDetailComponent implements OnInit {
       severity: severidad,
       summary: resumen,
       detail: detalle,
-      life: 3000
+      life: 5000
     });
   }
 
