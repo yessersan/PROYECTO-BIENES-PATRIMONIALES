@@ -1,164 +1,150 @@
-/* layout general */
+/* diseño general */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #0f766e;
+  color: #ffffff;
+  height: 100vh;
+  overflow: hidden;
+}
+
 .layout {
   display: flex;
-  min-height: 100vh;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f7ff;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* sidebar */
 .sidebar {
-  width: 270px;
-  background: linear-gradient(135deg, #4e54c8, #8f94fb);
-  color: rgb(245, 240, 240);
-  padding: 2rem 1.2rem;
+  width: 260px;
+  background: #0d9488;
+  padding: 2rem 1rem;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  color: #ffffff;
   display: flex;
   flex-direction: column;
+  justify-content: start;
+  flex-shrink: 0;
+  overflow-y: auto;
 }
 
 .sidebar-title {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: bold;
   margin-bottom: 2rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #f8f7f6;
+  color: #ffffff;
 }
 
 .menu {
   list-style: none;
   padding: 0;
-  margin: 0;
 }
 
 .menu li {
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: 8px;
+  padding: 0.8rem 1rem;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  transition: background 0.2s ease;
+  transition: background 0.3s;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  color: #ffffff; /* siempre blanco */
 }
 
 .menu li:hover,
 .menu li.active {
-  background: rgba(255, 255, 255, 0.15);
+  background-color: #0f766e;
+  color: #ffffff; /* quitar el amarillo */
 }
 
-/* contenido */
+/* contenido principal con scroll */
 .content {
   flex: 1;
-  padding: 2.5rem;
+  background: #f4f7f9;
+  color: #333;
+  padding: 2rem;
+  overflow-y: auto;
+  height: 100vh;
+  box-sizing: border-box;
 }
 
-/* header y botón */
+/* encabezado y acciones */
 .header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .header-actions h2 {
-  color: #3a3a90;
-  font-weight: 700;
+  margin: 0;
+  color: #0f766e;
 }
 
 .header-actions button {
-  background: #3a3a90;
-  color: white;
-  padding: 0.6rem 1.4rem;
+  background-color: #0d9488;
+  color: #fff;
   border: none;
+  padding: 0.6rem 1.2rem;
   border-radius: 8px;
-  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.3s;
 }
 
 .header-actions button:hover {
-  background: #2e2e7a;
+  background-color: #0f766e;
 }
 
 /* tabla */
 .document-table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  background: #ffffff;
   border-radius: 12px;
   overflow: hidden;
-}
-
-.document-table thead {
-  background: #3a3a90;
-  color: white;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
 }
 
 .document-table th,
 .document-table td {
-  padding: 0.9rem 1.2rem;
+  padding: 0.9rem 1rem;
   text-align: left;
   border-bottom: 1px solid #e0e0e0;
 }
 
-.document-table tr:last-child td {
-  border-bottom: none;
+.document-table th {
+  background-color: #0d9488;
+  color: #fff;
 }
 
-.document-table tbody tr:hover {
-  background-color: #f1f5ff;
+.document-table tr:hover {
+  background-color: #f1fdfd;
 }
 
-/* enlaces */
-.document-table a {
-  color: #3a3a90;
-  font-weight: 500;
-  text-decoration: underline;
-}
-
-.document-table a:hover {
-  text-decoration: none;
-}
-
-/* botones de acción */
+/* botones acciones */
 .document-table button {
-  padding: 0.4rem 0.9rem;
-  font-size: 0.85rem;
+  background-color: #0d9488;
+  color: white;
   border: none;
+  padding: 0.4rem 0.8rem;
   border-radius: 6px;
+  margin-right: 0.5rem;
   cursor: pointer;
-  margin-right: 0.4rem;
-  font-weight: 600;
-  transition: background 0.2s ease;
-}
-
-.document-table button:first-child {
-  background: #ffc107;
-  color: #333;
-}
-
-.document-table button:first-child:hover {
-  background: #e0a800;
+  transition: background 0.3s;
 }
 
 .document-table button:last-child {
-  background: #dc3545;
-  color: white;
+  background-color: #ef4444;
 }
 
-.document-table button:last-child:hover {
-  background: #c82333;
+.document-table button:hover {
+  opacity: 0.9;
 }
 
-/* mensajes */
+/* mensaje de error */
 .error-message {
-  background: #ffe0e0;
-  color: #b00020;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  margin-top: 1rem;
-  font-size: 0.95rem;
+  color: #ef4444;
+  margin-bottom: 1rem;
+  font-weight: 500;
 }

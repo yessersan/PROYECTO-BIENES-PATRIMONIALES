@@ -118,10 +118,23 @@ class MovimientoSerializer(serializers.ModelSerializer):
 
 class ReporteSerializer(serializers.ModelSerializer):
     usuario = UsuarioSerializer(read_only=True)
+    archivo = serializers.SerializerMethodField()
+
     class Meta:
         model = Reporte
-        fields = ['id', 'tipo', 'fecha_generacion', 'contenido', 'formato', 'parametros', 'usuario', 'archivo']
+        fields = [
+            'id', 'tipo', 'fecha_generacion', 'contenido',
+            'formato', 'parametros', 'usuario', 'archivo'
+        ]
         read_only_fields = ['fecha_generacion', 'contenido', 'archivo']
+
+    def get_archivo(self, obj):
+        request = self.context.get('request')
+        if obj.archivo and request:
+            return request.build_absolute_uri(obj.archivo.url)
+        elif obj.archivo:
+            return obj.archivo.url
+        return None
 
 class HistorialAuditoriaSerializer(serializers.ModelSerializer):
     usuario = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())

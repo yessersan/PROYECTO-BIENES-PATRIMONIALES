@@ -24,7 +24,6 @@
         [(ngModel)]="estadoSeleccionado"
         placeholder="Estado"
         (onChange)="aplicarFiltros()"
-        optionLabel=""
         [style]="{'width':'180px'}">
         <ng-template let-option pTemplate="item">
           {{ option }}
@@ -40,16 +39,18 @@
       </p-checkbox>
     </div>
 
-    <!-- Mensajes -->
+    <!-- Mensajes de error -->
     <p-message *ngIf="error" severity="error" [text]="error"></p-message>
 
+    <!-- Loading -->
     <p-progressBar *ngIf="isLoading" mode="indeterminate" styleClass="p-mt-3"></p-progressBar>
 
-    <!-- Lista de Notificaciones -->
+    <!-- Sin notificaciones -->
     <div *ngIf="!isLoading && notificaciones.length === 0" class="empty-state">
       No hay notificaciones para mostrar.
     </div>
 
+    <!-- Lista de Notificaciones -->
     <div class="notification-list" *ngIf="!isLoading && notificaciones.length > 0">
       <div *ngFor="let n of notificaciones" class="notification-card" [ngClass]="{'leido': n.estado === 'LEIDO'}">
         <div class="header">
@@ -78,6 +79,7 @@
                   class="p-button-sm p-button-success" 
                   (click)="marcarComoLeido(n)">
           </button>
+
           <a *ngIf="n.url" 
              pButton 
              type="button" 
@@ -92,13 +94,12 @@
 
     <!-- Paginador -->
     <mat-paginator
+      *ngIf="totalItems > 0"
       [length]="totalItems"
       [pageSize]="pageSize"
       [pageIndex]="currentPage"
       [pageSizeOptions]="[5, 10, 25, 50]"
-      (page)="cambiarPagina($event)"
-      *ngIf="totalItems > 0">
+      (page)="cambiarPagina($event)">
     </mat-paginator>
-
   </main>
 </div>

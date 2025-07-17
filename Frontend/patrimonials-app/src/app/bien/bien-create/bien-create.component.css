@@ -1,171 +1,132 @@
 /* layout general */
 .layout {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f6f9;
+  background: #e6f9f5;
+  color: #0f766e;
 }
 
 /* sidebar */
 .sidebar {
   width: 270px;
-  background: linear-gradient(135deg, #4e54c8, #8f94fb);
-  color: rgb(245, 240, 240);
-  padding: 2rem 1.2rem;
+  background: linear-gradient(135deg, #14b8a6, #0f766e);
+  color: #ffffff;
   display: flex;
   flex-direction: column;
-}
-
-.sidebar-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 2rem;
-  gap: 0.5rem;
-}
-
-.sidebar-header .pi {
-  font-size: 1.8rem;
-  color: #ffd93d;
+  padding: 2rem 1.2rem;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+  overflow-y: auto; /* desplazamiento vertical */
+  max-height: 100vh;
 }
 
 .sidebar-title {
-  font-size: 1.3rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.sidebar-menu {
+.menu {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.sidebar-menu li {
-  margin-bottom: 1rem;
-}
-
-.sidebar-menu a {
+.menu li {
+  margin-bottom: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  transition: background 0.2s;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  text-decoration: none;
-  color: rgba(255, 255, 255, 0.85);
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  transition: background 0.3s ease;
+  color: #ffffff; /* letras blancas */
 }
 
-.sidebar-menu a:hover,
-.sidebar-menu a.active {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  font-weight: 500;
+.menu li:hover,
+.menu li.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  font-weight: 600;
 }
 
-.sidebar-menu i {
+.menu i {
   margin-right: 0.75rem;
+  font-size: 1rem;
 }
 
 /* contenido principal */
-.main-content {
+.content {
   flex: 1;
   padding: 3rem;
-  overflow-y: auto;
+  overflow-y: auto; /* desplazamiento vertical */
+  height: 100vh;
 }
 
-.form-container {
-  background: #ffffff;
-  padding: 2.5rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-  max-width: 800px;
-  margin: 0 auto;
+/* tabla */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-.form-title {
-  font-size: 1.75rem;
-  color: #4e54c8;
-  margin-bottom: 1.5rem;
-  text-align: center;
+thead {
+  background-color: #14b8a6;
+  color: #ffffff;
+  text-align: left;
 }
 
-.form-group {
-  margin-bottom: 1.5rem;
-  display: flex;
-  flex-direction: column;
+th, td {
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-label {
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 0.5rem;
+tbody tr:hover {
+  background-color: #f0fdfa;
 }
 
-input[type="text"],
-input[type="number"],
-input[type="date"],
-select {
-  padding: 0.6rem 1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border 0.3s ease;
-}
-
-input:focus,
-select:focus {
-  outline: none;
-  border-color: #4e54c8;
-  box-shadow: 0 0 0 2px rgba(78, 84, 200, 0.2);
-}
-
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.btn-save {
-  background-color: #4e54c8;
-  color: #fff;
+button {
+  margin-right: 0.5rem;
+  padding: 0.4rem 0.9rem;
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
+  border-radius: 6px;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: background 0.3s ease;
 }
 
-.btn-save:hover {
-  background-color: #3b41b3;
+button:hover {
+  opacity: 0.85;
 }
 
-.btn-cancel {
-  background-color: #e0e0e0;
-  color: #333;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+button:nth-child(1) {
+  background-color: #14b8a6;
+  color: #ffffff;
+}
+
+button:nth-child(2) {
+  background-color: #0ea5e9;
+  color: #ffffff;
+}
+
+button:nth-child(3) {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+button:nth-child(4) {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+/* mensajes de estado */
+.error {
+  color: #dc2626;
   font-weight: 600;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.btn-cancel:hover {
-  background-color: #c6c6c6;
-}
-
-.success-message {
   margin-top: 1rem;
-  color: #2e7d32;
-  background-color: #d0f0d8;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-}
-
-.error-message {
-  margin-top: 1rem;
-  color: #c62828;
-  background-color: #f8d7da;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
 }

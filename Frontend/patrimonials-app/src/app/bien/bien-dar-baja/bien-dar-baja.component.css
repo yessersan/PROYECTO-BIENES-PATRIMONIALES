@@ -1,36 +1,54 @@
 /* layout general */
 .layout {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f6f9;
+  background: #e6f9f5;
+  color: #0f766e;
 }
 
 /* sidebar */
 .sidebar {
   width: 270px;
-  background: linear-gradient(135deg, #4e54c8, #8f94fb);
-  color: rgb(245, 240, 240);
-  padding: 2rem 1.2rem;
+  background: linear-gradient(135deg, #14b8a6, #0f766e);
+  color: #ffffff;
   display: flex;
   flex-direction: column;
+  padding: 2rem 1.2rem;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+  overflow-y: auto;
+  max-height: 100vh;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .sidebar-header {
+  margin-bottom: 2rem;
   display: flex;
   align-items: center;
-  margin-bottom: 2rem;
-  gap: 0.5rem;
+  gap: 0.8rem;
 }
 
 .sidebar-header .pi {
-  font-size: 1.8rem;
-  color: #ffd93d;
+  font-size: 1.5rem;
+  color: #ffffff !important;
 }
 
 .sidebar-title {
-  font-size: 1.3rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ffffff;
 }
 
 .sidebar-menu {
@@ -40,24 +58,23 @@
 }
 
 .sidebar-menu li {
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;
 }
 
 .sidebar-menu a {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.85);
   padding: 0.75rem 1rem;
   border-radius: 8px;
-  transition: background 0.3s ease;
+  color: #e0fdfb;
+  transition: background 0.2s ease;
 }
 
 .sidebar-menu a:hover,
 .sidebar-menu a.active {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  font-weight: 500;
+  background-color: rgba(255, 255, 255, 0.12);
+  font-weight: 600;
 }
 
 .sidebar-menu i {
@@ -65,8 +82,11 @@
 }
 
 /* contenido principal */
-.main-content {
+.main-content,
+.content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   padding: 3rem;
   overflow-y: auto;
 }
@@ -74,45 +94,46 @@
 /* formulario */
 .form-container {
   background: #ffffff;
-  padding: 2.5rem;
+  padding: 2.5rem 3rem;
   border-radius: 16px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-  max-width: 700px;
-  margin: 0 auto;
+  max-width: 800px;
+  margin: auto;
 }
 
 .form-title {
-  font-size: 1.75rem;
-  color: #4e54c8;
-  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #0f766e;
+  margin-bottom: 2rem;
   text-align: center;
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
+  margin-bottom: 1.5rem;
 }
 
-label {
+.form-group label {
   font-weight: 600;
-  color: #333;
   margin-bottom: 0.5rem;
+  color: #0f766e;
 }
 
 .textarea-motivo {
-  resize: vertical;
-  padding: 1rem;
-  font-size: 1rem;
+  padding: 0.75rem;
   border: 1px solid #ccc;
   border-radius: 10px;
-  transition: border 0.3s ease;
+  font-size: 1rem;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s;
 }
 
 .textarea-motivo:focus {
-  border-color: #4e54c8;
   outline: none;
-  box-shadow: 0 0 0 2px rgba(78, 84, 200, 0.2);
+  border-color: #14b8a6;
 }
 
 /* acciones */
@@ -124,53 +145,58 @@ label {
 }
 
 .btn-baja {
-  background-color: #dc3545;
-  color: #fff;
+  background-color: #ef4444;
+  color: #ffffff;
   border: none;
   padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  border-radius: 10px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background 0.2s;
 }
 
 .btn-baja:hover {
-  background-color: #c82333;
+  background-color: #dc2626;
 }
 
 .btn-cancel {
-  background-color: #e0e0e0;
-  color: #333;
+  background-color: #facc15;
+  color: #0f5132;
   border: none;
   padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  border-radius: 10px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background 0.2s;
 }
 
 .btn-cancel:hover {
-  background-color: #c6c6c6;
+  background-color: #ffd93d;
 }
 
 /* mensajes */
-.success-message,
-.error-message {
-  margin-top: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  font-weight: 500;
+.success-message {
+  background-color: #d1fae5;
+  color: #065f46;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.success-message {
-  background-color: #d0f0d8;
-  color: #2e7d32;
+  font-weight: 600;
 }
 
 .error-message {
-  background-color: #f8d7da;
-  color: #c62828;
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
 }

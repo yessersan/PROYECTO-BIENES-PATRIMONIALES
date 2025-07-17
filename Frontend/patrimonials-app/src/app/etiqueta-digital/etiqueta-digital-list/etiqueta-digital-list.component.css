@@ -1,29 +1,33 @@
-/* layout base */
+/* layout principal */
 .layout {
   display: flex;
-  min-height: 100vh;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f4f7fc;
+  height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f1f5f9;
+  color: #0f172a;
 }
 
 /* sidebar */
 .sidebar {
-  width: 270px;
-  background: linear-gradient(135deg, #4e54c8, #8f94fb);
-  color: rgb(245, 240, 240);
-  padding: 2rem 1.2rem;
+  width: 280px;
+  background-color: #0f766e;
   display: flex;
   flex-direction: column;
+  padding: 1rem;
+  overflow-y: auto;
+  position: fixed;
+  height: 100vh;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-title {
   font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
+  font-weight: bold;
+  color: #ffffff;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #f9f8f1;
+  margin-bottom: 2rem;
 }
 
 .menu {
@@ -35,106 +39,108 @@
 .menu li {
   padding: 0.75rem 1rem;
   margin-bottom: 0.5rem;
-  border-radius: 8px;
+  color: #ffffff;
   cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.3s ease;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  transition: background 0.2s ease;
 }
 
 .menu li:hover,
 .menu li.active {
-  background: rgba(255, 255, 255, 0.15);
+  background-color: #14b8a6;
 }
 
-/* contenido principal */
+/* contenido */
 .content {
+  margin-left: 280px;
+  padding: 2rem;
   flex: 1;
-  padding: 2.5rem;
+  background-color: #f8fafc;
+  overflow-y: auto;
 }
 
-/* encabezado y acciones */
+/* encabezado con acción */
 .header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .header-actions h2 {
-  color: #3a3a90;
-  font-weight: 700;
+  margin: 0;
+  color: #0f172a;
 }
 
 .header-actions button {
-  background-color: #3a3a90;
-  color: #fff;
-  padding: 0.6rem 1.2rem;
+  background-color: #14b8a6;
+  color: #ffffff;
   border: none;
-  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
   font-weight: 600;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.3s ease;
 }
 
 .header-actions button:hover {
-  background-color: #2f2f78;
+  background-color: #0d9488;
 }
 
-/* tabla */
+/* mensaje de error */
+.error-message {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+/* tabla de etiquetas */
 .etiquetas-table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
-  border-radius: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
 .etiquetas-table th,
 .etiquetas-table td {
-  padding: 0.85rem 1rem;
+  padding: 1rem;
   text-align: left;
-  border-bottom: 1px solid #e0e6f1;
-  font-size: 0.95rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .etiquetas-table th {
-  background-color: #f0f4ff;
-  color: #3a3a90;
+  background-color: #14b8a6;
+  color: #ffffff;
   font-weight: 600;
 }
 
-.etiquetas-table td button {
-  background-color: transparent;
-  border: 1px solid #3a3a90;
-  color: #3a3a90;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.85rem;
-  margin-right: 0.3rem;
+.etiquetas-table td {
+  color: #0f172a;
+  background-color: #ffffff;
+}
+
+/* botones de acciones */
+.etiquetas-table button {
+  background-color: #14b8a6;
+  color: #ffffff;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  margin-right: 0.5rem;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  transition: background 0.3s ease;
 }
 
-.etiquetas-table td button:hover {
-  background-color: #3a3a90;
-  color: #fff;
-}
-
-/* imagen qr */
-.etiquetas-table img {
-  border: 2px solid #3a3a90;
-  border-radius: 6px;
-}
-
-/* mensajes */
-.error-message {
-  background: #ffe0e0;
-  color: #b00020;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
+.etiquetas-table button:hover {
+  background-color: #0d9488;
 }

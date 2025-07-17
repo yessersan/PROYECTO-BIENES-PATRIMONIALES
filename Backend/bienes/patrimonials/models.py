@@ -1,3 +1,4 @@
+import tempfile
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 
@@ -9,6 +10,9 @@ from django.dispatch import receiver
 from datetime import date, timedelta
 import qrcode 
 from io import BytesIO
+from django.template.loader import render_to_string
+from weasyprint import HTML  
+import pandas as pd
 from django.core.files import File 
 
 class UsuarioManager(UserManager):
@@ -419,95 +423,115 @@ class Reporte(models.Model):
         ('BAJAS', 'Bajas'),
         ('MANTENIMIENTOS', 'Mantenimientos'),
     )
-    
+
     FORMATOS = (
         ('PDF', 'PDF'),
         ('EXCEL', 'Excel'),
         ('HTML', 'HTML'),
         ('CSV', 'CSV'),
     )
-    
+
     tipo = models.CharField(max_length=20, choices=TIPOS)
     fecha_generacion = models.DateTimeField(auto_now_add=True)
     contenido = models.TextField()
     formato = models.CharField(max_length=10, choices=FORMATOS, default='PDF')
-    parametros = models.JSONField(default=dict)  # Almacena los filtros usados
+    parametros = models.JSONField(default=dict)
     usuario = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name='reportes')
     archivo = models.FileField(upload_to='reportes/', null=True, blank=True)
 
     def generar_reporte(self, filtros=None, formato='PDF'):
-        """Genera el reporte según los filtros y formato especificado"""
-        from django.template.loader import render_to_string # type: ignore
-        import pandas as pd # type: ignore
-        from weasyprint import HTML # type: ignore
-        import tempfile
-        
         if not filtros:
             filtros = {}
-        
+
         self.parametros = filtros
         self.formato = formato
-        
-        # Obtener datos según tipo de reporte
-        if self.tipo == 'INVENTARIO':
-            queryset = BienPatrimonial.objects.filter(activo=True)
-            if 'categoria' in filtros:
-                queryset = queryset.filter(categoria_id=filtros['categoria'])
-            if 'estado' in filtros:
-                queryset = queryset.filter(estado=filtros['estado'])
-            if 'ubicacion' in filtros:
-                queryset = queryset.filter(ubicacion_id=filtros['ubicacion'])
-            
-            datos = list(queryset.values(
-                'codigo', 'descripcion', 'valor_adquisicion', 'depreciacion', 
-                'estado', 'categoria__nombre', 'ubicacion__edificio', 'ubicacion__oficina'
-            ))
-            
-            contexto = {
-                'titulo': 'Reporte de Inventario',
-                'filtros': filtros,
-                'datos': datos,
-                'total_bienes': len(datos),
-                'valor_total': sum(float(item['valor_adquisicion']) for item in datos),
-                'depreciacion_total': sum(float(item['depreciacion']) for item in datos),
-            }
-        
-        elif self.tipo == 'DEPRECIACION':
-            # Lógica similar para otros tipos de reportes
-            pass
-        
-        # Generar contenido según formato
-        if formato == 'PDF':
-            html_string = render_to_string('reportes/base.html', contexto)
-            html = HTML(string=html_string)
-            result = html.write_pdf()
-            
-            with tempfile.NamedTemporaryFile(delete=True) as output:
-                output.write(result)
-                self.archivo.save(f'reporte_{self.id}.pdf', File(output))
-                self.contenido = "Reporte generado en PDF"
-        
-        elif formato == 'EXCEL':
-            df = pd.DataFrame(datos)
-            with tempfile.NamedTemporaryFile(delete=True) as output:
-                df.to_excel(output.name, index=False)
-                self.archivo.save(f'reporte_{self.id}.xlsx', File(output))
-                self.contenido = "Reporte generado en Excel"
-        
-        self.save()
-        return True, "Reporte generado exitosamente"
+
+        queryset = BienPatrimonial.objects.filter(activo=True)
+
+        if 'categoria' in filtros:
+            queryset = queryset.filter(categoria_id=filtros['categoria'])
+        if 'estado' in filtros:
+            queryset = queryset.filter(estado=filtros['estado'])
+        if 'ubicacion' in filtros:
+            queryset = queryset.filter(ubicacion_id=filtros['ubicacion'])
+
+        datos = list(queryset.values(
+            'codigo', 'descripcion', 'valor_adquisicion', 'depreciacion',
+            'estado', 'categoria__nombre', 'ubicacion__edificio', 'ubicacion__oficina'
+        ))
+
+        # Título dinámico según tipo
+        titulos = {
+            'INVENTARIO': 'Reporte de Inventario',
+            'DEPRECIACION': 'Reporte de Depreciación',
+            'ESTADO': 'Reporte de Estado de Bienes',
+            'MOVIMIENTOS': 'Reporte de Movimientos',
+            'BAJAS': 'Reporte de Bajas',
+            'MANTENIMIENTOS': 'Reporte de Mantenimientos'
+        }
+
+        if self.tipo not in titulos:
+            return False, f"Tipo de reporte '{self.tipo}' no está implementado."
+
+        contexto = {
+            'titulo': titulos[self.tipo],
+            'filtros': filtros,
+            'datos': datos,
+            'total_bienes': len(datos),
+            'valor_total': sum(float(item['valor_adquisicion']) for item in datos),
+            'depreciacion_total': sum(float(item['depreciacion']) for item in datos),
+        }
+
+        try:
+            if formato == 'PDF':
+                html_string = render_to_string('reportes/base.html', contexto)
+                html = HTML(string=html_string)
+                result = html.write_pdf()
+
+                with tempfile.NamedTemporaryFile(delete=True) as output:
+                    output.write(result)
+                    self.archivo.save(f'reporte_{self.id}.pdf', File(output))
+                    self.contenido = f"Reporte generado en PDF: {titulos[self.tipo]}"
+
+            elif formato == 'EXCEL':
+                df = pd.DataFrame(datos)
+                with tempfile.NamedTemporaryFile(delete=True) as output:
+                    df.to_excel(output.name, index=False)
+                    self.archivo.save(f'reporte_{self.id}.xlsx', File(output))
+                    self.contenido = f"Reporte generado en Excel: {titulos[self.tipo]}"
+
+            elif formato == 'CSV':
+                df = pd.DataFrame(datos)
+                with tempfile.NamedTemporaryFile(delete=True, mode='w+', suffix=".csv") as output:
+                    df.to_csv(output.name, index=False)
+                    self.archivo.save(f'reporte_{self.id}.csv', File(open(output.name, 'rb')))
+                    self.contenido = f"Reporte generado en CSV: {titulos[self.tipo]}"
+
+            elif formato == 'HTML':
+                html_string = render_to_string('reportes/base.html', contexto)
+                with tempfile.NamedTemporaryFile(delete=True, mode='w+', suffix='.html') as output:
+                    output.write(html_string)
+                    self.archivo.save(f'reporte_{self.id}.html', File(open(output.name, 'rb')))
+                    self.contenido = f"Reporte generado en HTML: {titulos[self.tipo]}"
+
+            else:
+                return False, f"Formato '{formato}' no soportado."
+
+            self.save()
+            return True, "Reporte generado exitosamente"
+
+        except Exception as e:
+            return False, f"Error al generar el reporte: {str(e)}"
 
     def exportar_reportes(self, formato=None):
-        """Exporta el reporte en el formato especificado"""
         if not formato:
             formato = self.formato
-        
+
         if not self.archivo:
             success, message = self.generar_reporte(self.parametros, formato)
             if not success:
                 return False, message
-        
-        # En una implementación real, aquí iría la lógica para enviar el archivo
+
         return True, f"Reporte listo para exportar en formato {formato}"
 
     def __str__(self):

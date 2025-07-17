@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ titulo }}</title>
+  <style>
+    @page {
+      margin: 30px;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      padding: 20px 30px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    .filtros, .resumen {
+      margin-bottom: 15px;
+    }
+
+    .filtros strong {
+      display: inline-block;
+      min-width: 120px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #eee;
+    }
+
+    .resumen {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 11px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>{{ titulo }}</h1>
+
+    {% if filtros %}
+    <div class="filtros">
+      <h3>Filtros aplicados:</h3>
+      {% for key, value in filtros.items %}
+        <div><strong>{{ key|title }}:</strong> {{ value }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descripción</th>
+          <th>Valor (S/)</th>
+          <th>Depreciación (S/)</th>
+          <th>Estado</th>
+          <th>Categoría</th>
+          <th>Edificio</th>
+          <th>Oficina</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for bien in datos %}
+        <tr>
+          <td>{{ bien.codigo }}</td>
+          <td>{{ bien.descripcion }}</td>
+          <td>{{ bien.valor_adquisicion }}</td>
+          <td>{{ bien.depreciacion }}</td>
+          <td>{{ bien.estado }}</td>
+          <td>{{ bien.categoria__nombre }}</td>
+          <td>{{ bien.ubicacion__edificio }}</td>
+          <td>{{ bien.ubicacion__oficina }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="resumen">
+      Total de bienes: {{ total_bienes }}<br>
+      Valor total de adquisición: S/ {{ valor_total|floatformat:2 }}<br>
+      Total de depreciación: S/ {{ depreciacion_total|floatformat:2 }}
+    </div>
+
+    <footer>
+      Reporte generado automáticamente por el Sistema de Bienes Patrimoniales.
+    </footer>
+  </div>
+</body>
+</html>

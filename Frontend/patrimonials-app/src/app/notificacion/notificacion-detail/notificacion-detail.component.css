@@ -1,29 +1,40 @@
-/* layout general */
+/* general */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #0f766e;
+  color: #ffffff;
+  height: 100vh;
+  overflow: hidden;
+}
+
 .layout {
   display: flex;
-  min-height: 100vh;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f7ff;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* sidebar */
 .sidebar {
-  width: 270px;
-  background: linear-gradient(135deg, #4e54c8, #8f94fb);
-  color: rgb(245, 240, 240);
-  padding: 2rem 1.2rem;
+  width: 260px;
+  background: #0d9488;
+  padding: 2rem 1rem;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  color: #ffffff;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
 }
 
 .sidebar-title {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: bold;
   margin-bottom: 2rem;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  color: #fbfbfa;
+  gap: 0.5rem;
+  color: #ffffff;
 }
 
 .menu {
@@ -33,108 +44,124 @@
 }
 
 .menu li {
-  padding: 0.75rem 1rem;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  transition: background 0.3s;
   border-radius: 8px;
   margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
+  color: #ffffff;
 }
 
 .menu li:hover,
 .menu li.active {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: #0f766e;
+  color: #ffffff;
 }
 
-/* contenido */
+/* contenido principal */
 .content {
   flex: 1;
-  padding: 2.5rem;
-  background-color: #fff;
+  background: #f4f7f9;
+  color: #333;
+  padding: 2rem;
+  overflow-y: auto;
+  height: 100vh;
+  box-sizing: border-box;
 }
 
+/* encabezado */
 .content h2 {
-  font-size: 1.6rem;
-  color: #3a3a90;
-  font-weight: 700;
+  color: #0f766e;
   margin-bottom: 1.5rem;
 }
 
 /* filtros */
 .filters {
   display: flex;
-  gap: 1.5rem;
   align-items: center;
+  gap: 2rem;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .filters label {
-  font-size: 0.95rem;
-  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #0f766e;
+  font-weight: 500;
 }
 
-.filters select,
-.filters input[type="checkbox"] {
-  margin-left: 0.5rem;
-}
-
-/* lista de notificaciones */
-mat-list-item {
-  background-color: #f9faff;
-  margin-bottom: 1rem;
-  border-left: 5px solid #6f75f3;
+.filters select {
+  padding: 0.4rem;
   border-radius: 6px;
-  padding: 1rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  transition: background-color 0.2s ease;
+  border: 1px solid #ccc;
 }
 
-mat-list-item:hover {
-  background-color: #eef2ff;
-}
-
-.badge-importante {
-  background-color: #e53935;
-  color: white;
-  padding: 0.25rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  margin-right: 0.5rem;
-}
-
-/* botón dentro de la lista */
-mat-list-item button {
-  margin-top: 0.6rem;
-  background-color: #3a3a90;
-  color: white;
-  font-size: 0.85rem;
-  padding: 0.4rem 0.8rem;
-  border-radius: 5px;
-}
-
-mat-list-item button:hover {
-  background-color: #2f2f78;
-}
-
-/* paginador */
-mat-paginator {
-  margin-top: 2rem;
-}
-
-/* carga y errores */
+/* spinner y error */
 .loading {
   display: flex;
   align-items: center;
   gap: 1rem;
-  font-size: 0.95rem;
-  color: #555;
-  margin-bottom: 1rem;
+  font-size: 1rem;
+  color: #0f766e;
+  font-weight: 500;
 }
 
 .error-msg {
-  color: #d32f2f;
-  font-size: 0.95rem;
+  color: #ef4444;
+  font-weight: bold;
   margin-bottom: 1rem;
+}
+
+/* notificaciones */
+mat-list {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+mat-list-item {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+mat-list-item:last-child {
+  border-bottom: none;
+}
+
+.badge-importante {
+  background: #facc15;
+  color: #0f172a;
+  padding: 0.2rem 0.5rem;
+  border-radius: 5px;
+  margin-right: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+/* botones */
+button[mat-button] {
+  align-self: flex-start;
+  background-color: #14b8a6;
+  color: #fff;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s;
+}
+
+button[mat-button]:hover {
+  background-color: #0f766e;
+}
+
+/* paginador */
+mat-paginator {
+  margin-top: 1.5rem;
 }

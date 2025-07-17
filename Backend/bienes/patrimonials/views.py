@@ -259,21 +259,43 @@ class MovimientoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView)
     serializer_class = MovimientoSerializer
     permission_classes = [IsAuthenticatedWithPermission]
 
+
 class ReporteListCreateView(generics.ListCreateAPIView):
-    queryset = Reporte.objects.all()
+    queryset = Reporte.objects.all().order_by('-fecha_generacion')
     serializer_class = ReporteSerializer
     permission_classes = [IsAuthenticatedWithPermission]
 
-    def perform_create(self, serializer):
-        serializer.save(usuario=self.request.user)
-        success, message = serializer.instance.generar_reporte(filtros=serializer.validated_data.get('parametros', {}))
+    def get_serializer_context(self):
+        return {'request': self.request}
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Guarda el objeto sin archivo aún
+        serializer.save(usuario=request.user)
+
+        # Generar archivo con reporte
+        instance = serializer.instance
+        success, message = instance.generar_reporte(
+            filtros=serializer.validated_data.get('parametros', {}),
+            formato=serializer.validated_data.get('formato', 'PDF')
+        )
+
         if not success:
             return Response({'error': message}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Refrescar el serializador con archivo generado
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class ReporteRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Reporte.objects.all()
     serializer_class = ReporteSerializer
     permission_classes = [IsAuthenticatedWithPermission]
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
 class HistorialAuditoriaListView(generics.ListAPIView):
     queryset = HistorialAuditoria.objects.all()

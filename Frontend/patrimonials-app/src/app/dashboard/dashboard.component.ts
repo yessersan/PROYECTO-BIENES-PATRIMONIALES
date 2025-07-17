@@ -98,7 +98,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         label: 'Historial de Auditoría',
         icon: 'pi pi-history',
         routerLink: '/historial-auditoria',
-        visible: this.puedeAcceder(['ADMIN', 'AUDITOR', 'GESTOR'])
+        visible: this.puedeAcceder(['ADMIN', 'AUDITOR'])
       },
       {
         label: 'Documentos',

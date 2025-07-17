@@ -1,29 +1,33 @@
-/* estructura general */
+/* layout general */
 .layout {
   display: flex;
   min-height: 100vh;
+  background-color: #0f766e;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f7ff;
+  color: #ffffff;
 }
 
 /* sidebar */
 .sidebar {
-  width: 270px;
-  background: linear-gradient(135deg, #4e54c8, #8f94fb);
-  color: rgb(245, 240, 240);
-  padding: 2rem 1.2rem;
-  display: flex;
-  flex-direction: column;
+  width: 260px;
+  background: linear-gradient(135deg, #0f766e, #0d5c57);
+  padding: 2rem 1.5rem;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-title {
   font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 2rem;
+  color: #ffffff;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  color: #fafaf8;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.sidebar-title i {
+  font-size: 1.6rem;
+  color: #facc15;
 }
 
 .menu {
@@ -34,146 +38,135 @@
 
 .menu li {
   padding: 0.75rem 1rem;
-  border-radius: 8px;
   margin-bottom: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
+  gap: 0.6rem;
+  background-color: transparent;
+  transition: background-color 0.3s;
 }
 
 .menu li:hover,
 .menu li.active {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: #14b8a6;
+  color: #ffffff;
+}
+
+.menu li i {
+  font-size: 1.2rem;
 }
 
 /* contenido */
 .content {
   flex: 1;
-  padding: 2.5rem;
-  background-color: #fff;
+  padding: 2rem 3rem;
+  background-color: #f4f9f9;
+  color: #222;
+  border-top-left-radius: 2rem;
 }
 
-/* título */
-.content h2 {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #3a3a90;
+h2 {
+  font-size: 1.8rem;
+  color: #0f766e;
   margin-bottom: 1.5rem;
 }
 
-/* formulario rápido */
+/* formulario */
 .form-rapido {
   display: flex;
-  gap: 1.5rem;
   flex-wrap: wrap;
-  align-items: flex-end;
-  background: #fdfdfd;
-  padding: 1.5rem;
-  border-radius: 10px;
+  gap: 1.5rem;
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   margin-bottom: 2rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .form-rapido label {
   display: flex;
   flex-direction: column;
-  font-weight: 600;
-  color: #333;
+  font-weight: 500;
+  color: #0f766e;
+  flex: 1;
   min-width: 200px;
 }
 
 .form-rapido select {
-  margin-top: 0.25rem;
-  padding: 0.55rem;
-  font-size: 1rem;
-  border-radius: 6px;
+  padding: 0.6rem 1rem;
   border: 1px solid #ccc;
-  background-color: #fff;
+  border-radius: 8px;
+  margin-top: 0.4rem;
+  font-size: 1rem;
+  background: #fdfdfd;
 }
 
 .form-rapido button {
-  padding: 0.6rem 1.2rem;
-  font-weight: 600;
-  background-color: #3a3a90;
+  background-color: #14b8a6;
   color: #fff;
+  padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  align-self: flex-end;
 }
 
 .form-rapido button:hover {
-  background-color: #2e2e7d;
+  background-color: #0d9488;
 }
 
-.form-rapido button[disabled] {
-  background-color: #bbb;
-  cursor: not-allowed;
-}
-
-/* tabla de reportes */
+/* tabla */
 .tabla-reportes {
   width: 100%;
   border-collapse: collapse;
   background-color: #fff;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.04);
-  border-radius: 8px;
+  border-radius: 1rem;
   overflow: hidden;
-}
-
-.tabla-reportes thead {
-  background-color: #3a3a90;
-  color: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
 }
 
 .tabla-reportes th,
 .tabla-reportes td {
-  padding: 0.85rem 1rem;
+  padding: 1rem;
   text-align: left;
+  border-bottom: 1px solid #eee;
 }
 
-.tabla-reportes tbody tr:nth-child(even) {
-  background-color: #f8f8f8;
+.tabla-reportes thead {
+  background-color: #14b8a6;
+  color: #fff;
 }
 
-.tabla-reportes button {
+.tabla-reportes td button,
+.tabla-reportes td a {
   margin-right: 0.5rem;
   padding: 0.4rem 0.8rem;
-  font-size: 0.85rem;
   border: none;
   border-radius: 6px;
-  background-color: #3a3a90;
-  color: #fff;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: background 0.2s ease;
+  color: #fff;
+  background-color: #0f766e;
+  text-decoration: none;
 }
 
-.tabla-reportes button:hover {
-  background-color: #2f2f76;
+.tabla-reportes td button:hover,
+.tabla-reportes td a:hover {
+  background-color: #0d5c57;
 }
 
-.tabla-reportes a {
-  color: #3a3a90;
-  font-weight: 500;
-  text-decoration: underline;
-}
-
-/* estados */
+/* mensajes */
 .loading,
 .empty {
-  font-size: 1rem;
-  color: #555;
-  padding: 1rem 0;
-}
-
-.error {
-  color: #d32f2f;
-  font-weight: 600;
-}
-
-.success {
-  color: #388e3c;
-  font-weight: 600;
+  padding: 1.5rem;
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  margin-bottom: 2rem;
 }

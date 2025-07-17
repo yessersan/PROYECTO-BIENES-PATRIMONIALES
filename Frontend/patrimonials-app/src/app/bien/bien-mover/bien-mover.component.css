@@ -1,38 +1,49 @@
 /* layout general */
 .layout {
   display: flex;
-  height: 100vh;
-  background: #f5f7fb;
+  min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #0f766e;
+  color: #ffffff;
 }
 
 /* sidebar */
 .sidebar {
   width: 270px;
-  background: linear-gradient(135deg, #4e54c8, #8f94fb);
-  color: rgb(245, 240, 240);
-  padding: 2rem 1.2rem;
+  background: #14b8a6;
+  color: #fff;
+  padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
+  gap: 2rem;
+  overflow-y: auto;
+  max-height: 100vh;
 }
 
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+/* header */
 .sidebar-header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-}
-
-.sidebar-header .pi {
-  font-size: 1.8rem;
-  color: #ffd93d;
+  gap: 0.75rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ffffff;
 }
 
 .sidebar-title {
-  font-size: 1.3rem;
-  font-weight: bold;
+  font-size: 1.2rem;
 }
 
+/* menú */
 .sidebar-menu {
   list-style: none;
   padding: 0;
@@ -44,118 +55,103 @@
 }
 
 .sidebar-menu a {
+  color: #ffffff;
+  text-decoration: none;
   display: flex;
   align-items: center;
-  padding: 0.75rem 1rem;
+  gap: 0.75rem;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
   border-radius: 8px;
-  color: rgba(255, 255, 255, 0.85);
-  text-decoration: none;
-  transition: background 0.3s ease;
+  transition: background 0.3s;
 }
 
 .sidebar-menu a:hover,
 .sidebar-menu a.active {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  font-weight: 600;
+  background: #0f766e;
 }
 
-.sidebar-menu i {
-  margin-right: 0.75rem;
-}
-
-/* contenido */
+/* contenido principal */
 .main-content {
   flex: 1;
-  padding: 3rem;
-  overflow-y: auto;
+  padding: 2rem;
+  background-color: #f4f7ff;
+  color: #0f172a;
 }
 
 /* contenedor del formulario */
 .form-container {
   background: #ffffff;
-  padding: 2.5rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  padding: 2rem 2.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
   max-width: 600px;
   margin: 0 auto;
 }
 
 .form-title {
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #0f766e;
   margin-bottom: 2rem;
-  color: #4e54c8;
   text-align: center;
 }
 
-/* grupo de campos */
 .form-group {
-  margin-bottom: 1.8rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #333;
+  margin-bottom: 0.5rem;
+  color: #0f172a;
 }
 
 .form-group select {
-  width: 100%;
-  padding: 0.65rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  padding: 0.6rem;
   font-size: 1rem;
-  outline: none;
-  transition: border 0.3s ease;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #0f172a;
 }
 
-.form-group select:focus {
-  border-color: #4e54c8;
-  box-shadow: 0 0 0 3px rgba(78, 84, 200, 0.2);
-}
-
-/* botones */
+/* acciones del formulario */
 .actions {
   display: flex;
   justify-content: center;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 }
 
 .btn-primary {
-  background-color: #4e54c8;
-  color: white;
-  padding: 0.7rem 1.6rem;
-  font-weight: 600;
+  background-color: #ffd93d;
+  color: #0f172a;
   border: none;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.3s ease;
+  font-weight: 600;
+  transition: background 0.3s;
 }
 
 .btn-primary:hover {
-  background-color: #3f47b1;
+  background-color: #facc15;
 }
 
 /* mensajes */
 .success-message {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-  padding: 0.8rem 1rem;
-  border-radius: 8px;
+  color: #16a34a;
+  font-weight: 500;
   margin-top: 1.5rem;
   text-align: center;
 }
 
 .error-message {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-  padding: 0.8rem 1rem;
-  border-radius: 8px;
+  color: #dc2626;
+  font-weight: 500;
   margin-top: 1.5rem;
   text-align: center;
 }

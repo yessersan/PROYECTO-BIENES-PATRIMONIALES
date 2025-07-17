@@ -1,29 +1,33 @@
-/* layout base */
+/* layout general */
 .layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f7ff;
+  background-color: #f1f5f9;
+  color: #ffffff;
 }
 
 /* sidebar */
 .sidebar {
-  width: 270px;
-  background: linear-gradient(135deg, #4e54c8, #8f94fb);
-  color: rgb(245, 240, 240);
-  padding: 2rem 1.2rem;
+  width: 280px;
+  background-color: #0f766e;
   display: flex;
   flex-direction: column;
+  padding: 1rem;
+  overflow-y: auto; /* desplazamiento */
+  position: fixed;
+  height: 100vh;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-title {
   font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
+  font-weight: bold;
+  color: #ffffff;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #f7f5ee;
+  margin-bottom: 2rem;
 }
 
 .menu {
@@ -35,68 +39,72 @@
 .menu li {
   padding: 0.75rem 1rem;
   margin-bottom: 0.5rem;
-  border-radius: 8px;
+  color: #ffffff;
   cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.3s ease;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  transition: background 0.2s ease;
 }
 
 .menu li:hover,
 .menu li.active {
-  background: rgba(255, 255, 255, 0.15);
+  background-color: #14b8a6;
 }
 
-/* contenido principal */
+/* contenido */
 .content {
+  margin-left: 280px;
+  padding: 2rem;
   flex: 1;
-  padding: 2.5rem;
+  background-color: #f8fafc;
+  color: #0f172a;
+  overflow-y: auto;
 }
 
-/* título */
-.content h2 {
-  color: #3a3a90;
-  font-weight: 700;
-  margin-bottom: 2rem;
+h2 {
+  margin-bottom: 1.5rem;
+  color: #0f172a;
 }
 
 /* mensaje de error */
 .error-message {
-  background: #ffe0e0;
-  color: #b00020;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-weight: 500;
 }
 
-/* sección qr */
+/* sección del código QR */
 .qr-section {
-  background: #ffffff;
+  background-color: #ffffff;
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   text-align: center;
+  max-width: 500px;
 }
 
 .qr-section img {
-  margin-bottom: 1rem;
-  border: 4px solid #3a3a90;
+  margin-bottom: 1.5rem;
+  border: 4px solid #14b8a6;
   border-radius: 12px;
-  background-color: white;
 }
 
-.qr-section a {
-  display: inline-block;
-  margin-top: 1rem;
-  text-decoration: none;
-  color: #3a3a90;
-  font-weight: 600;
-  transition: color 0.2s ease;
+/* botón de descarga */
+.p-button-primary {
+  background-color: #14b8a6 !important;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-weight: bold;
+  color: #ffffff;
+  border-radius: 8px;
+  transition: background 0.3s ease;
 }
 
-.qr-section a:hover {
-  color: #2f2f78;
+.p-button-primary:hover {
+  background-color: #0d9488 !important;
 }

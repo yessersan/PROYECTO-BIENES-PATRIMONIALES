@@ -1,25 +1,52 @@
+<!-- Toast de mensajes -->
 <p-toast></p-toast>
 
-<div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f3f4f6;">
+<!-- VIDEO DE FONDO -->
+<video autoplay muted loop id="bg-video">
+  <source src="assets/video.mp4" type="video/mp4">
+  Tu navegador no soporta el video de fondo.
+</video>
+
+<!-- ESTILOS PARA QUE EL VIDEO ESTÉ DETRÁS -->
+<style>
+  #bg-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1;
+    pointer-events: none;
+  }
+</style>
+
+
+<!-- CONTENIDO EXISTENTE SIN CAMBIOS -->
+<div style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
   <div style="display: flex; background-color: #ffffff; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); max-width: 900px; width: 100%; overflow: hidden;">
 
     <!-- lado del formulario -->
     <div style="padding: 3rem; flex: 1;">
-      <h1 style="margin-bottom: 0.5rem;">Bienvenido al <span style="color: #0284c7; font-weight: bold;">Sistema de Patrimoniales</span></h1>
-      <p style="margin-bottom: 2rem;">Ingrese sus credenciales</p>
+      <h1 style="margin-bottom: 0.5rem; color: #0f172a;">
+        Bienvenido al 
+        <span style="color: #048ca8; font-weight: bold;">Sistema de Bienes Patrimoniales</span>
+      </h1>
+      <p style="margin-bottom: 2rem; color: #475569;">Ingrese sus credenciales</p>
 
       <form [formGroup]="loginForm" (ngSubmit)="login()">
+
         <!-- usuario -->
-        <label for="username">Usuario</label>
-        <div style="display: flex; align-items: center; background-color: #f9fafb; border: 1px solid #d1d5db; border-radius: 8px; padding: 0.5rem; margin-bottom: 1rem;">
-          <i class="pi pi-user" style="margin-right: 0.5rem; color: #6b7280;"></i>
+        <label for="username" style="color: #334155;">Usuario</label>
+        <div style="display: flex; align-items: center; background-color: #ecfeff; border: 1px solid #7dd3fc; border-radius: 8px; padding: 0.5rem; margin-bottom: 1rem;">
+          <i class="pi pi-user" style="margin-right: 0.5rem; color: #03677c;"></i>
           <input
             type="text"
             id="username"
             formControlName="username"
             pInputText
             placeholder="Ingrese su usuario"
-            style="flex: 1; border: none; outline: none; background: transparent;"
+            style="flex: 1; border: none; outline: none; background: transparent; color: #0f172a;"
             [ngClass]="{'ng-invalid ng-dirty': isInvalid('username')}"
             required
           />
@@ -29,19 +56,19 @@
         </small>
 
         <!-- contraseña -->
-        <label for="password">Contraseña</label>
-        <div style="display: flex; align-items: center; background-color: #f9fafb; border: 1px solid #d1d5db; border-radius: 8px; padding: 0.5rem; margin-bottom: 1rem;">
+        <label for="password" style="color: #0a0b0c;">Contraseña</label>
+        <div style="display: flex; align-items: center; background-color: #ecfeff; border: 1px solid #7dd3fc; border-radius: 8px; padding: 0.5rem; margin-bottom: 1rem;">
           <input
             type="password"
             id="password"
             formControlName="password"
             pInputText
             placeholder="Ingrese su contraseña"
-            style="flex: 1; border: none; outline: none; background: transparent;"
+            style="flex: 1; border: none; outline: none; background: transparent; color: #0f172a;"
             [ngClass]="{'ng-invalid ng-dirty': isInvalid('password')}"
             required
           />
-          <i class="pi pi-lock" style="margin-left: 0.5rem; color: #6b7280;"></i>
+          <i class="pi pi-lock" style="margin-left: 0.5rem; color: #03677c;"></i>
         </div>
         <small *ngIf="isInvalid('password')" class="p-error" style="display: block; margin-top: -0.5rem; margin-bottom: 1rem;">
           Contraseña debe tener al menos 8 caracteres
@@ -55,7 +82,7 @@
           icon="pi pi-sign-in"
           [loading]="loading"
           [disabled]="loading || loginForm.invalid"
-          style="width: 100%; border-radius: 8px; background: linear-gradient(90deg, #0284c7, #0ea5e9); color: white; margin-top: 1rem;"
+          style="width: 100%; border-radius: 8px; background: linear-gradient(90deg, #048ca8, #027e96); color: white; margin-top: 1rem; border: none;"
         ></button>
 
         <!-- registro -->
@@ -65,9 +92,9 @@
             (keydown.enter)="goToRegistro()"
             tabindex="0"
             role="button"
-            style="color: #0284c7; font-weight: 500; cursor: pointer; text-decoration: none;"
-            onmouseover="this.style.color='#0369a1'"
-            onmouseout="this.style.color='#0284c7'"
+            style="color: #0b0e0f; font-weight: 500; cursor: pointer; text-decoration: none;"
+            onmouseover="this.style.color='#03677c'"
+            onmouseout="this.style.color='#048ca8'"
           >
             ¿No tienes cuenta? Regístrate
           </a>
@@ -76,10 +103,10 @@
     </div>
 
     <!-- lado de la imagen -->
-<div style="flex: 1; background-color: #e5e7eb; display: flex; align-items: center; justify-content: center;">
-  <img src="assets/imagenes/hco.jpg"
-       alt="logo"
-       style="width: 100%; height: 100%; object-fit: cover;"/>
-</div>
-
+    <div style="flex: 1; background-color: #bae6fd; display: flex; align-items: center; justify-content: center;">
+      <img src="assets/imagenes/hco.jpg"
+           alt="logo"
+           style="width: 100%; height: 100%; object-fit: cover;" />
+    </div>
+  </div>
 </div>

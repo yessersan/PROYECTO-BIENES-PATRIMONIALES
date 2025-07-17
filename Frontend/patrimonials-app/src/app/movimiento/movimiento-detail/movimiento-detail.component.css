@@ -2,143 +2,143 @@
 .layout {
   display: flex;
   min-height: 100vh;
+  background: #0f766e;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f7ff;
+  overflow: hidden;
 }
 
 /* sidebar */
 .sidebar {
   width: 270px;
-  background: linear-gradient(135deg, #4e54c8, #8f94fb);
-  color: rgb(245, 240, 240);
-  padding: 2rem 1.2rem;
-  display: flex;
-  flex-direction: column;
+  background: #134e4a;
+  color: #fff;
+  padding: 2rem 1.5rem;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  max-height: 100vh;
 }
 
 .sidebar-title {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: bold;
   margin-bottom: 2rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sidebar .menu {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar .menu li {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  color: #fbfaf7;
+  transition: background 0.3s;
 }
 
-.menu {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.sidebar .menu li:hover,
+.sidebar .menu li.active {
+  background-color: #14b8a6;
+  color: #fff;
 }
 
-.menu li {
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.menu li:hover,
-.menu li.active {
-  background-color: rgba(255, 255, 255, 0.15);
-}
-
-/* contenido */
+/* contenido principal */
 .content {
   flex: 1;
-  padding: 2.5rem;
-  background-color: #fff;
+  background: #f0fdfa;
+  padding: 2.5rem 3rem;
+  color: #1e293b;
+  overflow-y: auto;
+  max-height: 100vh;
 }
 
-.content h2 {
-  font-size: 1.6rem;
-  color: #3a3a90;
-  font-weight: 700;
+h2 {
+  font-size: 1.8rem;
+  color: #0f766e;
   margin-bottom: 2rem;
+  border-bottom: 2px solid #14b8a6;
+  padding-bottom: 0.5rem;
 }
 
 /* formulario */
 form {
-  max-width: 800px;
-  background-color: #f9f9ff;
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 2rem 2.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  max-width: 920px;
+  width: 100%;
 }
 
 label {
   display: block;
+  margin-bottom: 1.5rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #444;
+  color: #0f172a;
 }
 
-input[type="text"],
-input[type="number"],
-input[type="date"],
-select,
-textarea {
+label select,
+label textarea {
   width: 100%;
-  padding: 0.6rem;
-  margin-bottom: 1.2rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  background-color: #fff;
-  transition: border-color 0.2s ease;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: #6f75f3;
-  box-shadow: 0 0 0 2px rgba(111, 117, 243, 0.2);
+  padding: 0.6rem 0.8rem;
+  margin-top: 0.4rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 1rem;
+  background: #f8fafc;
+  color: #0f172a;
 }
 
 textarea {
   resize: vertical;
+  min-height: 80px;
 }
 
-/* errores */
 .error-msg {
-  color: #d32f2f;
+  color: #dc2626;
   font-size: 0.9rem;
-  margin-top: -0.8rem;
-  margin-bottom: 1rem;
+  margin-top: 0.3rem;
 }
 
 /* botones */
 button {
-  padding: 0.6rem 1.2rem;
+  padding: 0.6rem 1.4rem;
   border: none;
   border-radius: 6px;
-  font-size: 0.95rem;
+  font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
-  margin-right: 0.6rem;
-  transition: background-color 0.2s ease;
+  margin-right: 1rem;
+  transition: background 0.3s ease;
 }
 
 button[type="submit"] {
-  background-color: #3a3a90;
-  color: white;
+  background-color: #14b8a6;
+  color: #fff;
+}
+
+button[type="submit"]:hover {
+  background-color: #0d9488;
 }
 
 button[type="button"] {
-  background-color: #6c757d;
-  color: white;
+  background-color: #facc15;
+  color: #000;
 }
 
-button[type="button"]:nth-child(3) {
-  background-color: #dc3545;
+button[type="button"]:hover {
+  background-color: #ffd93d;
 }
 
-button:disabled {
+button[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
 }
